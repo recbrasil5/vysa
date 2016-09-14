@@ -1,0 +1,34 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models
+{
+    public class RegistrationViewModel
+    {
+        public Season CurrentSeason { get; set; }
+        public IEnumerable<Season> Seasons { get; set; }
+        public Boolean AnySeasons { get; set; }
+        public IEnumerable<Player> UnregisteredPlayers { get; set; }
+        public Boolean AnyUnregisteredPlayers { get; set; }
+        public IEnumerable<Player> UnconfirmedRegisteredPlayers { get; set; }
+        public Boolean AnyUnconfirmedRegisteredPlayers { get; set; }
+        public IEnumerable<Registration> PlayerRegistrations{ get; set; }
+        public Boolean AnyRegistrationsForSeason { get; set; }
+
+        public int SelectedSeasonId { get; set; }
+        public IEnumerable<int> SelectedPlayerIds { get; set; }
+    }
+
+    public class RegistrationInView
+    {
+        public int Id { get; set; }
+        public Season Season { get; set; }
+        public Player Player { get; set; }
+        public DateTime DateRegistered { get; set; }
+        public string PaymentMethod { get; set; }
+        public bool Paid { get; set; }
+    }
+}

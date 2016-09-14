@@ -1,0 +1,68 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Web.Models;
+
+namespace VYSA.Web.Services
+{
+    public class BoardService
+    {
+        private UnitOfWork unitOfWork;
+
+        public BoardService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<BoardMember> GetBoardMembers()
+        {
+            return unitOfWork.BoardMemberRepository.Get(b => b.IsActive);     
+        }
+
+        public BoardMemberDTO GetBoardMember(int id)
+        {
+            var boardMember = unitOfWork.BoardMemberRepository.GetByID(id);
+            return boardMember == null ? null : boardMember.ConvertToDto();
+        }
+
+        public BoardMemberDTO UpdateBoardMember(BoardMemberDTO updatedBoardMemberDto, string lastUpdateBy)
+        {
+            var boardMember = unitOfWork.BoardMemberRepository.GetByID(updatedBoardMemberDto.Id);
+            if (boardMember == null) return null;
+
+            //do update
+            boardMember.UpdateValuesFromDTO(updatedBoardMemberDto, lastUpdateBy, false);
+
+            unitOfWork.BoardMemberRepository.Update(boardMember);
+            unitOfWork.Save();
+
+            return updatedBoardMemberDto;
+        }
+
+        public BoardMemberDTO AddBoardMember(BoardMemberDTO newBoardMemberDto, string lastUpdateBy)
+        {
+            BoardMember boardMember = new BoardMember().UpdateValuesFromDTO(newBoardMemberDto, lastUpdateBy, true);
+            unitOfWork.BoardMemberRepository.Insert(boardMember);
+            unitOfWork.Save();
+
+            return boardMember.ConvertToDto();
+        }
+
+        public BoardMemberDTO SoftDeleteBoardMember(int id)
+        {
+            var boardMember = unitOfWork.BoardMemberRepository.GetByID(id);
+            if (boardMember == null) return null;
+
+            boardMember.IsActive = false;
+            unitOfWork.BoardMemberRepository.Update(boardMember);
+            unitOfWork.Save();
+
+            return boardMember.ConvertToDto();
+        }
+    }
+
+}

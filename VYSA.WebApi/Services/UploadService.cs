@@ -1,0 +1,168 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Extensions;
+using VYSA.WebApi.Properties;
+
+namespace VYSA.WebApi.Services
+{
+    public class UploadService
+    {
+        private readonly UnitOfWork _unitOfWork;
+
+        #region Constructor(s)
+
+        public UploadService(IUnitOfWork unitOfWork)
+        {
+            this._unitOfWork = (UnitOfWork)unitOfWork;
+        }
+        #endregion
+
+        public async Task<HttpResponseMessage> UploadImageTask(HttpRequestMessage request, string lastUpdateBy)
+        {
+            var subDirMap = string.Empty;
+            string[] acceptedTypes = { ".jpg", ".jpeg", ".png", ".gif" };
+
+            try
+            {
+                #region setup code
+
+                subDirMap = Path.Combine(HttpContext.Current.Server.MapPath(Settings.Default.VirtualUploadDirectory), "images/public");
+
+                if (!request.Content.IsMimeMultipartContent())
+                {
+                    return new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.NotAcceptable,
+                        Content = new StringContent("File was not in the correct format. Allowable image formats are jpg, jpeg, gif and png.")
+                    };
+                }
+
+                if (!Directory.Exists(subDirMap))
+                    Directory.CreateDirectory(subDirMap);
+                #endregion
+
+                #region steam file(s) to subDirMap
+                var streamProvider = new MultipartFormDataStreamProvider(subDirMap);
+                await request.Content.ReadAsMultipartAsync(streamProvider);
+
+                if (streamProvider.FileData.Count > 1)
+                {
+                    return request.CreateResponse(HttpStatusCode.NotAcceptable, "Only one file may be uploaded.");
+                }
+                #endregion
+
+                foreach (MultipartFileData fileData in streamProvider.FileData)
+                {
+                    #region upload each individual fileData for each in streamProvider.FileData
+                    if (string.IsNullOrEmpty(fileData.Headers.ContentDisposition.FileName))
+                    {
+                        //return Request.CreateResponse(HttpStatusCode.NotAcceptable, "This request is not properly formatted");
+                        return new HttpResponseMessage
+                        {
+                            StatusCode = HttpStatusCode.NotAcceptable,
+                            Content = new StringContent("This request is not properly formatted")
+                        };
+                    }
+
+                    var fileName = fileData.Headers.ContentDisposition.FileName;
+                    var fileType = fileName.Substring(fileName.Length - 5, 4).ToLower();
+
+                    if (!acceptedTypes.Contains(fileType))
+                    {
+                        return new HttpResponseMessage
+                        {
+                            StatusCode = HttpStatusCode.NotAcceptable,
+                            Content = new StringContent("File was not in the correct format. Allowable image formats are JPG, JPEG, GIF and PNG.")
+                        };
+                    }
+
+                    FormatFileName(ref fileName, acceptedTypes);
+
+                    var fileNameAndExt = fileName + fileType;
+                    var virtualPath = Path.Combine(subDirMap, fileNameAndExt);
+
+                    try
+                    {
+                        /*http://stackoverflow.com/questions/275781/server-mappath-server-mappath-server-mappath-server-mappath*/
+                        File.Delete(virtualPath);
+                        File.Move(fileData.LocalFileName, virtualPath);
+
+                        //Save to database
+                        SaveUploadRecord(request, lastUpdateBy, fileNameAndExt, virtualPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        var sb = new StringBuilder();
+                        sb.AppendFormat("Unexpected error while saving the file(s) to disk: {0}", ex.Message).AppendLine();
+                        sb.AppendFormat("subDirMap: {0}", subDirMap).AppendLine();
+                        sb.AppendFormat("virtualPath: {0}", virtualPath).AppendLine();
+                        sb.AppendFormat("fileData.LocalFileName: {0}", fileData.LocalFileName);
+
+                        throw new Exception(sb.ToString(), ex); //create new exception by sending in the original exception as the InnerException
+                    }
+                    #endregion
+                }
+
+                //return 200!!
+                return new HttpResponseMessage { StatusCode = HttpStatusCode.OK };
+            }
+            catch (Exception ex)
+            {
+                var sb = new StringBuilder();
+                sb.AppendFormat("Unexpected error while uploading (streaming) file(s) locally: {0}", ex.Message).AppendLine();
+                sb.AppendFormat("subDirMap: {0}", subDirMap);
+
+                throw new Exception(sb.ToString(), ex); //create new exception by sending in the original exception as the InnerException
+            }
+        }
+
+        private void SaveUploadRecord(HttpRequestMessage request, string lastUpdateBy, string fileNameAndExt, string path)
+        {
+            var upload = new Upload
+            {
+                FileName = fileNameAndExt,
+                FilePath = path,
+                IPAddress = request.GetClientIpAddress(),
+                IsActive = true,
+                CreatedBy = lastUpdateBy,
+                CreatedDateUtc = DateTime.UtcNow,
+                LastUpdateBy = lastUpdateBy,
+                LastUpdateUtc = DateTime.UtcNow
+            };
+            _unitOfWork.UploadRepository.Insert(upload);
+            _unitOfWork.Save();
+        }
+
+        private static void FormatFileName(ref string fileName, string[] acceptedTypes)
+        {
+            if (fileName.StartsWith("\"") && fileName.EndsWith("\""))
+            {
+                fileName = fileName.Trim('"');
+            }
+            if (fileName.Contains(@"/") || fileName.Contains(@"\"))
+            {
+                fileName = Path.GetFileName(fileName);
+            }
+
+            //get rid of fileExtensions in the name
+            foreach (var a in acceptedTypes)
+            {
+                if (fileName.ToLower().EndsWith(a))
+                {
+                    fileName = fileName.ToLower().Replace(a, string.Empty);
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<repositories>
+  <repository path="..\..\ms connect\Web_API\2-2-15\MSConnectWebApi\packages.config" />
+  <repository path="..\VYSA.Domain\packages.config" />
+  <repository path="..\VYSA.UnitTests\packages.config" />
+  <repository path="..\VYSA.Web\packages.config" />
+  <repository path="..\VYSA.WebApi\packages.config" />
+  <repository path="..\VYSA.WebUI\packages.config" />
+</repositories>

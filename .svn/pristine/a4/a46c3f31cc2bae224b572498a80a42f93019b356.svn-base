@@ -1,0 +1,59 @@
+﻿using System.Net.Http;
+using System.Security.Claims;
+using System.Web.Http;
+using System.Web.Http.Filters;
+using Microsoft.AspNet.Identity;
+using System.Net;
+
+namespace MSConnectWebApi.Filters
+{
+    public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
+    {
+        //public override void OnException(HttpActionExecutedContext context)
+        //{
+        //    var exception = context.Exception;
+
+        //    if (exception != null)
+        //    {
+        //        if (exception.Message.Equals("Unauthorized: Permission Not Found"))
+        //        {
+        //            context.Response = context.Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
+        //                "Unauthorized Access: You do not have the permissions to use this resource.");
+        //        }
+        //        else if (exception.Message.Equals("Data Set in excess of 100,000"))
+        //        {
+        //            context.Response = context.Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+        //                "Data Set in excess of 100,000, please adjust your parameters.");
+        //        }
+        //        else
+        //        {
+        //            LogService ls = new LogService();
+        //            //build Additional Info String here
+        //            string additionalInfo = "";
+
+        //            var singleOrDefault = context.Request.GetOwinContext()
+        //                .Authentication.User.Claims.SingleOrDefault(c => c.Type == "accountUserId");
+        //            if (singleOrDefault == null) return;
+        //            int? accountUserId =
+        //                Int32.Parse(
+        //                    singleOrDefault
+        //                        .Value.ToString());
+        //            Claim orDefault = context.Request.GetOwinContext()
+        //                .Authentication.User.Claims.SingleOrDefault(c => c.Type == "sub");
+        //            if (orDefault == null) return;
+        //            string userName =
+        //                orDefault
+        //                    .Value;
+
+        //            additionalInfo += exception.GetBaseException();
+        //            var exceptionId = ls.LogError(exception, additionalInfo, true, true, accountUserId, userName);
+
+        //            context.Response = context.Request.CreateErrorResponse(HttpStatusCode.InternalServerError,
+        //                "There has been an internal server error. We apologize for the inconvenience. Error Id: " +
+        //                exceptionId);
+        //        }
+        //    }
+
+        //}
+    }
+}

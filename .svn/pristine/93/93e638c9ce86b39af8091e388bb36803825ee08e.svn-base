@@ -1,0 +1,46 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysa")
+        .controller('AdminAnnouncementsAddEditController',
+        function ($scope, $routeParams, $location, notifierService, AdminAnnouncementRepository) {
+
+            var announcementId = $routeParams.id;
+            $scope.editing = announcementId !== undefined;
+
+            if ($scope.editing) {
+                AdminAnnouncementRepository.get({ id: parseInt(announcementId) }, function (data) {
+                    data.to = new Date(data.to);
+                    data.from = new Date(data.from);
+                    $scope.announcement = data;
+                });
+            }
+
+            $scope.save = function () {
+
+                if ($scope.editing) {
+                    
+                    AdminAnnouncementRepository.update($scope.announcement, function () {
+                        $location.url('/Admin/Home/WebsiteMaintenance');
+                        notifierService.success("The announcement with the title '" + $scope.announcement.title + "' has been updated!");
+                    }, function () {
+                        notifierService.error("Error while updating announcement!");
+                    });
+                } else {
+                    AdminAnnouncementRepository.save($scope.announcement, function () {
+                        $location.url('/Admin/Home/WebsiteMaintenance');
+                        notifierService.success("The announcement with the title '" + $scope.announcement.title + "' has been added!");
+                    }, function () {
+                        notifierService.error("Error while adding announcement!");
+                    });
+                }
+            }
+
+            $scope.cancel = function () {
+                $location.url('/Admin/Home/WebsiteMaintenance');
+            }
+
+        });
+
+}());

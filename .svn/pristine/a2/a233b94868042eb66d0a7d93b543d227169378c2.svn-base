@@ -1,0 +1,51 @@
+
+<nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul side-navigation class="nav" id="side-menu">
+            <li class="nav-header">
+                <div class="dropdown profile-element">
+                    <!--<img alt="image" class="img-circle" src="img/profile_small.jpg"/>-->
+                    <a class="dropdown-toggle" href="/admin.html">
+                        <span class="clear">
+                            <span class="block m-t-xs">
+                                <strong class="font-bold">VYSA</strong>
+                            </span>
+                        </span>
+                    </a>
+                </div>
+                <div class="logo-element">
+                    <a href="/admin.html">VYSA</a>
+                </div>
+            </li>
+            <li ng-class="{active: $state.includes('clubmanagement')}">
+                <a ui-sref="clubmanagement.default"><i class="fa fa-th-large"></i> <span class="nav-label">Club Management</span><span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level" ng-class="{in: $state.includes('clubmanagement')}">
+                    <li ui-sref-active="active"><a ui-sref="clubmanagement.seasonmanagement.default">Season Management</a></li>
+                </ul>
+            </li>
+            <li ng-class="{active: $state.includes('mailingList')}">
+                <a><i class="fa fa-th-large"></i> <span class="nav-label">Mailing List</span><span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li ng-class="{active: $state.includes('mailingList')}" ui-sref-active="active"><a ui-sref="mailingList.default">Mailing List</a></li>
+                </ul>
+            </li>
+            <li ng-class="{active: $state.includes('fileupload')}">
+                <a><i class="fa fa-th-large"></i> <span class="nav-label">File Upload</span><span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li ng-class="{active: $state.includes('fileupload')}" ui-sref-active="active"><a ui-sref="fileupload.fileonly">File Upload (beta)</a></li>
+                    <li ng-class="{active: $state.includes('fileupload')}" ui-sref-active="active"><a ui-sref="fileupload.fileandvideo">File Video Upload (beta)</a></li>
+                </ul>
+            </li>
+            <li ng-class="{active: $state.includes('websitemaintenance')}">
+                <a><i class="fa fa-th-large"></i> <span class="nav-label">Website Maintenance</span><span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li ng-class="{active: $state.includes('websitemaintenance')}" ui-sref-active="active"><a ui-sref="websitemaintenance.announcements.list">Announcements</a></li>
+                    <li ng-class="{active: $state.includes('websitemaintenance')}" ui-sref-active="active"><a ui-sref="websitemaintenance.boardmembers.list">Board Members</a></li>
+                </ul>
+            </li>
+            <li>
+                <a ng-click="goHome()"><i class="fa fa-th-large"></i> <span class="nav-label">Main Site</span></a>
+            </li>
+        </ul>
+    </div>
+</nav>

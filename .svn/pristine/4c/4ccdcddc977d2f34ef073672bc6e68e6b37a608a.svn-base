@@ -1,0 +1,56 @@
+﻿
+using System;
+using System.ComponentModel.DataAnnotations;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Enums;
+using VYSA.Domain.Extensions;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Models.Resource
+{
+    public class UserResourceModel
+    {
+        public int Id { get; set; }
+
+        public string UserName { get; set; }
+
+        [Required]
+        public string Email { get; set; }
+
+        public string Role { get; set; }
+    }
+
+    public static class UserExtensions
+    {
+        public static User PopulateEntityWithResourceModel(this User user, UserResourceModel resourceModel, string lastUpdateBy, bool onCreate)
+        {
+            user.Id = resourceModel.Id;
+            user.UserName = resourceModel.UserName;
+            user.Email = resourceModel.Email;
+            //todo: set RoleId
+            //user.RoleId = (int)resourceModel.Role.ToEnum<Enums>();
+            user.IsActive = true;
+            user.LastUpdateBy = lastUpdateBy;
+            user.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                user.CreatedBy = lastUpdateBy;
+                user.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return user;
+        }
+
+        public static UserResourceModel ConvertToResourceModel(this User user)
+        {
+            return new UserResourceModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                Role = user.Roles.ToString()
+            };
+        }
+    }
+}

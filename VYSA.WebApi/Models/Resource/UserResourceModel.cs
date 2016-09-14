@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models.Resource
+{
+    public class UserResourceModel
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public string Email { get; set; }
+
+        public string Roles { get; set; } 
+    }
+
+    public static class UserExtensions
+    {
+        public static User PopulateEntityWithResourceModel(this User user, UserResourceModel resourceModel, string lastUpdateBy, bool onCreate)
+        {
+            user.Id = resourceModel.Id;
+            user.Username = resourceModel.Email;
+            //todo: set RoleId
+            //user.RoleId = (int)resourceModel.Role.ToEnum<Enums>();
+            user.IsActive = true;
+            user.LastUpdateBy = lastUpdateBy;
+            user.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                user.CreatedBy = lastUpdateBy;
+                user.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return user;
+        }
+
+        public static UserResourceModel ConvertToResourceModel(this User user)
+        {
+            return new UserResourceModel
+            {
+                Id = user.Id,
+                Email = user.Username,
+                Roles = string.Join(",", user.Roles.Select(x => x.Name).ToArray())
+            };
+        }
+       
+    }
+}

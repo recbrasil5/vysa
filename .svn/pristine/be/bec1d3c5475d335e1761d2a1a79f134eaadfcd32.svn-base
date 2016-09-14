@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class ParentRepService
+    {
+        private UnitOfWork unitOfWork;
+
+        public ParentRepService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<ParentRep> GetParentReps()
+        {
+            return unitOfWork.ParentRepRepository.Get(a => a.IsActive);
+        }
+
+        public IEnumerable<DropdownItemVM> GetParentRepDropdownVMs()
+        {
+            var parentRepList = unitOfWork.ParentRepRepository.Get(a => a.IsActive);
+            var list = new List<DropdownItemVM>();
+            parentRepList.ToList().ForEach(x => list.Add(new DropdownItemVM
+            {
+                Id = x.Id,
+                Label = x.FirstName + " " + x.LastName
+            }));
+            return list;
+        }
+
+        public ParentRepDTO GetParentRep(int id)
+        {
+            var parentRep = unitOfWork.ParentRepRepository.GetByID(id);
+            return parentRep == null ? null : parentRep.ConvertToDto();
+        }
+
+        public ParentRepDTO UpdateParentRep(ParentRepDTO updatedParentRepDto, string lastUpdateBy)
+        {
+            var parentRep = unitOfWork.ParentRepRepository.GetByID(updatedParentRepDto.Id);
+            if (parentRep == null) return null;
+
+            //do update
+            parentRep.UpdateValuesFromDTO(updatedParentRepDto, lastUpdateBy, false);
+
+            unitOfWork.ParentRepRepository.Update(parentRep);
+            unitOfWork.Save();
+
+            return updatedParentRepDto;
+        }
+
+        public ParentRepDTO AddParentRep(ParentRepDTO newParentRepDto, string lastUpdateBy)
+        {
+            ParentRep parentRep = new ParentRep().UpdateValuesFromDTO(newParentRepDto, lastUpdateBy, true);
+            unitOfWork.ParentRepRepository.Insert(parentRep);
+            unitOfWork.Save();
+
+            return parentRep.ConvertToDto();
+        }
+
+        public ParentRepDTO SoftDeleteParentRep(int id, string lastUpdateBy)
+        {
+            var parentRep = unitOfWork.ParentRepRepository.GetByID(id);
+            if (parentRep == null) return null;
+
+            parentRep.IsActive = false;
+            parentRep.LastUpdateUtc = DateTime.UtcNow;
+            parentRep.LastUpdateBy = lastUpdateBy;
+            unitOfWork.ParentRepRepository.Update(parentRep);
+            unitOfWork.Save();
+
+            return parentRep.ConvertToDto();
+        }
+    }
+}

@@ -1,0 +1,151 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Admin/Players")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminPlayersController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private PlayerService playerService;
+        public AdminPlayersController()
+        {
+            playerService = new PlayerService(unitOfWork);
+        }
+
+        //[HttpGet]
+        //[Route("ListView")]
+        //public IEnumerable<ListViewPlayerDTO> GetListViewPlayers()
+        //{
+        //    return playerService.GetListViewPlayers();
+        //}
+
+        [HttpPost]
+        [Route("ListView")]
+        public IHttpActionResult GetListViewPlayers(PagingFilterDTO pfDto)
+        {
+            PlayerGridDTO collection = new PlayerGridDTO();
+            collection.Players = playerService.GetListViewPlayers(pfDto);
+            if(pfDto.GetCount)
+            {
+                collection.Count = playerService.GetActivePlayerCount();
+            }
+            return Ok(collection);
+        }
+
+        [HttpGet]
+        [Route("")]
+        public IEnumerable<PlayerDTO> GetPlayers()
+        {
+            return playerService.GetActivePlayers();
+        }
+
+        [HttpPost]
+        [Route("Filter/Roster")]
+        [ResponseType(typeof(PlayerFilterDTO))]
+        public IHttpActionResult RosterFilter(FilterDTO filter)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var list = filter.LookupId == 0 ?  //if the lookupId == 0, this means the UI is in AddNew mode and there is no lookupId
+                playerService.GetActivePlayers() :
+                playerService.GetPlayersByRosterFilter(filter);
+
+            return Ok(new PlayerFilterDTO { Players = list });
+        }
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetPlayerById")]
+        [ResponseType(typeof(PlayerDTO))]
+        public IHttpActionResult GetPlayer(int id)
+        {
+            PlayerDTO player = playerService.GetPlayer(id);
+
+            // return it if you got it
+            if (player == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(player);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(PlayerDTO))]
+        public IHttpActionResult UpdatePlayer(int id, PlayerDTO playerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != playerDto.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedPlayerDto = playerService.UpdatePlayer(playerDto, User.Identity.Name);
+
+            if (updatedPlayerDto == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedPlayerDto);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(PlayerDTO))]
+        public IHttpActionResult CreatePlayer(PlayerDTO playerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newPlayerDto = playerService.AddPlayer(playerDto, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetPlayerById
+            //return CreatedAtRoute("GetPlayerById", new { id = newPlayerDto.Id }, newPlayerDto);
+            return Ok(newPlayerDto);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(PlayerDTO))]
+        public IHttpActionResult DeletePlayer(int id)
+        {
+            var player = playerService.SoftDeletePlayer(id, User.Identity.Name);
+            if (player == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(player);
+        }
+
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using Microsoft.Owin;
+
+namespace VYSA.Web.Controllers
+{
+    public class TokenInfo
+    {
+        public string Username { get; set; }
+        public string Role { get; set; }
+    }
+
+    [Authorize]
+    [RoutePrefix("api/Account")]
+    public class AccountController : ApiController
+    {
+        // GET api/<controller>
+        [HttpGet]
+        [Route("info")]
+        public TokenInfo GetTokenInfo()
+        {
+            var sub = Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == "sub");
+            var role = Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == "role");
+            return new TokenInfo
+            {
+                Username = sub != null ? sub.Value : "-- Unknown User --",
+                Role = role != null ? role.Value : "-- Unknown Role --"
+            };
+        }
+
+    }
+}

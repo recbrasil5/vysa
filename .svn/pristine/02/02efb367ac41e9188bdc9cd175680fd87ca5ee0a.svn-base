@@ -1,0 +1,21 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysa")
+    .controller('mailingListRegistrationController', function ($scope, mailingListMemberRepository, notifierService) {
+
+        $scope.askToJoin = true;
+
+        $scope.register = function () {
+            console.log($scope.memberToBe);
+            mailingListMemberRepository.save($scope.memberToBe, function () {
+                notifierService.success("Thanks for registring for our mailing list!");
+                $scope.memberToBe = {};
+                $scope.askToJoin = false;
+            }, function () {
+                notifierService.error('Please make sure you filled out all of the fields!');
+            });
+
+        }
+    });
+}());

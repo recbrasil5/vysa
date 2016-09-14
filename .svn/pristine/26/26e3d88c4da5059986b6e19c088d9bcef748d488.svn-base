@@ -1,0 +1,90 @@
+﻿body {
+}
+
+#signInDiv {
+    margin-top: 10px;
+    margin-left: 80px;
+}
+
+.authenticatedDiv{
+    margin-top: 10px;
+    margin-right: 150px;
+}
+
+.errorDiv
+{
+	border: solid 1px #CD0000;
+	background-color: #FFF0F5;
+    /*background-image: url(../images/exclaimation_point_sm.gif);*/
+	background-position: 5px center;
+	background-repeat: no-repeat;
+	padding: 5px 5px 5px 10px;
+	margin: 5px 5px 5px 0;
+}
+
+.warningDiv
+{
+	border: solid 1px #B2B300;
+	background-color: #FEFFBF;
+	/*background-image: url(../images/warn_sm.png);*/
+	background-position: 5px center;
+	background-repeat: no-repeat;
+	padding: 5px 5px 5px 10px;
+	margin: 5px 5px 5px 0;
+}
+
+.successDiv
+{
+	border: solid 1px #24B200;
+	background-color: #CCFEBF;
+	/*background-image: url(../images/check_sm.png);*/
+	background-position: 5px center;
+	background-repeat: no-repeat;
+	padding: 5px 5px 5px 10px;
+	margin: 5px 5px 5px 0;
+}
+
+.pills
+{ 
+    padding: 1px 1px !important;
+}
+
+.pills ul
+{
+    list-style-type: none !important;
+    margin-left: -5px !important;
+}
+
+.pills li
+{
+    display: inline-block !important;
+    margin-left: 5px !important;
+}
+
+.pills li a
+{
+    margin-right: 5px !important;
+    padding: 5px 10px !important;
+    text-decoration: none !important;
+    border-radius: 3px !important;
+    font-size: 13px !important;
+    background-color: #EEEEEE !important;
+    color: #666666 !important;
+} 
+
+.pills li .active, .pills .active:hover 
+{
+    background-color: #3E60B6 !important;
+    color: #FFFFFF !important;
+} 
+
+.pills li a:hover
+{
+    background-color: #DDDDDD !important;
+    color: #000000 !important;
+}
+
+.vysa-nav-head {
+    margin-left: 20px;
+}
+

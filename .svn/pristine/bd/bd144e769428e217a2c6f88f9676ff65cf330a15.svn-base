@@ -1,0 +1,16 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysa")
+    .factory('ContactRepository', function ($http, $q) {
+        return {
+            sendMsg: function (msg) {
+                var deferred = $q.defer();
+                $http.post('/Contact/SendMsg', msg)
+                    .success(function () { deferred.resolve(); })
+                    .error(function () { deferred.reject(); });
+                return deferred.promise;                
+            }
+        }
+    })
+}());

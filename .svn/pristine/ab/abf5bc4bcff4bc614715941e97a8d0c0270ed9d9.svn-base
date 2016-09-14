@@ -1,0 +1,132 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Filters;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [ApiExceptionFilter]
+    [ModelValidator]
+    [RoutePrefix("Admin/Users")]
+    [Authorize(Roles = ", Super")]
+    public class UsersController : ApiController
+    {
+        private readonly UnitOfWork _unitOfWork = new UnitOfWork();
+        private readonly UsersService _usersService;
+        public UsersController()
+        {
+            _usersService = new UsersService(_unitOfWork);
+        }
+
+        [HttpGet]
+        [Route("")]
+        public IEnumerable<UserResourceModel> GetUsers()
+        {
+            return _usersService.GetUserResourceModels();
+        }
+
+        //[HttpGet]
+        //[Route("")]
+        //public IEnumerable<User> GetUsers()
+        //{
+        //    return _usersService.GetUsers();
+        //}
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetUserById")]
+        [ResponseType(typeof(UserResourceModel))]
+        public IHttpActionResult GetUser(int id)
+        {
+            UserResourceModel user = _usersService.GetUserResourceModel(id);
+
+            // return it if you got it
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
+        //[HttpPut]
+        //[Route("{id:int}")]
+        //[ResponseType(typeof(UserResourceModel))]
+        //public IHttpActionResult UpdateUser(int id, UserResourceModel userResourceModel)
+        //{
+        //    if (id != userResourceModel.Id)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    //var updateduserRm = _usersService.UpdateUser(userResourceModel, User.Identity.Name);
+
+        //    if (updateduserRm == null)
+        //    {
+        //        //can't find the record to update
+        //        return NotFound();
+        //    }
+
+        //    return Ok(updateduserRm);
+        //}
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(UserResourceModel))]
+        public IHttpActionResult CreateUser(UserResourceModel userRm)
+        {
+
+            var newUserRm = _usersService.AddUser(userRm, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetUserById
+            //return CreatedAtRoute("GetUserById", new { id = newuserRm.Id }, newuserRm);
+            return Ok(newUserRm);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(UserResourceModel))]
+        public IHttpActionResult DeleteUser(int id)
+        {
+            var _user = _usersService.SoftDeleteUser(id, User.Identity.Name);
+            if (_user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_user);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+
+        //[HttpPatch]
+        //[Route("{id:int}")]
+        //[ResponseType(typeof(LeadDTO))]
+        //public IHttpActionResult PatchLead(int id, IEnumerable<OperationDTO> operations)
+        //{
+        //    var updatedLeadDto = ServiceManager.LeadService.UpdateLead(id, operations);
+        //    if (updatedLeadDto == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return Ok(updatedLeadDto);
+
+        //    return StatusCode(HttpStatusCode.NoContent);
+        //}
+
+        //Add
+    }
+}

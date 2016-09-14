@@ -1,0 +1,493 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data.Entity;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Util;
+using VYSA.Domain.Extensions;
+using System.Data.SqlTypes;
+using VYSA.Domain.Enums;
+
+namespace VYSA.Web.Infrastructure
+{
+    public class DropCreateIfChangeInitializer : DropCreateDatabaseIfModelChanges<EFDbContext>
+    {
+        #region private members
+        private const string lastUpdateBy = "VYSA.DropCreateIfChangeInitializer";
+
+        private static Role adminRole = new Role
+        {
+            Name = "Admin",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private static Role superAdminRole = new Role
+        {
+            Name = "SuperAdmin",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private static Role memberRole = new Role
+        {
+            Name = "Member",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private static Season springSeason = new Season
+        {
+            Year = 2015,
+            SeasonType = Enums.SeasonType.Spring,
+            RegistrationDate = DateTime.Parse("01/11/2015"),
+            StartDate = DateTime.Parse("03/17/2015"),
+            EndDate = DateTime.Parse("05/30/2015"),
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private static Coach testCoach = new Coach
+        {
+            FirstName = "Nick",
+            LastName = "Turner",
+            Email = "recbrasil5@gmail.com",
+            Phone = "(608) 385-3649",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private static ParentRep testParentRep = new ParentRep
+        {
+            FirstName = "Kally",
+            LastName = "Hernandez",
+            Email = "klr9905@yahoo.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private static Division testDivision = new Division
+        {
+            AgeLimit = 14,
+            GenderCode = Enums.GenderCode.Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private static Team testTeam = new Team
+        {
+            Division = testDivision,
+            Cost = 1.00M,
+            Season = springSeason,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        #endregion
+
+        protected override void Seed(EFDbContext context)
+        {
+            //EF figures out that Roles need to save before Users :-)
+            setupDefaultRoles(context);
+            setupDefaultAnnouncements(context);
+            setupDefaultBoardMembers(context);
+            setupDefaultUsers(context);
+            setupDefaultCoaches(context);
+            setupDefaultParentReps(context);
+            setupDefaultSeason(context);
+            setupDefaultDivisions(context);
+            setupDefaultEvents(context);
+            setupDefaultTeams(context);
+            setupDefaultTeamCoaches(context);
+            setupDefaultTeamParentReps(context);
+
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                //TODO: LOG EXCEPTION
+                var x = e;
+            }
+        }
+
+        private void setupDefaultTeamParentReps(EFDbContext context)
+        {
+            new List<TeamParentRep>
+            {
+                new TeamParentRep
+                {
+                    ParentRep = testParentRep,
+                    Team = testTeam,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                }
+            }.ForEach(a => context.TeamParentReps.Add(a));
+        }
+
+        private void setupDefaultTeamCoaches(EFDbContext context)
+        {
+            new List<TeamCoach>
+            {
+                new TeamCoach
+                {
+                    Coach = testCoach,
+                    Team = testTeam,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                }
+            }.ForEach(a => context.TeamCoaches.Add(a));
+        }
+
+        private void setupDefaultParentReps(EFDbContext context)
+        {
+            new List<ParentRep>
+            {
+                testParentRep
+            }.ForEach(a => context.ParentReps.Add(a));
+        }
+
+        private void setupDefaultCoaches(EFDbContext context)
+        {
+            new List<Coach>
+            {
+                testCoach
+            }.ForEach(a => context.Coaches.Add(a));
+        }
+
+        private void setupDefaultTeams(EFDbContext context)
+        {
+            new List<Team>
+            {
+                testTeam
+            }.ForEach(a => context.Teams.Add(a));
+        }
+
+        private void setupDefaultEvents(EFDbContext context)
+        {
+            new List<Event>
+           {
+               new Event
+               {    
+                    Name = "CRSA ChillOut Pre-Season Tournament",
+                    City = "Marian",
+                    State = "IA",
+                    TournamentUrl = "http://www.crsoccer.com/continents-782749361-1/ChillOutTournament.html",
+                    StartDate = DateTime.Parse("4/18/2015"),
+                    EndDate = DateTime.Parse("4/19/2015"),
+                    Season = springSeason,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+               }
+           }.ForEach(a => context.Events.Add(a));
+        }
+
+        private void setupDefaultDivisions(EFDbContext context)
+        {
+            new List<Division>
+            {
+                new Division
+                {
+                    AgeLimit = 10,
+                    GenderCode = Enums.GenderCode.Boys,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+                new Division
+                {
+                    AgeLimit = 11,
+                    GenderCode = Enums.GenderCode.Boys,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+                new Division
+                {
+                    AgeLimit = 12,
+                    GenderCode = Enums.GenderCode.Boys,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+                new Division
+                {
+                    AgeLimit = 13,
+                    GenderCode = Enums.GenderCode.Boys,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+                testDivision,
+                new Division
+                {
+                    AgeLimit = 11,
+                    GenderCode = Enums.GenderCode.Girls,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                }
+            }.ForEach(a => context.Divisions.Add(a));
+        }
+
+        private void setupDefaultAnnouncements(EFDbContext context)
+        {
+            new List<Announcement>
+            {
+                new Announcement
+                {
+                    Title = "Spring Registration", 
+                    Message = @"The Viking Youth Soccer Association is making this very long announcment to test things ", 
+                    StartTime = DateTime.UtcNow,
+                    EndTime = DateTime.UtcNow.AddDays(30),
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                }
+            }.ForEach(a => context.Announcements.Add(a));
+        }
+
+        private void setupDefaultSeason(EFDbContext context)
+        {
+            new List<Season>()
+            {
+                springSeason
+            }.ForEach(s => context.Seasons.Add(s));
+        }
+
+        private void setupDefaultUsers(EFDbContext context)
+        {
+            #region users
+            new List<User>()
+            {
+                new User()
+                {
+                    UserName = "superadmin",
+                    Email = "vysa@gmail.com",
+                    Password = RandomPassword.EncryptPasswordSHA("pw"),
+                    Approved = true,
+                    HasRegistered = true,
+                    Role = superAdminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow                   
+                },
+
+                new User()
+                {
+                    UserName = "admin",
+                    Email = "holmensoccer@yahoo.com",
+                    Password = RandomPassword.EncryptPasswordSHA("pw"),
+                    Approved = true,
+                    HasRegistered = true,
+                    Role = adminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow 
+                },
+
+                new User()
+                {
+                    UserName = "nturner",
+                    Email = "recbrasil5@gmail.com",
+                    Password = RandomPassword.EncryptPasswordSHA("pw"),
+                    Approved = true,
+                    HasRegistered = true,
+                    Role = memberRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow 
+                }
+
+            }.ForEach(u => context.Users.Add(u));
+            #endregion
+        }
+
+        private void setupDefaultBoardMembers(EFDbContext context)
+        {
+            #region BoardMembers
+            List<BoardMember> members = new List<BoardMember>()
+            {
+                new BoardMember 
+                {
+                    Name = "Al Hanson",
+                    Title = "President", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Josh Kipp",
+                    Title = "Vice President", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+                
+                new BoardMember 
+                {
+                    Name = "Tara Rieck",
+                    Title = "Treasurer", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Stacy Foster",
+                    Title = "Secretary", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Shannon Schneider",
+                    Title = "Fundraising Director", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Steve Olson",
+                    Title = "Tournament Director", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Andy Olson",
+                    Title = "Coaching Director", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Pat Rotering",
+                    Title = "Registrar", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Katie Malone",
+                    Title = "Public Relations", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Derek Peterson",
+                    Title = "Equipment Manager", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+            };
+            #endregion
+
+            members.ForEach(m => context.BoardMembers.Add(m));
+        }
+
+        private void setupDefaultRoles(EFDbContext context)
+        {
+            #region Roles
+            new List<Role>()
+            {
+                adminRole,                
+                superAdminRole,
+                memberRole
+            }.ForEach(r => context.Roles.Add(r));
+            #endregion
+        }
+
+    }
+}

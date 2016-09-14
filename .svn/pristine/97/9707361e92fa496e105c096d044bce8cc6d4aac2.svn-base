@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Util;
+using VYSA.Web.Infrastructure.Abstract;
+using VYSA.Web.Infrastructure.Service;
+using VYSA.Web.Models;
+
+namespace VYSA.Web.Services
+{
+    public class UserService
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+
+        public UserService()
+        {
+        }
+
+        public User GetUser(string username)
+        {
+            return unitOfWork.UserRepository.GetUser(username);
+        }
+
+    }
+}

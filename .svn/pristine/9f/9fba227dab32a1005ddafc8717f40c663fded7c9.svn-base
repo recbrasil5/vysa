@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Enums;
+
+namespace VYSA.WebApi.Models
+{
+    public class GuardianFilterDTO
+    {
+        public IEnumerable<GuardianDTO> Guardians { get; set; }
+    }
+
+    public class GuardianDTO
+    {
+        public int Id { get; set; }
+
+        public string FullName
+        {
+            get { return String.Format("{0} {1}", FirstName, LastName); }
+        }
+
+        [Required]
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; }
+
+        [Required]
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; }
+
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Display(Name = "Phone")]
+        public string Phone { get; set; }
+
+        //public IEnumerable<PlayerGuardianDTO> Players { get; set; }
+    }
+
+    public static class GuardianDTOExtensions
+    {
+        public static Guardian UpdateValuesFromDTO(this Guardian guardian, GuardianDTO guardianInView, string lastUpdateBy, bool onCreate)
+        {
+            guardian.Id = guardianInView.Id;
+            guardian.FirstName = guardianInView.FirstName;
+            guardian.LastName = guardianInView.LastName;
+            //guardian.Relationship = guardianInView.Relationship;
+            guardian.Phone = guardianInView.Phone;
+            guardian.Email = guardianInView.Email;
+            guardian.IsActive = true;
+            guardian.LastUpdateBy = lastUpdateBy;
+            guardian.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                guardian.CreatedBy = lastUpdateBy;
+                guardian.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return guardian;
+        }
+
+        public static GuardianDTO ConvertToDto(this Guardian guardian)
+        {
+            return new GuardianDTO
+            {
+                Id = guardian.Id,
+                FirstName = guardian.FirstName,
+                LastName = guardian.LastName,
+                //RelationshipStr = guardian.Relationship.ToString(),
+                Phone = guardian.Phone,
+                Email = guardian.Email
+            };
+        }
+
+        
+
+    }
+}

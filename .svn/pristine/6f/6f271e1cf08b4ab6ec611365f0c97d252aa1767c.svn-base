@@ -1,0 +1,67 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Web.Models;
+
+namespace VYSA.Web.Services
+{
+    public class CoachService
+    {
+        private UnitOfWork unitOfWork;
+
+        public CoachService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<Coach> GetCoaches()
+        {
+            return unitOfWork.CoachRepository.Get(a => a.IsActive);
+        }
+        
+        public CoachDTO GetCoach(int id)
+        {
+            var coach = unitOfWork.CoachRepository.GetByID(id);
+            return coach == null ? null : coach.ConvertToDto();
+        }
+
+        public CoachDTO UpdateCoach(CoachDTO updatedCoachDto, string lastUpdateBy)
+        {
+            var coach = unitOfWork.CoachRepository.GetByID(updatedCoachDto.Id);
+            if (coach == null) return null;
+
+            //do update
+            coach.UpdateValuesFromDTO(updatedCoachDto, lastUpdateBy, false);
+
+            unitOfWork.CoachRepository.Update(coach);
+            unitOfWork.Save();
+
+            return updatedCoachDto;
+        }
+
+        public CoachDTO AddCoach(CoachDTO newCoachDto, string lastUpdateBy)
+        {
+            Coach coach = new Coach().UpdateValuesFromDTO(newCoachDto, lastUpdateBy, true);
+            unitOfWork.CoachRepository.Insert(coach);
+            unitOfWork.Save();
+
+            return coach.ConvertToDto();
+        }
+
+        public CoachDTO SoftDeleteCoach(int id)
+        {
+            var coach = unitOfWork.CoachRepository.GetByID(id);
+            if (coach == null) return null;
+
+            coach.IsActive = false;
+            unitOfWork.CoachRepository.Update(coach);
+            unitOfWork.Save();
+
+            return coach.ConvertToDto();
+        }
+    }
+}

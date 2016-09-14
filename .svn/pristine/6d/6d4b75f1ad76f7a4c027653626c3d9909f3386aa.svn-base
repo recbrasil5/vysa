@@ -1,0 +1,35 @@
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using VYSA.WebApi.Controllers;
+using VYSA.WebApi.Models.Resource;
+
+namespace VYSA.WebApi.Extensions
+{
+    public static class BaseControllerExtensions
+    {
+        public static string GetUserName(this BaseController controller)
+        {
+            var claim = controller.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name);
+            return claim != null && !String.IsNullOrEmpty(claim.Value) ? claim.Value : "";
+        }
+
+        public static string GetRoles(this BaseController controller)
+        {
+            var claim = controller.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Role);
+            return claim != null && !String.IsNullOrEmpty(claim.Value) ? claim.Value : "";
+        }
+
+        public static TokenResourceModel GetTokenResourceModel(this BaseController controller)
+        {
+            var token = new TokenResourceModel
+            {
+                Username = GetUserName(controller),
+                Roles = GetRoles(controller).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList()
+            };
+
+            return token;
+        }
+
+    }
+}

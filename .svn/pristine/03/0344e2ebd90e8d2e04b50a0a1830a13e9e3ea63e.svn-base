@@ -1,0 +1,70 @@
+﻿using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Filters;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [ApiExceptionFilter]
+    [ModelValidator]
+    [RoutePrefix("Admin/Rosters")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminRosterController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private RosterService rosterService;
+        public AdminRosterController()
+        {
+            rosterService = new RosterService(unitOfWork);
+        }
+
+        //TODO: Finish this Endpoint
+        //[HttpPost]
+        //[Route("filter")]
+        //[ResponseType(typeof(RosteredPlayerFilterViewModel))]
+        //public IHttpActionResult GetPlayersFilter(RosterFilterViewModel bm)
+        //{
+        //    var vm = new RosterFilterViewModel();
+        //    vm.Players = rosterService.GetPlayersFilter(bm);
+        //    if (bm.BoolCount)
+        //    {
+        //        vm.Count = rosterService.GetPlayersFilterCount(bm);
+        //    }
+        //    return Ok(vm);
+        //}
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(RosterResourceModel))]
+        public IHttpActionResult AddPlayerToRoster(RosterResourceModel rosterDto)
+        {
+            var newRoster = rosterService.AddPlayerToRoster(rosterDto, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetPlayerById
+            //return CreatedAtRoute("GetPlayerById", new { id = newPlayerDto.Id }, newPlayerDto);
+            return Ok(newRoster);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(RosteredPlayerResourceModel))]
+        public IHttpActionResult RemovePlayerFromRoster(int id)
+        {
+            var rosteredPlayer = rosterService.SoftDeletePlayerFromRoster(id, User.Identity.Name);
+            if (rosteredPlayer == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(rosteredPlayer);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

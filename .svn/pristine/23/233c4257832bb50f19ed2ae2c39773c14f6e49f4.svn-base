@@ -1,0 +1,82 @@
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.Owin.Security.OAuth;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Cryptography;
+//using VYSA.WebApi.Infrastructure;
+//using VYSA.WebApi.Infrastructure.Service;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Providers
+{
+    public class ApplicationOAuthProvider : OAuthAuthorizationServerProvider
+    {
+        //http://www.tugberkugurlu.com/archive/simple-oauth-server-implementing-a-simple-oauth-server-with-katana-oauth-authorization-server-components-part-1
+
+        public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
+        {
+            context.Validated();
+        }
+
+        public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
+        {
+            //IFormCollection submittedFormDataFormData = await context.Request.ReadFormAsync();// get form data not auto-parsed by owin context 
+            //string accountId = submittedFormDataFormData["accountId"];
+            //var authenticationSuccess =
+            //    new AccountMembershipService(context.UserName)
+            //    .ValidateUser(context.UserName, context.Password);
+
+            var user = new UserService(new UnitOfWork()).GetUser(context.UserName);
+            var authenticationSuccess = PasswordHash.ValidatePassword(context.Password, user.PasswordHash);
+
+            if (authenticationSuccess)
+            {
+                // Authentication succesfull grant an identity access token
+                var oAuthIdentity = new ClaimsIdentity(context.Options.AuthenticationType);
+                oAuthIdentity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
+                //todo: send the role right away or add to the claim later?
+                //oAuthIdentity.AddClaim(new Claim(ClaimTypes.Role, new EFRoleProvider().GetRolesForUser(context.UserName)[0]));
+                oAuthIdentity.AddClaim(new Claim(ClaimTypes.Role, "Admin")); //debug
+
+                context.Validated(oAuthIdentity);
+                return;
+            }
+            
+            //Authentication failed
+            context.SetError("Invalid Credentials", "The user name or password is incorrect.");
+            context.Rejected();
+            return;
+
+            #region code not yet used
+            //    HttpContextBase httpContext;
+            //string userName;
+            //HashSet<string> scope;
+            //if (!request.TryGetHttpContext(out httpContext))
+            //    throw new InvalidOperationException(“HttpContext must not be null.”);
+            //var resourceServer = new ResourceServer(new StandardAccessTokenAnalyzer(
+            //                                            (RSACryptoServiceProvider)_configuration.IssuerSigningCertificate.PublicKey.Key,
+            //                                            (RSACryptoServiceProvider)_configuration.EncryptionVerificationCertificate.PrivateKey));
+            //var error = resourceServer.VerifyAccess(httpContext.Request, out userName, out scope);
+            //if (error != null)
+            //    return Task<HttpResponseMessage>.Factory.StartNew(error.ToHttpResponseMessage);
+            //var identity = new ClaimsIdentity(scope.Select(s => new Claim(s, s)));
+            //if (!string.IsNullOrEmpty(userName))
+            //    identity.Claims.Add(new Claim(ClaimTypes.Name, userName));
+            //httpContext.User = ClaimsPrincipal.CreateFromIdentity(identity);
+            //Thread.CurrentPrincipal = httpContext.User;
+            //return base.SendAsync(request, cancellationToken);
+            #endregion
+
+        }
+
+        ////Maybe
+        //public static AuthenticationProperties CreateProperties(string userName)
+        //{
+        //    IDictionary<string, string> data = new Dictionary<string, string>
+        //    {
+        //        { "userName", userName }
+        //    };
+        //    return new AuthenticationProperties(data);
+        //}
+    }
+}

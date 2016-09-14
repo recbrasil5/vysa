@@ -1,0 +1,115 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Models
+{
+    public class TeamListViewDTO
+    {
+        public int Id { get; set; }
+        public string TeamName { get; set; }
+        public string Coaches { get; set; }
+        public string ParentReps { get; set; }
+        //public decimal Cost { get; set; }
+    }
+
+    public class TeamDTO
+    {
+        public int Id { get; set; }
+        [Required]
+        public int SeasonId { get; set; }
+        [Required]
+        public int DivisionId { get; set; }
+
+        //[Required(ErrorMessage = "Cost Required.")]
+        //[Display(Name = "Cost")]
+        // public decimal Cost { get; set; }
+
+        public IEnumerable<Int32> TeamCoaches { get; set; }
+        public IEnumerable<Int32> TeamParentReps { get; set; }
+        public IEnumerable<Int32> TeamEvents { get; set; }
+        public IEnumerable<RosteredPlayerDTO> Roster { get; set; }
+    }
+
+    public static class TeamDTOExtensions
+    {
+        public static Team UpdateValuesFromDTO(this Team team, TeamDTO teamDTO, string lastUpdateBy, bool onCreate)
+        {
+            team.Id = teamDTO.Id;
+            team.SeasonId = teamDTO.SeasonId;
+            team.DivisionId = teamDTO.DivisionId;
+            //team.Cost = teamDTO.Cost;
+            team.IsActive = true;
+            team.LastUpdateBy = lastUpdateBy;
+            team.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                team.CreatedBy = lastUpdateBy;
+                team.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return team;
+        }
+
+        public static TeamDTO ConvertToDto(this Team team)
+        {
+            return new TeamDTO
+            {
+                Id = team.Id,
+                SeasonId = team.SeasonId,
+                DivisionId = team.DivisionId,
+                //Cost = team.Cost
+            };
+        }
+
+        public static TeamDTO ConvertToDto(this Team team, IUnitOfWork _unitOfWork)
+        {            
+            return new TeamDTO
+            {
+                Id = team.Id,
+                SeasonId = team.SeasonId,
+                DivisionId = team.DivisionId,
+                TeamCoaches = new TeamCoachService(_unitOfWork).GetActiveTeamCoachIdList(team.TeamCoaches),
+                TeamParentReps = new TeamParentRepService(_unitOfWork).GetActiveTeamParentRepIdList(team.TeamParentReps),
+                TeamEvents = new TeamEventService(_unitOfWork).GetActiveTeamEventIdList(team.TeamEvents),
+                Roster = new RosterService(_unitOfWork).GetRosteredPlayerDtoListFromRoster(team.Rosters)
+            };
+        }
+
+        public static TeamListViewDTO ConvertToListViewDTO(this Team team, IUnitOfWork _unitOfWork)
+        {
+            var teamListViewDto = new TeamListViewDTO
+            {
+                Id = team.Id,
+                TeamName = string.Format("U{0} {1}", team.Division.AgeLimit.ToString(), team.Division.GenderCode.ToString()),
+                //Cost = team.Cost
+            };
+
+            if (team.TeamCoaches.Count > 0)
+            {
+                var coachList = new List<String>();
+                var coachService = new CoachService(_unitOfWork);
+                team.TeamCoaches.Select(c => c.CoachId).ToList()
+                    .ForEach(c => coachList.Add(coachService.GetCoach(c).FullName));
+                teamListViewDto.Coaches = string.Join(", ", coachList.ToArray());
+            }
+
+            if (team.TeamParentReps.Count > 0)
+            {
+                var parentRepList = new List<String>();
+                var parentRepService = new ParentRepService(_unitOfWork);
+                team.TeamParentReps.Select(c => c.ParentRepId).ToList()
+                    .ForEach(c => parentRepList.Add(parentRepService.GetParentRep(c).FullName));
+                teamListViewDto.ParentReps = string.Join(", ", parentRepList.ToArray());
+            }
+
+            return teamListViewDto;
+        }
+    }
+}

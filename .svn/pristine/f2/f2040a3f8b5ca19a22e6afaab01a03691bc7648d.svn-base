@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Admin/MailingListMember")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminMailingListMemberController : ApiController
+    {
+        private UnitOfWork _unitOfWork = new UnitOfWork();
+        private MailingListMemberService mlmService;
+        public AdminMailingListMemberController()
+        {
+            mlmService = new MailingListMemberService(_unitOfWork);
+        }
+
+        [HttpGet]
+        public IEnumerable<MailingListMember> GetMailingListMembers()
+        {
+            return mlmService.GetMailingListMembers();
+        }
+    }
+}

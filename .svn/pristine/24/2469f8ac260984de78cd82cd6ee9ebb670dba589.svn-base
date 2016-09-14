@@ -1,0 +1,8 @@
+﻿<td>
+    <a data-ng-click="update(parentRep)">Save</a>
+    <a data-ng-click="reset()" class="vysa-inline-edit-cancel-button">Cancel</a>
+</td>
+<td><input class="form-control" type="text" data-ng-model="parentRep.firstName" required /></td>
+<td><input class="form-control" type="text" data-ng-model="parentRep.lastName" required /></td>
+<td><input class="form-control" type="email" data-ng-model="parentRep.email" required /></td>
+<td><input class="form-control" type="tel" data-ng-model="parentRep.phone" /></td>

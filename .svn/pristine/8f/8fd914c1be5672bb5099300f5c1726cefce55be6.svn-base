@@ -1,0 +1,57 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models
+{
+    public class ContactUsMessageDTO
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Name is required")]
+        [Display(Name = "Email")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [Display(Name = "Email")]
+        [DataType(DataType.EmailAddress)]
+        public string EmailAddr { get; set; }
+
+        //[Required(ErrorMessage = "")]
+        public string Subject { get; set; }
+
+        [Required(ErrorMessage = "Message is required")]
+        [DataType(DataType.MultilineText)]
+        [MaxLength(256)]
+        public string Message { get; set; }
+    }
+
+    public static class ContactUsMessageDTOExtensions
+    {
+        public static ContactUsMessage UpdateValuesFromDTO(this ContactUsMessage contactUsMessage, ContactUsMessageDTO contactUsMessageDto)
+        {
+            contactUsMessage.Id = contactUsMessageDto.Id;
+            contactUsMessage.Name = contactUsMessageDto.Name;
+            contactUsMessage.EmailAddr = contactUsMessageDto.EmailAddr;
+            contactUsMessage.Subject = contactUsMessageDto.Subject;
+            contactUsMessage.Message = contactUsMessageDto.Message;
+            contactUsMessage.IsActive = true;
+            contactUsMessage.LastUpdateUtc = DateTime.UtcNow;
+            contactUsMessage.CreatedDateUtc = DateTime.UtcNow;
+
+            return contactUsMessage;
+        }
+
+        public static ContactUsMessageDTO ConvertToDto(this ContactUsMessage contactUsMessage)
+        {
+            return new ContactUsMessageDTO
+            {
+                Id = contactUsMessage.Id,
+                Name = contactUsMessage.Name,
+                EmailAddr = contactUsMessage.EmailAddr,
+                Subject = contactUsMessage.Subject,
+                Message = contactUsMessage.Message
+            };
+        }
+    }
+}

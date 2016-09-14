@@ -1,0 +1,69 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Services
+{
+    public class TeamParentRepService
+    {
+        private readonly UnitOfWork _unitOfWork;
+
+        public TeamParentRepService(IUnitOfWork unitOfWork)
+        {
+            this._unitOfWork = (UnitOfWork)unitOfWork;
+        }
+
+        public IEnumerable<TeamParentRep> GetTeamParentReps(int teamId)
+        {
+            return _unitOfWork.TeamParentRepRepository.Get(e => e.IsActive && e.TeamId == teamId);
+        }
+
+        public IEnumerable<Int32> GetActiveTeamParentRepIdList(ICollection<TeamParentRep> teamParentReps)
+        {
+            var list = new List<Int32>();
+            if (teamParentReps != null)
+            {
+                teamParentReps.ToList().ForEach(x => { if (x.IsActive) list.Add(x.ParentRepId); });
+            }
+            return list;
+        }
+
+        public void UpdateTeamParentReps(int teamId, List<Int32> parentRepIdList, string lastUpdateBy)
+        {
+            var addList = new List<TeamParentRep>();
+
+            var existingRecords = GetTeamParentReps(teamId);
+            var softDeleteList = existingRecords.Where(x => !parentRepIdList.Contains(x.ParentRepId)).ToList();
+
+            var existingTeamParentRepIdList = existingRecords.Select(x => x.ParentRepId);
+
+            //build addLIst
+            parentRepIdList.Where(x => !existingTeamParentRepIdList.Contains(x))
+                .ToList().ForEach(x => addList.Add(new TeamParentRep
+                {
+                    TeamId = teamId,
+                    ParentRepId = x,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    CreatedDateUtc = DateTime.UtcNow,
+                    LastUpdateBy = lastUpdateBy,
+                    LastUpdateUtc = DateTime.UtcNow
+                }));
+
+            //perform soft delete
+            softDeleteList.ForEach(x => 
+            { 
+                x.IsActive = false;
+                x.LastUpdateUtc = DateTime.UtcNow;
+                x.LastUpdateBy = lastUpdateBy;
+                _unitOfWork.TeamParentRepRepository.Update(x);
+            });
+
+            //add
+            addList.ForEach(x => _unitOfWork.TeamParentRepRepository.Insert(x));
+        }
+    }
+}

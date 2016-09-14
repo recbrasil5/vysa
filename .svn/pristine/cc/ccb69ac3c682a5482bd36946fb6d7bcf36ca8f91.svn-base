@@ -1,0 +1,20 @@
+﻿<div class="pull-left">
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>VYSA Admin Home</h2>
+            <ol class="breadcrumb">
+                <li class="active">
+                    <strong>Home</strong>
+                </li>
+            </ol>
+        </div>
+        <div class="col-lg-2">
+        </div>
+    </div>
+    <div class="row  border-bottom white-bg dashboard-header">
+        <div class="col-lg-3">
+            <h2>WELCOME</h2>
+            <small>Thanks for helping the club!</small>
+        </div>
+    </div>
+</div>

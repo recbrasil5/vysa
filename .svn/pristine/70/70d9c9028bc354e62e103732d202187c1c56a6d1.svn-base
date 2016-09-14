@@ -1,0 +1,110 @@
+﻿using System;
+using System.Collections.Generic;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Enums;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public static class DefaultPlayerGuardians
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static List<PlayerGuardian> PlayerGuardianListStrupp 
+        {
+            get
+            {
+                return new List<PlayerGuardian> 
+                {
+                     new PlayerGuardian
+                    {
+                        Player = DefaultPlayers.PlayerBraxtonStrupp,
+                        Guardian = DefaultGuardians.GuardianPatStrupp,
+                        Relationship = Enums.Relationship.Father,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    },
+
+                    new PlayerGuardian
+                    {
+                        Player = DefaultPlayers.PlayerBraxtonStrupp,
+                        Guardian = DefaultGuardians.GuardianAmyStrupp,
+                        Relationship = Enums.Relationship.Mother,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    }
+                };
+            }
+        }
+
+        public static List<PlayerGuardian> PlayerGuardianListJacobClements
+        {
+            get
+            {
+                return new List<PlayerGuardian> 
+                {
+                    new PlayerGuardian
+                    {
+                        Player = DefaultPlayers.PlayerJacobClements,
+                        Guardian = DefaultGuardians.GuardianBrianClements,
+                        Relationship = Enums.Relationship.Father,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    },
+                    new PlayerGuardian
+                    {
+                        Player = DefaultPlayers.PlayerJacobClements,
+                        Guardian = DefaultGuardians.GuardianSaraClements,
+                        Relationship = Enums.Relationship.Mother,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    }
+                };
+            }
+        }
+
+        public static List<PlayerGuardian> PlayerGuardianListJonahJohnson
+        {
+            get
+            {
+                return new List<PlayerGuardian> 
+                {
+                    new PlayerGuardian
+                    {
+                        Player = DefaultPlayers.PlayerJonahJohnson,
+                        Guardian = DefaultGuardians.GuardianNateJohnson,
+                        Relationship = Enums.Relationship.Father,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    },
+                    new PlayerGuardian
+                    {
+                        Player = DefaultPlayers.PlayerJonahJohnson,
+                        Guardian = DefaultGuardians.GuardianTinaJohnson,
+                        Relationship = Enums.Relationship.Mother,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    }
+                };
+            }
+        }
+        
+    }
+}

@@ -1,0 +1,70 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Util;
+
+namespace VYSA.WebApi.Services
+{
+    public class MailingListMemberService
+    {
+        private UnitOfWork unitOfWork;
+
+        public MailingListMemberService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<MailingListMember> GetMailingListMembers()
+        {
+            return unitOfWork.MailingListMemberRepository.Get(b => b.IsActive);
+        }
+
+        public MailingListMemberDto GetMailingListMember(int id)
+        {
+            var member = unitOfWork.MailingListMemberRepository.GetByID(id);
+            return member == null ? null : member.ConvertToDto();
+        }
+
+        public MailingListMemberDto UpdateMailingListMember(MailingListMemberDto updatedMailingListMemberDto, string lastUpdateBy)
+        {
+            var member = unitOfWork.MailingListMemberRepository.GetByID(updatedMailingListMemberDto.Id);
+            if (member == null) return null;
+
+            //do update
+            member.UpdateValuesFromDTO(updatedMailingListMemberDto, lastUpdateBy, false);
+
+            unitOfWork.MailingListMemberRepository.Update(member);
+            unitOfWork.Save();
+
+            return updatedMailingListMemberDto;
+        }
+
+        public MailingListMemberDto AddMailingListMember(MailingListMemberDto newMailingListMemberDto, string lastUpdateBy)
+        {
+            var member = new MailingListMember().UpdateValuesFromDTO(newMailingListMemberDto, lastUpdateBy, true);
+            unitOfWork.MailingListMemberRepository.Insert(member);
+            unitOfWork.Save();
+
+            return member.ConvertToDto();
+        }
+
+        public MailingListMemberDto SoftDeleteMailingListMember(int id, string lastUpdateBy)
+        {
+            var member = unitOfWork.MailingListMemberRepository.GetByID(id);
+            if (member == null) return null;
+
+            member.IsActive = false;
+            member.LastUpdateUtc = DateTime.UtcNow;
+            member.LastUpdateBy = lastUpdateBy;
+            unitOfWork.MailingListMemberRepository.Update(member);
+            unitOfWork.Save();
+
+            return member.ConvertToDto();
+        }
+    }
+}

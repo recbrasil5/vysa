@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Admin/Rosters")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminRosterController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private RosterService rosterService;
+        public AdminRosterController()
+        {
+            rosterService = new RosterService(unitOfWork);
+        }
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(RosterDTO))]
+        public IHttpActionResult AddPlayerToRoster(RosterDTO rosterDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newRoster = rosterService.AddPlayerToRoster(rosterDto, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetPlayerById
+            //return CreatedAtRoute("GetPlayerById", new { id = newPlayerDto.Id }, newPlayerDto);
+            return Ok(newRoster);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(RosteredPlayerDTO))]
+        public IHttpActionResult RemovePlayerFromRoster(int id)
+        {
+            var rosteredPlayer = rosterService.SoftDeletePlayerFromRoster(id, User.Identity.Name);
+            if (rosteredPlayer == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(rosteredPlayer);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

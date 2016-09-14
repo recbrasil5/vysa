@@ -1,0 +1,59 @@
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Web.Http.Filters;
+using VYSA.WebApi.Controllers;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Filters
+{
+    public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
+    {
+        public override void OnException(HttpActionExecutedContext context)
+        {
+            ////to get the routeTemplate of and endpoint
+            //var routeTemplate = ((IHttpRouteData[])actionContext.Request.GetConfiguration().Routes.GetRouteData(actionContext.Request).Values["MS_SubRoutes"]).First().Route.RouteTemplate;
+            
+            var exception = context.Exception;
+
+            if (exception != null)
+            {
+                if (exception.Message.Equals("Unauthorized: Permission Not Found"))
+                {
+                    context.Response = context.Request.CreateErrorResponse(HttpStatusCode.Unauthorized,
+                        "Unauthorized Access: You do not have the permissions to use this resource.");
+                }
+                else if (exception.Message.Equals("Data Set in excess of 100,000"))
+                {
+                    context.Response = context.Request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        "Data Set in excess of 100,000, please adjust your parameters.");
+                }
+                else
+                {
+                    //build Additional Info String here
+                    var user = context.Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+                    var role = context.Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+
+                    var token = new TokenInfo
+                    {
+                        Username = user != null ? user.Value : "-- Unknown User --",
+                        Role = role != null ? role.Value : "-- Unknown Role --"
+                    };
+
+                    var logService = new LogService();
+                    var additionalInfo = string.Format("role: {0}", token.Role);
+                    additionalInfo += exception.GetBaseException();
+                    var exceptionId = logService.LogError(exception, additionalInfo, true, true, 1, token.Username);
+
+
+                    context.Response = context.Request
+                        .CreateErrorResponse(HttpStatusCode.InternalServerError, 
+                        string.Format("There has been an internal server error: {0}.", exception.Message));
+                }
+            }
+
+        }
+    }
+}

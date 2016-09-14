@@ -1,0 +1,157 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysaApp").controller('adminMailingListMemberController',
+        function ($scope, $location, metaDataService, notifierService, adMailingListDataDeliveryService) {
+
+            loadForm();
+
+            $scope.change = function (role) {
+                if (!role.isChecked && role.NAME !== 'All') {
+                    $scope.roles[0].isChecked = false;
+                }
+                if (role.name === 'All') {
+                    for (var i = 0; i < $scope.roles.length; i++) {
+                        $scope.roles[i].isChecked = role.isChecked;
+                    }
+                }
+                getGridData(1);
+            };
+
+            function loadForm() {
+                setupScopeVars();
+                getGridData(1);
+            }
+
+            function getGridData(pageNo) {
+
+                pageNo = pageNo || $scope.pagination.current;
+
+                var all = $scope.roles[0].isChecked;
+
+                if (all) {
+                    handleDataCallback(adMailingListDataDeliveryService
+                        .getMailingListMemberGridViewAll(pageNo,
+                            $scope.recordsPerPage,
+                            $scope.sort));
+                } else {
+                    handleDataCallback(adMailingListDataDeliveryService
+                        .getMailingListMemberGridViewFilter(pageNo,
+                            $scope.recordsPerPage,
+                            $scope.sort,
+                            $scope.roles));
+                }
+
+            }
+
+            function handleDataCallback(promise) {
+                promise.then(function (data) {
+                    if (data.count > 0) {
+                        $scope.gridData = data.mailingList;
+                        $scope.totalRecords = data.count;
+                        $scope.emailList = data.emailList;
+                        togglePagingDisplaySettings(data.count);
+                        $scope.noData = false;
+                    } else {
+                        $scope.totalRecords = 0;
+                        $scope.noData = true;
+                    }
+                },
+                    function (error) {
+                        $scope.gridContent = false;
+                        $scope.gridData = [];
+                        console.log(error);
+                        notifierService.error('There was an error loading the grid');
+                    }
+                );
+            }
+
+            function setupScopeVars() {
+                $scope.gridContent = true;
+                $scope.gridData = [];
+                setupPagingScopeVars();
+                $scope.gridHeaderItems = metaDataService.getMailingListGridHeaders;
+                $scope.roles = metaDataService.getMailingListFilterRoles;
+            }
+
+            function setupPagingScopeVars() {
+                $scope.totalRecords = 0;
+                $scope.recordsPerPage = 15;
+                $scope.pagination = { current: 1 };
+                $scope.sort = {
+                    column: 'Role',
+                    ascending: true //default setting for Name
+                };
+            }
+
+            function togglePagingDisplaySettings(count) {
+                if (count > 50) {
+                    $scope.equals100Records = true;
+                    $scope.under50Records = true;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count > 25) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = true;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count > 15) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = false;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count < 15) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = false;
+                    $scope.under25Records = false;
+                    $scope.under15Records = false;
+                }
+            }
+
+            $scope.delete = function (playerId) {
+                AdminPlayerRepository.players.delete({ id: parseInt(playerId) })
+                    .$promise.then(function () {
+                        notifierService.success('Record has been removed!');
+                        getGridData(1);
+                    }, function (error) {
+                        notifierService.error('Ex: ' + error.message);
+                    });
+            };
+
+            $scope.orderBy = function (column) {
+                this.sort.column = column;
+                this.sort.ascending = !this.sort.ascending;
+                getGridData(1);
+            }
+
+            $scope.pageChanged = function (pageNo) {
+
+                getGridData(pageNo);
+            };
+
+            $scope.success = function () {
+                notifierService.success('The email list has been copied to your clipboard!');
+            };
+
+            $scope.fail = function (err) {
+                notifierService.success('There was an error while copying the email list to your clipboard!');
+
+            };
+
+            //$scope.newRow = false;
+            //$scope.selected = {};
+            //loadMailingList();
+
+            //function loadMailingList() {
+            //    adminMailingListRepository.mailingList.query().$promise.then(function (data) {
+            //        $scope.gridData = data;
+            //        $scope.totalRecords = data.length;
+            //    }, function (error) {
+            //        //TODO
+            //        console.log('Failure to load grid data: ' + JSON.stringify(error));
+            //    });
+            //}
+
+        });
+
+}());

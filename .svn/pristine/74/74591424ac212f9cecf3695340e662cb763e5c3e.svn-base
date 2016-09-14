@@ -1,0 +1,16 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysa")
+    .controller('ContactController', function ($scope, ContactRepository, notifierService) {
+        $scope.sendMsg = function (msg) {
+            ContactRepository.sendMsg(msg).then(function () {
+                notifierService.success('Thanks for your feedback. Your message has been sent!');
+                $scope.msg = {};
+            }, 
+            function () {
+                notifierService.error('There was an error and this message was not sent. Please try again later!');
+            })
+        }
+    });
+}());

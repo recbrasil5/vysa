@@ -1,0 +1,113 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class TeamService
+    {
+        private UnitOfWork unitOfWork;
+
+        public TeamService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<Team> GetTeams()
+        {
+            return unitOfWork.TeamRepository.Get(a => a.IsActive);
+        }
+
+        public IEnumerable<TeamListViewDTO> GetTeamListViewDtos(int seasonId)
+        {
+            var teamListViewDtos = new List<TeamListViewDTO>();
+            var teams = unitOfWork.TeamRepository.Get(b => b.IsActive && b.SeasonId == seasonId, null, "Division, Rosters, TeamCoaches, TeamParentReps").ToList();
+            teams.ForEach(e => teamListViewDtos.Add(e.ConvertToListViewDTO(unitOfWork)));
+            return teamListViewDtos;
+        }
+
+        public Int32 GetTeamCountBySeasonId(int seasonId)
+        {
+            return unitOfWork.TeamRepository.Get(b => b.IsActive && b.SeasonId == seasonId).Count();
+        }
+        public Int32 GetRosteredPlayerCountBySeasonId(int seasonId)
+        {
+            var count = 0;
+            var teams = unitOfWork.TeamRepository.Get(b => b.IsActive && b.SeasonId.Equals(seasonId), null, "Rosters").ToList();
+            teams.ForEach(z => z.Rosters.Where(x => x.IsActive).ToList().ForEach(f => count++));
+            return count;
+        }
+        
+        public TeamDTO GetTeamDto(int id)
+        {
+            var team = unitOfWork.TeamRepository.Get(b => b.Id.Equals(id), null, "TeamCoaches, TeamEvents, TeamParentReps, Rosters").SingleOrDefault();
+            return team == null ? null : team.ConvertToDto(unitOfWork);
+        }
+
+        public TeamDTO UpdateTeam(TeamDTO updatedTeamDto, string lastUpdateBy)
+        {
+            var team = unitOfWork.TeamRepository.GetByID(updatedTeamDto.Id);
+            if (team == null) return null;
+
+            //perform update
+            team.UpdateValuesFromDTO(updatedTeamDto, lastUpdateBy, false);
+
+            updateChildRecords(updatedTeamDto, lastUpdateBy, false);
+
+            unitOfWork.TeamRepository.Update(team);
+            unitOfWork.Save();
+
+            return updatedTeamDto;
+        }
+
+        public TeamDTO AddTeam(TeamDTO newTeamDto, string lastUpdateBy)
+        {
+            Team team = new Team().UpdateValuesFromDTO(newTeamDto, lastUpdateBy, true);
+            unitOfWork.TeamRepository.Insert(team);
+
+            updateChildRecords(newTeamDto, lastUpdateBy, true);
+
+            unitOfWork.Save();
+
+            return team.ConvertToDto();
+        }
+
+        public TeamDTO SoftDeleteTeam(int id, string lastUpdateBy)
+        {
+            var team = unitOfWork.TeamRepository.GetByID(id);
+            if (team == null) return null;
+
+            team.IsActive = false;
+            team.LastUpdateUtc = DateTime.UtcNow;
+            team.LastUpdateBy = lastUpdateBy;
+            unitOfWork.TeamRepository.Update(team);
+            unitOfWork.Save();
+
+            return team.ConvertToDto();
+        }
+
+        private void updateChildRecords(TeamDTO teamDto, string lastUpdateBy, bool onCreate)
+        {
+            //update child records
+            new TeamCoachService(unitOfWork).UpdateTeamCoaches(teamDto.Id, teamDto.TeamCoaches.ToList(), lastUpdateBy);
+            new TeamParentRepService(unitOfWork).UpdateTeamParentReps(teamDto.Id, teamDto.TeamParentReps.ToList(), lastUpdateBy);
+
+            var teamEventService = new TeamEventService(unitOfWork);
+            if(onCreate)
+            {
+                //automatically attend all teamEvents on team creation
+                var eventIdList = new EventService(unitOfWork).GetEventsBySeasonId(teamDto.SeasonId).Select(x => x.Id).ToList();
+                teamEventService.UpdateTeamEvents(teamDto.Id, eventIdList, lastUpdateBy);
+            }
+            else
+            {
+                teamEventService.UpdateTeamEvents(teamDto.Id, teamDto.TeamEvents.ToList(), lastUpdateBy);
+            }
+                     
+        }
+    }
+}

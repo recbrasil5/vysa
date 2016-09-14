@@ -1,0 +1,76 @@
+﻿using System;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public class DefaultTeamCoaches
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static TeamCoach TeamCoachU10Boys = new TeamCoach
+        {
+            Coach = DefaultCoaches.CoachManuel,
+            Team = DefaultTeams.TeamU10Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamCoach TeamCoachU11Coed = new TeamCoach
+        {
+            Coach = DefaultCoaches.CoachBruce,
+            Team = DefaultTeams.TeamU11Coed,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamCoach TeamCoachU11Girls = new TeamCoach
+        {
+            Coach = DefaultCoaches.CoachLori,
+            Team = DefaultTeams.TeamU11Girls,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamCoach TeamCoachU12Boys = new TeamCoach
+        {
+            Coach = DefaultCoaches.CoachZach,
+            Team = DefaultTeams.TeamU12Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamCoach TeamCoachU13Boys = new TeamCoach
+        {
+            Coach = DefaultCoaches.CoachMark,
+            Team = DefaultTeams.TeamU13Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamCoach TeamCoachU14Boys = new TeamCoach
+        {
+            Coach = DefaultCoaches.CoachNick,
+            Team = DefaultTeams.TeamU14Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+    }
+}

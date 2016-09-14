@@ -1,0 +1,143 @@
+﻿<div class="pull-left">
+    <div class="page-header">
+        <h1>
+            Club Management<small> | Players</small>
+        </h1>
+    </div>
+    <div class="container pull-left">
+        <form class="form-horizontal" role="form" novalidate>
+            <div class="panel-group">
+                <div class="panel-group">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h2 data-ng-if="!editing" class="panel-title">Add Player</h2>
+                            <h2 data-ng-if="editing" class="panel-title">Edit Player</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-sm-6 col-lg-12">
+                                <div class="panel panel-primary panel-margin">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Player Information</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <input type="hidden" name="playerId" data-ng-model="player.id" />
+                                                    <label for="fn" class="col-md-4 control-label">First Name: </label>
+                                                    <div class="col-md-8">
+                                                        <input id="fn" class="form-control" type="text" placeholder="FirstName" data-ng-model="player.firstName" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <label for="ln" class="col-md-4 control-label">Last Name: </label>
+                                                    <div class="col-md-8">
+                                                        <input id="ln" class="form-control" type="text" placeholder="LastName" data-ng-model="player.lastName" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <label for="fromDate" class="col-md-4 control-label">Date of Birth: </label>
+                                                    <div class="col-md-8">
+                                                        <input id="fromDate" type="date" class="form-control" placeholder="Date Of Birth" data-ng-model="player.dateOfBirth" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <label for="fromDate" class="col-md-4 control-label">Gender: </label>
+                                                    <div class="col-md-8">
+                                                        <select id="genderStr" class="form-control"
+                                                                data-ng-model="player.genderStr"
+                                                                data-ng-options="g for g in genderTypes" required></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-12">
+                                <div class="panel panel-primary panel-margin">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Guardian Information</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="ibox float-e-margins">
+                                                <div>
+                                                    <div class="ibox-content">
+                                                        <h3>Guardians</h3>
+                                                        <span><strong>Note:&nbsp;</strong>A player must have at least one guardian.</span><br /><br />
+                                                        <button ng-show="!displaySearch" type="button" ng-click="addNew()">Add Guardian</button>    
+                                                        <table class="table table-striped table-hover table-condensed">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>&nbsp;</th>
+                                                                    <th>&nbsp;</th>
+                                                                    <td>First Name</td>
+                                                                    <td>Last Name</td>
+                                                                    <td>Relationship</td>
+                                                                    <td>Email</td>
+                                                                    <td>Phone</td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <!-- newRow -->
+                                                                <tr data-ng-show="newRow">
+                                                                    <td><a data-ng-click="create()">Add</a></td>
+                                                                    <td><a data-ng-click="cancel()" class="vysa-cancel-button">Cancel</a></td>
+                                                                    <td>
+                                                                        <div ng-show="displaySearch" custom-select="asyncOptions" ng-change="asyncChanged()" ng-model="selectedFilterItem" ng-options="a as a.fullName for a in async" ng-disabled="!isCustomEnabled">
+                                                                            <div class="pull-left" style="width: 40px">
+                                                                                <span></span>
+                                                                            </div>
+                                                                            <div>
+                                                                                <strong>{{ a.fullName }}</strong><br />
+                                                                                <span>{{ a.email }}</span>
+                                                                            </div>
+                                                                            <div class="clearfix"></div>
+                                                                        </div>
+                                                                        <input ng-show="!displaySearch" type="text" data-ng-model="newGuardian.firstName" required />
+                                                                    </td>
+                                                                    <td><input ng-show="!displaySearch" type="text" data-ng-model="newGuardian.lastName" required /></td>
+                                                                    <td>
+                                                                        <select ng-show="!displaySearch" id="relationshipStr" class="form-control"
+                                                                                data-ng-model="newGuardian.relationshipStr"
+                                                                                data-ng-options="r for r in relationshipTypes" required></select>
+                                                                    </td>
+                                                                    <td><input ng-show="!displaySearch" type="email" data-ng-model="newGuardian.email" /></td>
+                                                                    <td><input ng-show="!displaySearch" type="tel" data-ng-model="newGuardian.phone" /></td>
+                                                                </tr>
+                                                                <!-- ngInclude: listView or editView -->
+                                                                <tr ng-repeat="guardian in player.guardians" ng-include="getTemplate(guardian)">
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer" style="text-align: right;">
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button type="submit" class="btn btn-success btn-sm" data-ng-click="save()" data-ng-if="displaySaveButton()">Save</button>
+                                    <button type="button" class="btn btn-default btn-sm" ui-sref="clubmanagement.default">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

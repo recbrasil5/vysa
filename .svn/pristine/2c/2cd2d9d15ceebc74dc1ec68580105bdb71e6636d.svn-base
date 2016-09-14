@@ -1,0 +1,45 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysa")
+        .controller('AdminBoardMembersAddEditController',
+        function ($scope, $routeParams, $location, notifierService, AdminBoardMemberRepository) {
+
+            var boardMemberId = $routeParams.id;
+            $scope.editing = boardMemberId !== undefined;
+
+            if ($scope.editing) {
+                AdminBoardMemberRepository.get({ id: parseInt(boardMemberId) }, function (data) {
+                    $scope.boardMember = data;
+                });
+            }
+
+            $scope.save = function () {
+
+                if ($scope.editing) {
+                    //update
+                    AdminBoardMemberRepository.update($scope.boardMember, function () {
+                        $location.url('/Admin/Home/WebsiteMaintenance');
+                        notifierService.success("The board member with the name '" + $scope.boardMember.name + "' has been updated!");
+                    }, function () {
+                        notifierService.error("Error while updating board member!");
+                    });
+                } else {
+                    //add
+                    AdminBoardMemberRepository.save($scope.boardMember, function () {
+                        $location.url('/Admin/Home/WebsiteMaintenance');
+                        notifierService.success("The board member with the name '" + $scope.boardMember.name + "' has been added!");
+                    }, function () {
+                        notifierService.error("Error while adding board member!");
+                    });
+                }
+            }
+
+            $scope.cancel = function () {
+                $location.url('/Admin/Home/WebsiteMaintenance');
+            }
+
+        });
+
+}());

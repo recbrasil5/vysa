@@ -1,0 +1,14 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysa").factory('AdminBoardMemberRepository', function ($resource) {
+        return $resource('/Admin/api/Board/:id', { id: '@id' }, {
+            get: { method: 'GET' },
+            query: { method: 'GET', isArray: true },
+            post: { method: 'POST' },
+            update: { method: 'PUT' },
+            delete: { method: 'DELETE' }
+        });
+    });
+
+}());

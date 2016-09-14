@@ -1,0 +1,290 @@
+﻿using System;
+using System.Data.SqlTypes;
+using System.Linq;
+using System.Web.Security;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Util;
+
+namespace VYSA.WebApi.Infrastructure
+{
+    public class EFMembershipProvider : MembershipProvider
+    {
+        private IUnitOfWork unitOfWork;
+        private string applicationName = "VYSA";
+        private string currentUserName; // = HttpContext.Current.User.Identity.Name;
+
+        //this parameterless constructor calls the parameterized constructor below it, 
+        //passing in a new'ed up UnitOfWork, which implements IUnitOfWork
+        public EFMembershipProvider() : this(new UnitOfWork()) { }
+
+        public EFMembershipProvider(IUnitOfWork unitOfWork)
+        {
+            this.unitOfWork = unitOfWork;
+        }
+
+        public override string ApplicationName
+        {
+            get
+            {
+                return applicationName;
+            }
+            set
+            {
+                applicationName = value;
+            }
+        }
+
+        public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
+        {
+            ValidatePasswordEventArgs args = new ValidatePasswordEventArgs(username, password, true);
+            OnValidatingPassword(args);
+
+            if (args.Cancel)
+            {
+                status = MembershipCreateStatus.InvalidPassword;
+                return null;
+            }
+
+            if (RequiresUniqueEmail && GetUserNameByEmail(email) != string.Empty)
+            {
+                status = MembershipCreateStatus.DuplicateEmail;
+                return null;
+            }
+
+            MembershipUser user = GetUser(username, true);
+
+            if (user == null)
+            {
+                DateTime utcNow = DateTime.UtcNow;
+                User newUser = new User()
+                {
+                    UserName = username,
+                    Password = RandomPassword.EncryptPasswordSHA(password),
+                    PasswordQuestion = passwordQuestion != null ? passwordQuestion : "",
+                    PasswordAnswer = passwordAnswer != null ? passwordAnswer : "",
+                    Email = email,
+                    LastUpdateUtc = utcNow,
+                    CreatedDateUtc = utcNow,
+                    LastUpdateBy = currentUserName,
+                    CreatedBy = currentUserName,
+                    IsActive = true,
+                    Approved = false,             
+                    LastActivityDate = SqlDateTime.MinValue.Value,
+                    LastLoginDate = SqlDateTime.MinValue.Value,
+                    LastPasswordChangeDate = SqlDateTime.MinValue.Value 
+                };
+
+                unitOfWork.UserRepository.Save(newUser);
+                status = MembershipCreateStatus.Success;
+
+                return GetUser(username, true);
+            }
+            else
+            {
+                status = MembershipCreateStatus.DuplicateUserName;
+            }
+
+            return null;
+        }
+
+        public override bool DeleteUser(string username, bool deleteAllRelatedData)
+        {
+            User userToDelete = unitOfWork.UserRepository.Users.SingleOrDefault(u => u.UserName.ToLower() == username.ToLower());
+
+            if (userToDelete == null)
+                return false;
+
+            unitOfWork.UserRepository.Delete(userToDelete);
+            return true;
+        }
+
+        public override bool ChangePassword(string username, string oldPassword, string newPassword)
+        {
+            User user = unitOfWork.UserRepository.Users.SingleOrDefault(u => u.UserName.ToLower() == username.ToLower());
+            //if (null != user && user.Password == RandomPassword.EncryptPasswordSHA(oldPassword))
+            if (null != user && user.Password == RandomPassword.EncryptPasswordSHA(oldPassword))
+            {
+                user.Password = RandomPassword.EncryptPasswordSHA(newPassword);
+                unitOfWork.UserRepository.Save(user);
+                return true;
+            }
+            return false;
+        }
+
+        public override bool ChangePasswordQuestionAndAnswer(string username, string password, string newPasswordQuestion, string newPasswordAnswer)
+        {
+            User user = unitOfWork.UserRepository.Users.SingleOrDefault(u => u.UserName.ToLower() == username.ToLower());
+            if (null != user)
+            {
+                user.PasswordQuestion = newPasswordQuestion;
+                user.PasswordAnswer = newPasswordAnswer;
+                unitOfWork.UserRepository.Save(user);
+                return true;
+            }
+            return false;
+        }
+
+        
+        public override bool EnablePasswordReset
+        {
+            get { return true; }
+        }
+
+        public override bool EnablePasswordRetrieval
+        {
+            get { return true; }
+        }
+        
+        public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
+        {
+            throw new NotImplementedException();
+        }               
+
+        public override int GetNumberOfUsersOnline()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetPassword(string username, string answer)
+        {
+            MembershipUser memUser = GetUser(username, false);
+            if (memUser != null)
+                return memUser.GetPassword();
+            else
+                return "";
+        }
+
+        public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
+        {
+            MembershipUserCollection userCollection = new MembershipUserCollection();
+            foreach (User u in unitOfWork.UserRepository.Users.AsEnumerable())
+            {
+                MembershipUser membershipUser = getMembershipUserFromEFUser(u.UserName, u);
+                if (membershipUser != null)
+                    userCollection.Add(membershipUser);
+            }
+
+            totalRecords = userCollection.Count;
+
+            if (userCollection.Count != 0)
+                return userCollection;
+            else 
+                return null;
+        }
+
+        public override MembershipUser GetUser(string username, bool userIsOnline)
+        {
+            User user = unitOfWork.UserRepository.GetUser(username);
+            return getMembershipUserFromEFUser(username, user);
+        }        
+
+        public override MembershipUser GetUser(object providerUserKey, bool userIsOnline)
+        {
+            //do something with userIsOnline later (if needed)
+            User user = unitOfWork.UserRepository.GetUser((int)providerUserKey);
+            return getMembershipUserFromEFUser(user.UserName, user);
+        }
+
+        public override string GetUserNameByEmail(string email)
+        {
+            User user = unitOfWork.UserRepository.GetUserByEmail(email);
+            if (user != null)
+                return user.UserName;
+            else
+                return string.Empty;
+        }
+
+        public override int MaxInvalidPasswordAttempts
+        {
+            get { return 5; }
+        }
+
+        public override int MinRequiredNonAlphanumericCharacters
+        {
+            get { return 1; }
+        }
+
+        public override int MinRequiredPasswordLength
+        {
+            get { return 6; }
+        }
+
+        public override int PasswordAttemptWindow
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override MembershipPasswordFormat PasswordFormat
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override string PasswordStrengthRegularExpression
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override bool RequiresQuestionAndAnswer
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override bool RequiresUniqueEmail
+        {
+            get { return true; } //this may change in the future. 
+        }
+
+        public override string ResetPassword(string username, string answer)
+        {
+            User user = unitOfWork.UserRepository.GetUser(username);
+            //if (user == null || user.PasswordAnswer.ToLower().Trim() != answer.ToLower().Trim())
+            //    return string.Empty;
+
+            string newPassword = RandomPassword.Generate();
+            user.Password = RandomPassword.EncryptPasswordSHA(newPassword);
+            user.LastPasswordChangeDate = DateTime.UtcNow;
+            user.LastUpdateUtc = DateTime.UtcNow;
+
+            unitOfWork.UserRepository.Save(user);
+            return newPassword;
+        }
+
+        public override bool UnlockUser(string userName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void UpdateUser(MembershipUser user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool ValidateUser(string username, string password)
+        {
+            User user = unitOfWork.UserRepository.GetUser(username, RandomPassword.EncryptPasswordSHA(password));
+            return user != null;
+        }
+
+        private static MembershipUser getMembershipUserFromEFUser(string username, User user)
+        {
+            if (user == null)
+                return null;
+
+            DateTime lastLoginDT = user.LastLoginDate.HasValue ? user.LastLoginDate.Value : ((DateTime)(SqlDateTime.MinValue)).ToUniversalTime();
+            DateTime lastActivityDT = user.LastActivityDate.HasValue ? user.LastActivityDate.Value : ((DateTime)(SqlDateTime.MinValue)).ToUniversalTime();
+            DateTime lastPasswordDT = user.LastPasswordChangeDate.HasValue ? user.LastPasswordChangeDate.Value : ((DateTime)(SqlDateTime.MinValue)).ToUniversalTime();
+
+            MembershipUser memUser = new MembershipUser("EFMembershipProvider", username, user.Id, user.Email, user.PasswordQuestion,
+                                                        string.Empty, user.IsActive, false, user.CreatedDateUtc,
+                                                        lastLoginDT, lastActivityDT, lastPasswordDT, ((DateTime)(SqlDateTime.MinValue)).ToUniversalTime());
+            return memUser;
+        }
+    }
+}

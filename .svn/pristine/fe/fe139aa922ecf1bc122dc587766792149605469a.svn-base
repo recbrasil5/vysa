@@ -1,0 +1,51 @@
+﻿
+using System;
+using System.ComponentModel.DataAnnotations;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models.Resource
+{
+    public class UserResourceModel
+    {
+        public int Id { get; set; }
+
+        public string UserName { get; set; }
+
+        [Required]
+        public string Email { get; set; }
+
+        public string RoleName { get; set; }
+    }
+
+    public static class UserExtensions
+    {
+        public static User PopulateEntityWithResourceModel(this User user, UserResourceModel resourceModel, string lastUpdateBy, bool onCreate)
+        {
+            user.Id = resourceModel.Id;
+            user.UserName = resourceModel.UserName;
+            user.Email = resourceModel.Email;
+            user.IsActive = true;
+            user.LastUpdateBy = lastUpdateBy;
+            user.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                user.CreatedBy = lastUpdateBy;
+                user.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return user;
+        }
+
+        public static UserResourceModel ConvertToResourceModel(this User user)
+        {
+            return new UserResourceModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                
+            };
+        }
+    }
+}

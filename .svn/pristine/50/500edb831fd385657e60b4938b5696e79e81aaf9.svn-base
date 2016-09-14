@@ -1,0 +1,75 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class DivisionService
+    {
+        private UnitOfWork unitOfWork;
+
+        public DivisionService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<DropdownItemVM> GetDivisionDropdownVms()
+        {
+            var list = new List<DropdownItemVM>();
+            var divisions = unitOfWork.DivisionRepository
+                              .Get(d => d.IsActive)
+                              .OrderBy(a => a.AgeLimit).ThenBy(a => a.GenderCode).ToList();
+
+            divisions.ForEach(d => list.Add(d.ConvertToDropdownItemVM()));
+            return list;
+        }
+
+        public DivisionDTO GetDivision(int id)
+        {
+            var division = unitOfWork.DivisionRepository.GetByID(id);
+            return division == null ? null : division.ConvertToDto();
+        }
+
+        public DivisionDTO UpdateDivision(DivisionDTO updatedDivisionDto, string lastUpdateBy)
+        {
+            var division = unitOfWork.DivisionRepository.GetByID(updatedDivisionDto.Id);
+            if (division == null) return null;
+
+            //do update
+            division.UpdateValuesFromDTO(updatedDivisionDto, lastUpdateBy, false);
+
+            unitOfWork.DivisionRepository.Update(division);
+            unitOfWork.Save();
+
+            return updatedDivisionDto;
+        }
+
+        public DivisionDTO AddDivision(DivisionDTO newDivisionDto, string lastUpdateBy)
+        {
+            Division division = new Division().UpdateValuesFromDTO(newDivisionDto, lastUpdateBy, true);
+            unitOfWork.DivisionRepository.Insert(division);
+            unitOfWork.Save();
+
+            return division.ConvertToDto();
+        }
+
+        public DivisionDTO SoftDeleteDivision(int id, string lastUpdateBy)
+        {
+            var division = unitOfWork.DivisionRepository.GetByID(id);
+            if (division == null) return null;
+
+            division.IsActive = false;
+            division.LastUpdateUtc = DateTime.UtcNow;
+            division.LastUpdateBy = lastUpdateBy;
+            unitOfWork.DivisionRepository.Update(division);
+            unitOfWork.Save();
+
+            return division.ConvertToDto();
+        }
+    }
+}

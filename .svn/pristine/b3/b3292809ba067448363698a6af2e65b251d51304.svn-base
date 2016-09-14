@@ -1,0 +1,133 @@
+﻿using System.Collections.Generic;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Filters;
+using VYSA.WebApi.Models.Binding;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Models.ViewModel;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [ApiExceptionFilter]
+    [ModelValidator]
+    [RoutePrefix("Admin/Guardians")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminGuardiansController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private GuardianService guardianService;
+        public AdminGuardiansController()
+        {
+            guardianService = new GuardianService(unitOfWork);
+        }
+
+        [HttpPost]
+        [Route("AutoComplete")]
+        [ResponseType(typeof(GuardiansViewModel))]
+        public IHttpActionResult Filter(AutoCompleteBindingModel autoCompleteBindingModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var list = string.IsNullOrWhiteSpace(autoCompleteBindingModel.SearchTerm) ?  //if searchTerm isn't empty, filter data
+                guardianService.GetGuardians() :
+                guardianService.GetGuardiansByFilter(autoCompleteBindingModel);
+
+            return Ok(new GuardiansViewModel { Guardians = list });
+        }
+
+        [HttpGet]
+        [Route("")]
+        [ResponseType(typeof(IEnumerable<GuardianResourceModel>))]
+        public IEnumerable<GuardianResourceModel> GetGuardians() 
+        {
+            return guardianService.GetGuardians();
+        }
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetGuardianById")]
+        [ResponseType(typeof(GuardianResourceModel))]
+        public IHttpActionResult GetGuardian(int id)
+        {
+            GuardianResourceModel guardianDto = guardianService.GetGuardianDto(id);
+
+            // return it if you got it
+            if (guardianDto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(guardianDto);
+        }
+
+        
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(GuardianResourceModel))]
+        public IHttpActionResult UpdateGuardian(int id, GuardianResourceModel GuardianDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != GuardianDTO.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedGuardianDTO = guardianService.UpdateGuardian(GuardianDTO, User.Identity.Name);
+
+            if (updatedGuardianDTO == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedGuardianDTO);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(GuardianResourceModel))]
+        public IHttpActionResult CreateGuardian(GuardianResourceModel GuardianDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newGuardianDTO = guardianService.AddGuardian(GuardianDTO, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetGuardianById
+            //return CreatedAtRoute("GetGuardianById", new { id = newGuardianDTO.Id }, newGuardianDTO);
+            return Ok(newGuardianDTO);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(GuardianResourceModel))]
+        public IHttpActionResult DeleteGuardian(int id)
+        {
+            var Guardian = guardianService.SoftDeleteGuardian(id, User.Identity.Name);
+            if (Guardian == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(Guardian);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

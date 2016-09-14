@@ -1,0 +1,121 @@
+﻿using System.Collections.Generic;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Filters;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Models.ViewModel;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [ApiExceptionFilter]
+    [ModelValidator]
+    [RoutePrefix("Admin/ParentReps")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminParentRepsController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private ParentRepService parentRepService;
+        public AdminParentRepsController()
+        {
+            parentRepService = new ParentRepService(unitOfWork);
+        }
+
+        [HttpGet]
+        [Route("")]
+        public IEnumerable<ParentRep> GetParentReps() //webApi hybrid call
+        {
+            return parentRepService.GetParentReps();
+        }
+
+        [HttpGet]
+        [Route("GetParentRepDropdownVms")]
+        public IEnumerable<DropdownItemViewModel> GetParentRepDropdownVms()
+        {
+            return parentRepService.GetParentRepDropdownVMs();
+        }
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetParentRepById")]
+        [ResponseType(typeof(ParentRepResourceModel))]
+        public IHttpActionResult GetParentRep(int id)
+        {
+            ParentRepResourceModel ParentRep = parentRepService.GetParentRep(id);
+
+            // return it if you got it
+            if (ParentRep == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(ParentRep);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(ParentRepResourceModel))]
+        public IHttpActionResult UpdateParentRep(int id, ParentRepResourceModel parentRepDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != parentRepDto.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedParentRepDTO = parentRepService.UpdateParentRep(parentRepDto, User.Identity.Name);
+
+            if (updatedParentRepDTO == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedParentRepDTO);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(ParentRepResourceModel))]
+        public IHttpActionResult CreateParentRep(ParentRepResourceModel parentRepDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newParentRepDTO = parentRepService.AddParentRep(parentRepDto, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetParentRepById
+            //return CreatedAtRoute("GetParentRepById", new { id = newParentRepDTO.Id }, newParentRepDTO);
+            return Ok(newParentRepDTO);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(ParentRepResourceModel))]
+        public IHttpActionResult DeleteParentRep(int id)
+        {
+            var parentRep = parentRepService.SoftDeleteParentRep(id, User.Identity.Name);
+            if (parentRep == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(parentRep);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+
+}

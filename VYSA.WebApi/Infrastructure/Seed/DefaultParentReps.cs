@@ -1,0 +1,84 @@
+﻿using System;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public static class DefaultParentReps
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static ParentRep ParentRepU10Boys = new ParentRep
+        {
+            FirstName = "Deb",
+            LastName = "Palmberg",
+            Email = "palmberg@charter.net",
+            Phone = "(608) 769-0135",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static ParentRep ParentRepU11Coed = new ParentRep
+        {
+            FirstName = "Amanda",
+            LastName = "Kreibich",
+            Email = "amanda.kreibich@gmail.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static ParentRep ParentRepU11Girls = new ParentRep
+        {
+            FirstName = "Lori",
+            LastName = "Sneig",
+            Email = "snieglm@hotmail.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static ParentRep ParentRepU12Boys = new ParentRep
+        {
+            FirstName = "Katie",
+            LastName = "Malone",
+            Email = "laesunmarie@yahoo.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static ParentRep ParentRepU13Boys = new ParentRep
+        {
+            FirstName = "Chelsey",
+            LastName = "Steinbrecher",
+            Email = "ctsteiny4@gmail.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static ParentRep ParentRepU14Boys = new ParentRep
+        {
+            FirstName = "Kally",
+            LastName = "Hernandez",
+            Email = "klr9905@yahoo.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+    }
+}

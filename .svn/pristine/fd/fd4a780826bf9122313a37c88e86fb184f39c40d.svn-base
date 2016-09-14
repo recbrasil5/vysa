@@ -1,0 +1,24 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+
+namespace VYSA.WebApi.Models
+{
+    public class PlayersFilteringParametersDto
+    {
+        //public DateTime FromDateTime { get; set; }
+        //public DateTime ToDateTime { get; set; }
+        public String OrderByFieldName { get; set; }
+        public bool Ascending { get; set; }
+
+        [Required]
+        public int PageNum { get; set; }
+        [Required]
+        [Range(1, 1000)]
+        public int NumofRecords { get; set; }
+        [Required]
+        public bool BoolCount { get; set; }
+    }
+}

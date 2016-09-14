@@ -1,0 +1,117 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Admin/Events")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminEventsController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private EventService eventService;
+        public AdminEventsController()
+        {
+            eventService = new EventService(unitOfWork);
+        }
+
+        [HttpGet]
+        [Route("GetEventsBySeasonId/{seasonId:int}", Name = "GetEventsBySeasonId")]
+        [ResponseType(typeof(IEnumerable<EventListViewSimpleDTO>))]
+        public IEnumerable<EventListViewSimpleDTO> GetEventsBySeasonId(int seasonId) //webApi hybrid call
+        {
+            return eventService.GetEventListViewSimpleDtos(seasonId);
+        }
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetEventById")]
+        [ResponseType(typeof(EventDTO))]
+        public IHttpActionResult GetEvent(int id)
+        {
+            EventDTO Event = eventService.GetEvent(id);
+
+            // return it if you got it
+            if (Event == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(Event);
+        }
+
+        
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(EventDTO))]
+        public IHttpActionResult UpdateEvent(int id, EventDTO EventDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != EventDTO.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedEventDTO = eventService.UpdateEvent(EventDTO, User.Identity.Name);
+
+            if (updatedEventDTO == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedEventDTO);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(EventDTO))]
+        public IHttpActionResult CreateEvent(EventDTO EventDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newEventDTO = eventService.AddEvent(EventDTO, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetEventById
+            //return CreatedAtRoute("GetEventById", new { id = newEventDTO.Id }, newEventDTO);
+            return Ok(newEventDTO);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(EventDTO))]
+        public IHttpActionResult DeleteEvent(int id)
+        {
+            var Event = eventService.SoftDeleteEvent(id, User.Identity.Name);
+            if (Event == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(Event);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

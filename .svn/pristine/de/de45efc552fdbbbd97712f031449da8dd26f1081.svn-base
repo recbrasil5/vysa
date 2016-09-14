@@ -1,0 +1,10 @@
+﻿using System.Collections.Generic;
+
+namespace VYSA.Domain.Entities
+{
+    public class Role : EntityBase
+    {
+        public string Name { get; set; }
+        public ICollection<User> Users { get; set; }
+    }
+}

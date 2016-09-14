@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Enums;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public static class DefaultSeasons
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static Season Spring2015 = new Season
+        {
+            Year = 2015,
+            SeasonType = Enums.SeasonType.Spring,
+            RegistrationDate = DateTime.Parse("01/11/2015"),
+            StartDate = DateTime.Parse("03/17/2015"),
+            EndDate = DateTime.Parse("05/30/2015"),
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+    }
+}

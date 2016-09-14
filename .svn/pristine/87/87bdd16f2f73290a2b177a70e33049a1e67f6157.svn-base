@@ -1,0 +1,22 @@
+﻿<div class="wrapper wrapper-content">
+
+    <div class="row">
+        <div class="col-lg-10 col-lg-offset-1">
+            <div ng-if="isData" class="ibox">
+                <h4 class="text-center m">
+                    Announcements
+                </h4>
+                <slick dots="true" init-onload=true data="announcements" slides-to-show="1" autoplay="true" autoplaySpeed="5000">
+                    <div ng-repeat="a in announcements">
+                        <div class="ibox-content">
+                            <h2>{{a.title}}</h2>
+                            <p>
+                                {{a.message}}
+                            </p>
+                        </div>
+                    </div>
+                </slick>
+            </div>
+        </div>
+    </div>
+</div>

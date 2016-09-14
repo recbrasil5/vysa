@@ -1,0 +1,35 @@
+﻿using System.Linq;
+using System.Net.Http;
+using System.Web.Http;
+using VYSA.WebApi.Filters;
+
+namespace VYSA.WebApi.Controllers
+{
+    public class TokenInfo
+    {
+        public string Username { get; set; }
+        public string Role { get; set; }
+    }
+
+    [ModelValidator]
+    [Authorize]
+    [RoutePrefix("Account")]
+    public class AccountController : ApiController
+    {
+        // GET api/<controller>
+        [HttpGet]
+        [Route("info")]
+        public TokenInfo GetTokenInfo()
+        {
+            var user = Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+            var role = Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+            
+            return new TokenInfo
+            {
+                Username = user != null ? user.Value : "-- Unknown User --",
+                Role = role != null ? role.Value : "-- Unknown Role --"
+            };
+        }
+
+    }
+}

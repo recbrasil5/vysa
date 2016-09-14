@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel.DataAnnotations;
+
+namespace VYSA.Web.Models
+{
+    public class ContactUsMessageViewModel
+    {
+        [Required(ErrorMessage = "*")]
+        public string Name { get; set; }
+        
+        [Display(Name="Email")]
+        [DataType(DataType.EmailAddress)]
+        public string EmailAddr{ get; set; }
+
+        [Required(ErrorMessage = "*")]
+        public string Subject { get; set; }
+
+        [Required(ErrorMessage = "*")]
+        [DataType(DataType.MultilineText)]
+        [MaxLength(256)]
+        public string Message { get; set; }
+    }
+}

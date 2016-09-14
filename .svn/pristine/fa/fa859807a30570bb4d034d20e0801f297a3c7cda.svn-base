@@ -1,0 +1,53 @@
+﻿<div class="pull-left">
+    <div id="loaderDiv" loader>
+        <img src="../../../../assets/images/site/ajax-loader.gif" class="ajax-loader" />
+    </div>
+    <div class="page-header">
+        <h1>
+            Club Management<small> | Season Management</small>
+        </h1>
+    </div>
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div>
+                    <div class="ibox-title">
+                        <h5>Seasons</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <button type="button" ui-sref="clubmanagement.seasonmanagement.seasons.setup">Add Season</button>
+                        <table class="table table-hover table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>Year</th>
+                                    <th>Season</th>
+                                    <th>Registration Date</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>No. of Teams</th>
+                                    <th>Rostered Players</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="season in seasons">
+                                    <td>
+                                        <div edit-item-btn item-to-edit="season" type2="Season"></div>
+                                    </td>
+                                    <td>{{season.year}}</td>
+                                    <td>{{season.seasonTypeStr}}</td>
+                                    <td>{{season.registrationDate | dateFormat }}</td>
+                                    <td>{{season.startDate | dateFormat }}</td>
+                                    <td>{{season.endDate | dateFormat }}</td>
+                                    <td>{{season.teams | number }}</td>
+                                    <td>{{season.rosteredPlayers | number }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

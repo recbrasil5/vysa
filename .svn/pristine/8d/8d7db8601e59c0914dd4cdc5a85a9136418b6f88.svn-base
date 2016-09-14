@@ -1,0 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("ContactUs")]
+    public class ContactUsController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private ContactUsService contactUsService;
+        public ContactUsController()
+        {
+            contactUsService = new ContactUsService(unitOfWork);
+        }
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(ContactUsMessageDTO))]
+        public IHttpActionResult SendMessage(ContactUsMessageDTO contactUsMessageDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newContactUsMessageDto = contactUsService.SendAndSaveContactUsMessage(contactUsMessageDto);
+
+            return Ok(newContactUsMessageDto);
+        }
+    }
+}

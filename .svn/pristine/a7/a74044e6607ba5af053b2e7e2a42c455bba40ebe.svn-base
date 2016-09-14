@@ -1,0 +1,236 @@
+﻿using System;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Util;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public static class DefaultUsers
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static User debugSuperAdmin = new User
+        {
+            UserName = "superadmin",
+            Email = "recbrasil5@gmail.com",
+            Password = RandomPassword.EncryptPasswordSHA("pw"),
+            Approved = true,
+            Role = DefaultRoles.SuperAdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User debugAdmin = new User
+        {
+            UserName = "admin",
+            Email = "holmensoccer@yahoo.com",
+            Password = RandomPassword.EncryptPasswordSHA("pw"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User debugMe = new User
+        {
+            UserName = "recbrasil5@gmail.com",
+            Email = "recbrasil5@gmail.com",
+            Password = RandomPassword.EncryptPasswordSHA("pw"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userSuperAdmin = new User
+        {
+            UserName = "superadmin",
+            Email = "recbrasil5@gmail.com",
+            Password = RandomPassword.EncryptPasswordSHA("nike0584"),
+            Approved = true,
+            Role = DefaultRoles.SuperAdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userMe = new User
+        {
+            UserName = "recbrasil5@gmail.com",
+            Email = "recbrasil5@gmail.com",
+            Password = RandomPassword.EncryptPasswordSHA("nike0584"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userAdmin = new User
+        {
+            UserName = "admin",
+            Email = "holmensoccer@yahoo.com",
+            Password = RandomPassword.EncryptPasswordSHA("1vysa*"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userAl = new User
+        {
+            UserName = "allan.j.hanson@gmail.com",
+            Email = "allan.j.hanson@gmail.com",
+            Password = RandomPassword.EncryptPasswordSHA("ahanson_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userJosh = new User
+        {
+            UserName = "joshkopp111379@gmail.com",
+            Email = "joshkopp111379@gmail.com",
+            Password = RandomPassword.EncryptPasswordSHA("jkopp_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userTara = new User
+        {
+            UserName = "timothyrieck@msn.com",
+            Email = "timothyrieck@msn.com",
+            Password = RandomPassword.EncryptPasswordSHA("trieck_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userStacey = new User
+        {
+            UserName = "Fosterstace1979@yahoo.com",
+            Email = "Fosterstace1979@yahoo.com",
+            Password = RandomPassword.EncryptPasswordSHA("sfoster_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userSteve = new User
+        {
+            UserName = "solson@mchughexcavating.com",
+            Email = "solson@mchughexcavating.com",
+            Password = RandomPassword.EncryptPasswordSHA("solson_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userPat = new User
+        {
+            UserName = "patrick.rotering@gmail.com",
+            Email = "patrick.rotering@gmail.com",
+            Password = RandomPassword.EncryptPasswordSHA("protering_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userKatie = new User
+        {
+            UserName = "laesunmarie@yahoo.com",
+            Email = "laesunmarie@yahoo.com",
+            Password = RandomPassword.EncryptPasswordSHA("kmalone_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userShannon = new User
+        {
+            UserName = "markandshop@yahoo.com",
+            Email = "markandshop@yahoo.com",
+            Password = RandomPassword.EncryptPasswordSHA("sschneider_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userDerek = new User
+        {
+            UserName = "deekpowers@hotmail.com",
+            Email = "deekpowers@hotmail.com",
+            Password = RandomPassword.EncryptPasswordSHA("dpeterson_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userPatStrupp = new User
+        {
+            UserName = "patrickstrupp@charter.net",
+            Email = "patrickstrupp@charter.net",
+            Password = RandomPassword.EncryptPasswordSHA("pstrupp_v2015!"),
+            Approved = true,
+            Role = DefaultRoles.AdminRole,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+        
+    }
+}

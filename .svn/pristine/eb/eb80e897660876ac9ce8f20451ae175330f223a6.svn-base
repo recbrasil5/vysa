@@ -1,0 +1,69 @@
+﻿
+function vysaConfig($stateProvider, $urlRouterProvider, $locationProvider) {
+
+    var adminRootPath = '../../templates/Admin';
+    $locationProvider.html5Mode({ enabled: true, requireBase: false }); //hash signs no-longer needed in href
+    $urlRouterProvider.otherwise("/");
+
+    $stateProvider
+        .state('WebsiteMaintenance', {
+            // With abstract set to true, that means this state can not be explicitly activated.
+            // It can only be implicitly activated by activating one of its children.
+            abstract: true,
+
+            // This abstract state will prepend '/WebsiteMaintenance' onto the urls of all its children.
+            url: "/WebsiteMaintenance",
+
+            // Example of loading a template from a file. This is also a top level state,
+            // so this template file will be loaded and then inserted into the ui-view
+            // within Admin/Home/index.cshtml.
+            templateUrl: adminRootPath + "/WebsiteMaintenance/site-maintenance.html",
+        })
+        .state('WebsiteMaintenance.nav', {
+            // Using an empty url means that this child state will become active
+            // when its parent's url is navigated to. Urls of child states are
+            // automatically appended to the urls of their parent. So this state's
+            // url is '/WebsiteMaintenance' (because '/WebsiteMaintenance' + '').
+            url: '',
+            // IMPORTANT: Now we have a state that is not a top level state. Its
+            // template will be inserted into the ui-view within this state's
+            // parent's template; so the ui-view within index.html. This is the
+            // most important thing to remember about templates.
+            templateUrl: adminRootPath + "/WebsiteMaintenance/site-maintenance.html"
+        })
+        .state('WebsiteMaintenance.announcements', {
+            // Using an empty url means that this child state will become active
+            // when its parent's url is navigated to. Urls of child states are
+            // automatically appended to the urls of their parent. So this state's
+            // url is '/Announcements' (because '/Announcements' + '').
+            url: '/Announcements',
+            // IMPORTANT: Now we have a state that is not a top level state. Its
+            // template will be inserted into the ui-view within this state's
+            // parent's template; so the ui-view within WebsiteMaintenance.html. This is the
+            // most important thing to remember about templates.
+            templateUrl: adminRootPath + "/WebsiteMaintenance/announcements.html"
+        })
+        .state('WebsiteMaintenance.board', {
+            url: '/Board',
+            templateUrl: adminRootPath + "/WebsiteMaintenance/board.html"
+        })
+        .state('ClubManagement', {
+            abstract: false,
+            url: "/ClubManagement",
+            templateUrl: adminRootPath + "/ClubManagement/season-maintenance.html",
+        });
+}
+angular
+    .module('vysa')
+    .config(vysaConfig)
+    .run(['$rootScope', '$state', '$stateParams', function ($rootScope, $state, $stateParams) {
+        // It's very handy to add references to $state and $stateParams to the $rootScope
+        // so that you can access them from any scope within your applications.
+        $rootScope.$state = $state;
+        $rootScope.$stateParams = $stateParams;
+
+        //prevent scrolling to ui-view on click
+        $rootScope.$on('$stateChangeSuccess', function () {
+            $("html, body").animate({ scrollTop: 0 }, 200);
+        })
+    }]);

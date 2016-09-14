@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+
+namespace VYSA.WebApi.Models
+{
+    public class FilterDTO
+    {
+        public int LookupId;
+        public string SearchTerm;
+    }
+
+    public class PagingFilterDTO
+    {
+        public String OrderByFieldName { get; set; }
+        public bool Ascending { get; set; }
+        [Required]
+        public int PageNum;
+        [Required]
+        [Range(1, 1000)]
+        public int NumRecs;
+        [Required]
+        public bool GetCount;
+    }
+
+}

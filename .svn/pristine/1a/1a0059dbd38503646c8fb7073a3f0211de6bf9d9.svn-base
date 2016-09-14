@@ -1,0 +1,79 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public class DefaultTeamParentReps
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static TeamParentRep TeamParentRepU10Boys = new TeamParentRep
+        {
+            Team = DefaultTeams.TeamU10Boys,
+            ParentRep = DefaultParentReps.ParentRepU10Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamParentRep TeamParentRepU11Coed = new TeamParentRep
+        {
+            Team = DefaultTeams.TeamU11Coed,
+            ParentRep = DefaultParentReps.ParentRepU11Coed,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamParentRep TeamParentRepU11Girls = new TeamParentRep
+        {
+            Team = DefaultTeams.TeamU11Girls,
+            ParentRep = DefaultParentReps.ParentRepU11Girls,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamParentRep TeamParentRepU12Boys = new TeamParentRep
+        {
+            Team = DefaultTeams.TeamU12Boys,
+            ParentRep = DefaultParentReps.ParentRepU12Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamParentRep TeamParentRepU13Boys = new TeamParentRep
+        {
+            Team = DefaultTeams.TeamU13Boys,
+            ParentRep = DefaultParentReps.ParentRepU13Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static TeamParentRep TeamParentRepU14Boys = new TeamParentRep
+        {
+            Team = DefaultTeams.TeamU14Boys,
+            ParentRep = DefaultParentReps.ParentRepU14Boys,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+    }
+}

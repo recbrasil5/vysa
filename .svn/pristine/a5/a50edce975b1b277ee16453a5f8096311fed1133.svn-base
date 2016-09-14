@@ -1,0 +1,11 @@
+﻿<div>
+    <div id="loaderDiv" loader>
+        <img src="~/assets/images/site/ajax-loader.gif" class="ajax-loader" />
+    </div>
+    <div class="page-header">
+        <h1>
+            Website Maintenance
+            <small></small>
+        </h1>
+    </div>
+</div>

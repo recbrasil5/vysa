@@ -1,0 +1,122 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Linq;
+using System.Web;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Abstract;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebUApi.Controllers
+{
+    [RoutePrefix("Admin/Seasons")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminSeasonsController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private SeasonService seasonService;
+
+        public AdminSeasonsController()
+        {
+            seasonService = new SeasonService(unitOfWork);
+        }
+
+        [HttpGet] //Admin/api/Seasons
+        [Route("")]
+        public IEnumerable<SeasonDTO> GetSeasons()
+        {
+            return seasonService.GetSeasonDtos();
+        }
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetSeasonById")]
+        [ResponseType(typeof(SeasonDTO))]
+        public IHttpActionResult GetSeason(int id)
+        {
+            SeasonDTO season = seasonService.GetSeason(id);
+
+            // return it if you got it
+            if (season == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(season);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(SeasonDTO))]
+        public IHttpActionResult UpdateSeason(int id, SeasonDTO seasonDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != seasonDTO.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedSeasonDTO = seasonService.UpdateSeason(seasonDTO, User.Identity.Name);
+
+            if (updatedSeasonDTO == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedSeasonDTO);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(SeasonDTO))]
+        public IHttpActionResult CreateSeason(SeasonDTO seasonDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (seasonService.AlreadyExists(seasonDTO.Year, seasonDTO.SeasonType))
+            {
+                ModelState.AddModelError("Duplicate", "Season with these specifications already exists.");
+                return BadRequest(ModelState);
+            }
+
+            var newSeasonDTO = seasonService.AddSeason(seasonDTO, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetSeasonById
+            //return CreatedAtRoute("GetSeasonById", new { id = newSeasonDTO.Id }, newSeasonDTO);
+            return Ok(newSeasonDTO);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(SeasonDTO))]
+        public IHttpActionResult DeleteSeason(int id)
+        {
+            var season = seasonService.SoftDeleteSeason(id, User.Identity.Name);
+            if (season == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(season);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

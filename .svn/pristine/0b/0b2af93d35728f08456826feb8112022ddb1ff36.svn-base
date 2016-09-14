@@ -1,0 +1,115 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Models.Resource
+{
+    public class TeamListViewResourceModel
+    {
+        public int Id { get; set; }
+        public string TeamName { get; set; }
+        public string Coaches { get; set; }
+        public string ParentReps { get; set; }
+        public Int32 RosteredPlayers { get; set; }
+        //public decimal Cost { get; set; }
+    }
+
+    public class TeamResourceModel
+    {
+        public int Id { get; set; }
+        [Required]
+        public int SeasonId { get; set; }
+        [Required]
+        public int DivisionId { get; set; }
+
+        //[Required(ErrorMessage = "Cost Required.")]
+        //[Display(Name = "Cost")]
+        // public decimal Cost { get; set; }
+
+        public IEnumerable<Int32> TeamCoaches { get; set; }
+        public IEnumerable<Int32> TeamParentReps { get; set; }
+        public IEnumerable<Int32> TeamEvents { get; set; }
+        public IEnumerable<RosteredPlayerResourceModel> Roster { get; set; }
+    }
+    
+    public static class TeamExtensions
+    {
+        public static Team PopulateEntityWithResourceModel(this Team team, TeamResourceModel resourceModel, string lastUpdateBy, bool onCreate)
+        {
+            team.Id = resourceModel.Id;
+            team.SeasonId = resourceModel.SeasonId;
+            team.DivisionId = resourceModel.DivisionId;
+            //team.Cost = teamDTO.Cost;
+            team.IsActive = true;
+            team.LastUpdateBy = lastUpdateBy;
+            team.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                team.CreatedBy = lastUpdateBy;
+                team.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return team;
+        }
+
+        public static TeamResourceModel ConvertToResourceModel(this Team team)
+        {
+            return new TeamResourceModel
+            {
+                Id = team.Id,
+                SeasonId = team.SeasonId,
+                DivisionId = team.DivisionId,
+                //Cost = team.Cost
+            };
+        }
+
+        public static TeamResourceModel ConvertToResourceModel(this Team team, IUnitOfWork unitOfWork)
+        {            
+            return new TeamResourceModel
+            {
+                Id = team.Id,
+                SeasonId = team.SeasonId,
+                DivisionId = team.DivisionId,
+                TeamCoaches = new TeamCoachService(unitOfWork).GetActiveTeamCoachIdList(team.TeamCoaches),
+                TeamParentReps = new TeamParentRepService(unitOfWork).GetActiveTeamParentRepIdList(team.TeamParentReps),
+                TeamEvents = new TeamEventService(unitOfWork).GetActiveTeamEventIdList(team.TeamEvents),
+                Roster = new RosterService(unitOfWork).GetRosteredPlayerDtoListFromRoster(team.Rosters)
+            };
+        }
+
+        public static TeamListViewResourceModel ConvertToListViewResourceModel(this Team team, IUnitOfWork unitOfWork)
+        {
+            var teamListViewResourceModel = new TeamListViewResourceModel
+            {
+                Id = team.Id,
+                TeamName = string.Format("U{0} {1}", team.Division.AgeLimit.ToString(), team.Division.GenderCode.ToString()),
+                RosteredPlayers = team.Rosters.Count
+            };
+
+            if (team.TeamCoaches.Count > 0)
+            {
+                var coachList = new List<String>();
+                var coachService = new CoachService(unitOfWork);
+                team.TeamCoaches.Select(c => c.CoachId).ToList()
+                    .ForEach(c => coachList.Add(coachService.GetCoach(c).FullName));
+                teamListViewResourceModel.Coaches = string.Join(", ", coachList.ToArray());
+            }
+
+            if (team.TeamParentReps.Count > 0)
+            {
+                var parentRepList = new List<String>();
+                var parentRepService = new ParentRepService(unitOfWork);
+                team.TeamParentReps.Select(c => c.ParentRepId).ToList()
+                    .ForEach(c => parentRepList.Add(parentRepService.GetParentRep(c).FullName));
+                teamListViewResourceModel.ParentReps = string.Join(", ", parentRepList.ToArray());
+            }
+
+            return teamListViewResourceModel;
+        }
+    }
+}

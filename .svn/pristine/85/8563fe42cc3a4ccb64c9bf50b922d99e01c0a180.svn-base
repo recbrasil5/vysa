@@ -1,0 +1,45 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysaApp").controller('loginController', function ($scope, $state, accountRepository, authenticationService, notifierService) {
+
+        var onAuthenticated = function () {
+            var promise = accountRepository.tokenInfo.get().$promise;
+            promise.then(function (data) {
+                $scope.tokenInfo = data;
+                if ($.inArray('Admin', data.roles) > -1 || $.inArray('SuperAdmin', data.roles) > -1) {
+                    $state.go('admin.home');
+                } else {
+                    notifierService.success("You have successfully logged in, I'm just waiting for the public landing page or member page to be complete!");
+                }
+            },
+            function (err) {
+                console.log(err.message);
+            });
+        };
+
+        if (authenticationService.authTokenExists()) {
+            onAuthenticated();
+        }
+
+        $scope.login = function () {
+            var promise = authenticationService.performLogin($scope.username, $scope.password);
+            promise.then(function (data) {
+                $scope.authenticated = data.access_token !== undefined;
+                if ($scope.authenticated) {
+                    onAuthenticated();
+                }
+            },
+                function (err) {
+                    console.log(JSON.stringify(err))
+                    if (err === null) {
+                        notifierService.error("Check to see if WebApi is running!");
+                    } else {
+                        notifierService.error(err.data.message);
+                    }
+                });
+        };
+
+    });
+
+}());

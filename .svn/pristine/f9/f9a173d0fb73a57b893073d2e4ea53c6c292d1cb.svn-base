@@ -1,0 +1,56 @@
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Extensions;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Account")]
+    public class AccountController : BaseController
+    {
+        private readonly UnitOfWork _unitOfWork = new UnitOfWork();
+        private readonly UserService userService;
+        public AccountController()
+        {
+            userService = new UserService(_unitOfWork);
+        }
+
+        // GET api/<controller>
+        [HttpGet]
+        [Route("tokeninfo")]
+        [ResponseType(typeof(TokenResourceModel))]
+        public IHttpActionResult GetTokenInfo()
+        {
+            return Ok(this.GetTokenResourceModel());
+        }
+
+        [HttpPost]
+        [Route("forgotpassword")]
+        [ResponseType(typeof(string))]
+        public IHttpActionResult ForgotPassword(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest("The email is required.");
+            }
+
+            if (!userService.EmailExists(email))
+            {
+                return Content(HttpStatusCode.NotFound,
+                    string.Format("The email address '{0}' was not an email of any of the users.", email));
+            }
+
+            userService.ResetPassword(email);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetPlayerById
+            //return CreatedAtRoute("GetPlayerById", new { id = newPlayerDto.Id }, newPlayerDto);
+            return Ok(email);
+        }
+
+    }
+}

@@ -1,0 +1,11 @@
+﻿namespace VYSA.Domain.Entities
+{
+    public class BoardMember : EntityBase
+    {
+        // Columns
+        public string Name { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; } //not yet used
+        public string Email { get; set; }
+    }
+}

@@ -1,0 +1,109 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysa")
+        .factory('authService', ['$http', '$q', '$cookieStore', '$location', function ($http, $q, $cookieStore, $location) {
+
+            var getAuthToken = function () {
+                return $cookieStore.get('_Token');
+            };
+
+            var tokenExists = function () {
+                return getAuthToken() !== undefined;
+            };
+
+            var removeToken = function () {
+                $cookieStore.remove('_Token');
+            };
+
+            return {
+                authTokenExists: function () {
+                    return tokenExists();
+                },
+                performAuthCheck: function () {
+                    if (tokenExists() === false) {
+                        $location.url('/'); //$location.url vs $location.path??
+                    }
+                },
+                performLogin: function (username, password) {
+
+                    var params = "grant_type=password" + "&username=" + username + "&password=" + password;
+                    var deferred = $q.defer();
+
+                    $http({
+                        url: '/Token', //'http://10.10.10.172/api/Token',
+                        method: "POST",
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        data: params
+                    })
+                        .success(function (response) {
+                            //console.log(response);
+                            $cookieStore.put('_Token', response.access_token);
+                            $http.defaults.headers.common.Authorization = 'Bearer ' + response.access_token;
+                            deferred.resolve(response);
+                        })
+                        .error(function (err, status) {
+                            deferred.reject(err);
+                        });
+
+                    return deferred.promise;
+                },
+                removeAuthCookie: function () {
+                    removeToken();
+                },
+                getUserName: function () {
+                    //var params = "grant_type=password" + "&username=" + username + "&password=" + password;
+                    var deferred = $q.defer();
+                    $http.get('/api/account/username')
+                    .success(function (data, status, headers, config) {
+                        if (data !== undefined && data !== "-- Unknown User --") {
+                            deferred.resolve(data.replace(/["']{1}/gi, "")); //Remove any quotes from the username before pushing it out.
+                        } else
+                            deferred.resolve(undefined);
+                    })
+                    .error(function (err, status) {
+                        deferred.reject(err);
+                    });
+
+                    return deferred.promise;
+                },
+                getUserRole: function () {
+                    //var params = "grant_type=password" + "&username=" + username + "&password=" + password;
+                    var deferred = $q.defer();
+                    $http.get('/api/account/role')
+                    .success(function (data, status, headers, config) {
+                        if (data !== undefined && data !== "-- Unknown Role --") {
+                            deferred.resolve(data.replace(/["']{1}/gi, "")); //Remove any quotes from the role before pushing it out.
+                        } else
+                            deferred.resolve(undefined);
+                    })
+                    .error(function (err, status) {
+                        deferred.reject(err);
+                    });
+
+                    return deferred.promise;
+                },
+                getUserInfo: function () {
+                    var deferred = $q.defer();
+                    $http.get('/api/account/info')
+                    .success(function (data, status, headers, config) {
+                        if (data !== undefined) {
+                            deferred.resolve(data);
+                        } else
+                            deferred.resolve(undefined);
+                    })
+                    .error(function (err, status) {
+                        deferred.reject(err);
+                    });
+
+                    return deferred.promise;
+                },
+                fillAuthData: function () {
+                    if (tokenExists()) {
+                        //headers.Authorization vs headers.common.Authorization see authInterceptorService Request code??
+                        $http.defaults.headers.common.Authorization = 'Bearer ' + getAuthToken();
+                    }
+                }
+            }
+        }]);
+}());

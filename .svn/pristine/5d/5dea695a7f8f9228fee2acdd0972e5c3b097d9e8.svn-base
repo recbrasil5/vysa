@@ -1,0 +1,71 @@
+﻿using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Filters;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    public class TokenInfo
+    {
+        public string Username { get; set; }
+        public string Role { get; set; }
+    }
+
+    [ApiExceptionFilter]
+    [ModelValidator]
+    [RoutePrefix("Account")]
+    public class AccountController : ApiController
+    {
+        private readonly UnitOfWork _unitOfWork = new UnitOfWork();
+        private readonly UserService userService;
+        public AccountController()
+        {
+            userService = new UserService(_unitOfWork);
+        }
+
+        // GET api/<controller>
+        [HttpGet]
+        [Authorize]
+        [Route("info")]
+        public TokenInfo GetTokenInfo()
+        {
+            var user = Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name); //"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+            var role = Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Role); //"http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+            
+            return new TokenInfo
+            {
+                Username = user != null ? user.Value : "-- Unknown User --",
+                Role = role != null ? role.Value : "-- Unknown Role --"
+            };
+        }
+
+        [HttpPost]
+        [Route("forgotpassword")]
+        [ResponseType(typeof(string))]
+        public IHttpActionResult ForgotPassword(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest("The email is required.");
+            }
+
+            if (!userService.EmailExists(email))
+            {
+                return Content(HttpStatusCode.NotFound,
+                    string.Format("The email address '{0}' was not an email of any of the users.", email));
+            }
+
+            userService.ResetPassword(email);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetPlayerById
+            //return CreatedAtRoute("GetPlayerById", new { id = newPlayerDto.Id }, newPlayerDto);
+            return Ok(email);
+        }
+
+    }
+}

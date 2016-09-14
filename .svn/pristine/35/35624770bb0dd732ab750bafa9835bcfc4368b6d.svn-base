@@ -1,0 +1,24 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("admin")
+        .factory('metaDataService', function (years, seasonTypes, relationshipTypes, genderTypes) {
+
+            return{
+                getYears: function() {
+                    return years;
+                },
+                getSeasonTypes: function () {
+                    return seasonTypes;
+                },
+                getRelationshipTypes: function () {
+                    return relationshipTypes;
+                },
+                getGenderTypes: function () {
+                    return genderTypes;
+            }
+            }
+        });
+
+}());

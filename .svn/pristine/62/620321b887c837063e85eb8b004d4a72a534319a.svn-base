@@ -1,0 +1,126 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Enums;
+using VYSA.Domain.Extensions;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Models
+{
+    public class SeasonDTO
+    {
+        public int Id { get; set; }
+
+        #region helper code
+        //public String TerminationStatus
+        //{
+        //    get
+        //    {
+        //        return TerminationStatusCodeInt.HasValue ?
+        //            ((Enums.Enums.TerminationStatusCode)(TerminationStatusCodeInt.Value)).msm_GetTerminationStatusCodeName()
+        //            : "Not Scheduled";
+        //    }
+        //}
+        #endregion
+
+        //public Int16? TerminationStatusCodeInt { get; set; }
+
+        private Enums.SeasonType seasonType;
+        public Enums.SeasonType SeasonType
+        {
+            get
+            {
+                seasonType = SeasonTypeStr.ToEnum<Enums.SeasonType>();
+                return seasonType;
+            }
+            set { seasonType = value; }
+        }
+        //public ICollection<Registration> Registrations { get; set; }
+
+        [Required(ErrorMessage = "SeasonType Required.")]
+        [Display(Name = "SeasonType")]
+        public string SeasonTypeStr { get; set; }
+
+        //[DisplayFormat(DataFormatString = "{0:F2}", ApplyFormatInEditMode = true)]
+        [Required(ErrorMessage = "Year Required.")]
+        [Display(Name = "Year")]
+        public int Year { get; set; }
+
+        [Required(ErrorMessage = "Registration Date Required.")]
+        [Display(Name = "Registration Date")]
+        [DataType(DataType.Date)]
+        public DateTime RegistrationDate { get; set; }
+
+        [Required(ErrorMessage = "Start Date Required.")]
+        [Display(Name = "Start Date")]
+        [DataType(DataType.Date)]
+        public DateTime StartDate { get; set; }
+
+        [Required(ErrorMessage = "End Date Required.")]
+        [Display(Name = "End Date")]
+        [DataType(DataType.Date)]
+        public DateTime EndDate { get; set; }
+
+        public IEnumerable<EventListViewDTO> EventList;
+        public IEnumerable<TeamListViewDTO> TeamList;
+    }
+
+    public static class SeasonDTOExtensions
+    {
+        public static Season UpdateValuesFromDTO(this Season season, SeasonDTO seasonDTO, string lastUpdateBy, bool onCreate)
+        {
+            season.Id = seasonDTO.Id;
+            season.SeasonType = seasonDTO.SeasonType;
+            season.Year = seasonDTO.Year;
+            season.RegistrationDate = seasonDTO.RegistrationDate.AbsoluteStart();
+            season.StartDate = seasonDTO.StartDate.AbsoluteStart();
+            season.EndDate = seasonDTO.EndDate.AbsoluteEnd();
+            season.IsActive = true;
+            season.LastUpdateBy = lastUpdateBy;
+            season.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                season.CreatedBy = lastUpdateBy;
+                season.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return season;
+
+        }
+
+        public static SeasonDTO ConvertToDto(this Season season)
+        {
+            return new SeasonDTO
+            {
+                Id = season.Id,
+                Year = season.Year,
+                SeasonType = season.SeasonType,
+                SeasonTypeStr = season.SeasonType.ToString(),
+                RegistrationDate = season.RegistrationDate,
+                StartDate = season.StartDate,
+                EndDate = season.EndDate
+            };
+        }
+
+        public static SeasonDTO ConvertToDto(this Season season, IUnitOfWork _unitOfWork)
+        {
+            return new SeasonDTO
+            {
+                Id = season.Id,
+                Year = season.Year,
+                SeasonType = season.SeasonType,
+                SeasonTypeStr = season.SeasonType.ToString(),
+                RegistrationDate = season.RegistrationDate,
+                StartDate = season.StartDate,
+                EndDate = season.EndDate,
+                EventList = new EventService(_unitOfWork).GetEventListViewDtos(season.Id),
+                TeamList = new TeamService(_unitOfWork).GetTeamListViewDtos(season.Id)
+            };
+        }
+    }
+}

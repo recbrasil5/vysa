@@ -1,0 +1,20 @@
+﻿using System;
+
+namespace VYSA.Domain.Entities
+{
+    public class Registration : EntityBase
+    {
+        // Foreign Key
+        public int PlayerId { get; set; }
+        public int TeamId { get; set; }
+
+        // Columns
+        public DateTime DateRegistered{ get; set; }
+        public string PaymentMethod { get; set; }
+        public bool Paid { get; set; }
+
+        // Navigation properties
+        public Player Player { get; set; }
+        public Team Team { get; set; }
+    }
+}

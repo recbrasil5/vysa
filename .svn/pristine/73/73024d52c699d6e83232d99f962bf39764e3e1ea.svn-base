@@ -1,0 +1,28 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("admin").factory('adminMailingListRepository',
+        function ($resource, config) {
+
+            return {
+                mailingList: $resource(config.apiServerUri + 'Admin/MailingListMember/:id', { id: '@id' }, {
+                    get: { method: 'GET' },
+                    query: { method: 'GET', isArray: true },
+                    post: { method: 'POST' },
+                    update: { method: 'PUT' },
+                    delete: { method: 'DELETE' }
+                })//,
+
+                //coachDropdownVms: $resource(config.apiServerUri + 'Admin/Coaches/GetCoachDropdownVms/', {
+                //    id: '@id'
+                //}, {
+                //    get: { method: 'GET' },
+                //    post: { method: 'POST' },
+                //    update: { method: 'PUT' }
+
+                //})
+            }
+
+        });
+
+}());

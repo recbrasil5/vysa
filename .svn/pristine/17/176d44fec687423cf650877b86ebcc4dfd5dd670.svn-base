@@ -1,0 +1,74 @@
+﻿
+(function () {
+    "use strict";
+
+    angular
+        .module("admin")
+        .factory('metaDataService', function (years, seasonTypes, relationshipTypes, genderTypes) {
+
+           var mailingListFilterRoles = [
+                { name: "All", id: 0, isChecked: false },
+                { name: "Mailing List", id: 1, isChecked: true },
+                { name: "Guardians", id: 2, isChecked: false },
+                { name: "Coaches", id: 3, isChecked: false },
+                { name: "Parent Reps", id: 4, isChecked: false },
+                { name: "Board Members", id: 5, isChecked: false }
+           ];
+
+           var contactUsGridHeaders = [
+              { field: "Name", name: "Name", id: 1, isChecked: true },
+              { field: "Email", name: "Email", id: 2, isChecked: false },
+              { field: "Message", name: "Message", id: 3, isChecked: false },
+              { field: "Subject", name: "Subject", id: 4, isChecked: false },
+              { field: "CreatedDateTimeCentralTime", name: "Timestamp", id: 5, isChecked: false }
+           ];
+
+            var playersGridHeaders = [
+            { id: 1, field: "FirstName", name: "First Name", show: "" },
+            { id: 2, field: "LastName", name: "Last Name", show: "" },
+            { id: 3, field: "DateOfBirth", name: "D.O.B.", show: "" },
+            { id: 4, field: "Age", name: "Age", show: "" },
+            { id: 5, field: "Guardians", name: "Guardians", show: "" }
+            ];
+
+            var rosterGridHeaders = [
+            { id: 1, field: "Name", name: "Name", show: "" },
+            { id: 2, field: "Age", name: "Age", show: "" }
+            ];
+
+            var mailingListGridHeaders = [
+            { id: 1, field: "Name", name: "Name", show: "" },
+            { id: 2, field: "Email", name: "Email", show: "" },
+            { id: 3, field: "Role", name: "Role", show: "" },
+            { id: 4, field: "Subscribed", name: "Subscribed", show: "" }
+            ];
+
+            var usersGridHeaders = [
+           { id: 1, field: "UserName", name: "UserName", show: "" },
+           { id: 2, field: "Email", name: "Email", show: "" },
+           { id: 3, field: "Role", name: "Role", show: "" }
+            ];
+
+            return {
+                getPlayersGridHeaders: playersGridHeaders,
+                getRosterGridHeaders: rosterGridHeaders,
+                getMailingListGridHeaders: mailingListGridHeaders,
+                getMailingListFilterRoles: mailingListFilterRoles,
+                getContactUsGridHeaders: contactUsGridHeaders,
+                getUserGridHeaders: usersGridHeaders,
+                getYears: function () {
+                    return years;
+                },
+                getSeasonTypes: function () {
+                    return seasonTypes;
+                },
+                getRelationshipTypes: function () {
+                    return relationshipTypes;
+                },
+                getGenderTypes: function () {
+                    return genderTypes;
+                }
+            }
+        });
+
+}());

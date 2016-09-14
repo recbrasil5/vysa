@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace VYSA.Domain.Entities
+{
+    public class Division : EntityBase
+    {
+        // Columns
+        public int AgeLimit { get; set; }
+        public Enums.Enums.GenderCode GenderCode { get; set; }
+
+        // Navigation properties
+        public ICollection<Team> Teams { get; set; }
+    }
+}

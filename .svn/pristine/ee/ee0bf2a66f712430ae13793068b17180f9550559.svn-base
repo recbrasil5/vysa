@@ -1,0 +1,25 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("admin").factory('adMailingListDataDeliveryService', function ($resource, adminMailingListRepository) {
+            return {
+                getGridView: function (pageNo, recordsPerPage, sort) {
+                    return adminMailingListRepository.filter
+                        .post({
+                            OrderByFieldName: sort.column,
+                            Ascending: sort.ascending,
+                            PageNum: pageNo,
+                            NumofRecords: recordsPerPage,
+                            BoolCount: true
+                        }).$promise;
+                }
+                //inUseCheck: function (category) {
+                //    return adCategoriesService.inUseCheck
+                //        .post({
+                //            text: category //id not needed here
+                //        }).$promise;
+                //}
+            };
+        });
+}());

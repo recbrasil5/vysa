@@ -1,0 +1,51 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models.Resource
+{
+    public class BoardMemberResourceModel
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [Display(Name = "Name")]
+        public string Name { get; set; }
+
+        [Required]
+        [Display(Name = "Title")]
+        public string Title { get; set; }
+
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+    }
+
+    public static class BoardMemberExtensions
+    {
+        public static BoardMember PopulateEntityWithResourceModel(this BoardMember boardMember, BoardMemberResourceModel resourceModel, string lastUpdateBy, bool onCreate)
+        {
+            boardMember.Id = resourceModel.Id;
+            //boardMember.Description = string.Empty; //not yet used.
+            boardMember.IsActive = true;
+            boardMember.LastUpdateBy = lastUpdateBy;
+            boardMember.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                boardMember.CreatedBy = lastUpdateBy;
+                boardMember.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return boardMember;
+        }
+
+        public static BoardMemberResourceModel ConvertToResourceModel(this BoardMember member)
+        {
+            return new BoardMemberResourceModel
+            {
+                Id = member.Id,
+            };
+        }
+    }
+}

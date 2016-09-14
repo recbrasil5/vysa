@@ -1,0 +1,74 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class RosterService
+    {
+        private UnitOfWork unitOfWork;
+
+        public RosterService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public Roster GetRostereredPlayer(int id)
+        {
+            return unitOfWork.RosterRepository.GetByID(id);
+        }
+
+        public IEnumerable<Roster> GetRoster(int teamId)
+        {
+            return unitOfWork.RosterRepository.Get(e => e.IsActive && e.TeamId == teamId);
+        }
+
+        public IEnumerable<RosteredPlayerDTO> GetRosteredPlayerDtoListFromRoster(ICollection<Roster> roster)
+        {
+            var list = new List<RosteredPlayerDTO>();
+            if (roster != null)
+            {
+                var playerService = new PlayerService(unitOfWork);
+                roster.ToList()
+                      .ForEach(x =>
+                       {
+                           if (x.IsActive)
+                               list.Add(x.ConvertToRosteredPlayerDto(playerService.GetPlayer(x.PlayerId)));
+                       });
+            }
+            return list;
+        }
+
+        public RosterDTO AddPlayerToRoster(RosterDTO rosterDto, string lastUpdateBy)
+        {
+            Roster roster = new Roster().UpdateValuesFromDTO(rosterDto, lastUpdateBy, true);
+            unitOfWork.RosterRepository.Insert(roster);
+            unitOfWork.Save();
+
+            return roster.ConvertToDto();
+        }
+
+        public RosteredPlayerDTO SoftDeletePlayerFromRoster(Int32 id, string lastUpdateBy)
+        {
+            var rosteredPlayer = GetRostereredPlayer(id);
+            if (rosteredPlayer == null) return null;
+
+            rosteredPlayer.IsActive = false;
+            rosteredPlayer.LastUpdateUtc = DateTime.UtcNow;
+            rosteredPlayer.LastUpdateBy = lastUpdateBy;
+            unitOfWork.RosterRepository.Update(rosteredPlayer);
+            unitOfWork.Save();
+
+            var playerDto = new PlayerService(unitOfWork).GetPlayer(rosteredPlayer.PlayerId);
+            if (playerDto == null) return null;
+
+            return rosteredPlayer.ConvertToRosteredPlayerDto(playerDto);
+        }
+
+    }
+}

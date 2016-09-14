@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Http;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Web.Models;
+
+namespace VYSA.Web.Services
+{
+    public class EventService
+    {
+        private UnitOfWork unitOfWork;
+
+        public EventService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<Event> GetEvents()
+        {
+            return unitOfWork.EventRepository.Get(b => b.IsActive);
+        }
+
+        public IEnumerable<EventListViewDTO> GetEventListViewDtos(int seasonId)
+        {
+            var eventListViewDtos = new List<EventListViewDTO>();
+            var seasonEvents = unitOfWork.EventRepository.Get(b => b.IsActive && b.SeasonID == seasonId).ToList();
+            seasonEvents.ForEach(e => eventListViewDtos.Add(e.ConvertToEventListViewDto()));
+            return eventListViewDtos;
+        }
+
+        public EventDTO GetEvent(int id)
+        {
+            var Event = unitOfWork.EventRepository.GetByID(id);
+            return Event == null ? null : Event.ConvertToDto();
+        }
+
+        public EventDTO UpdateEvent(EventDTO updatedEventDTO, string lastUpdateBy)
+        {
+            var Event = unitOfWork.EventRepository.GetByID(updatedEventDTO.Id);
+            if (Event == null) return null;
+
+            //do update
+            Event.UpdateValuesFromDTO(updatedEventDTO, lastUpdateBy, false);
+
+            unitOfWork.EventRepository.Update(Event);
+            unitOfWork.Save();
+
+            return updatedEventDTO;
+        }
+
+        public EventDTO AddEvent(EventDTO newEventDTO, string lastUpdateBy)
+        {
+            Event Event = new Event().UpdateValuesFromDTO(newEventDTO, lastUpdateBy, true);
+            unitOfWork.EventRepository.Insert(Event);
+            unitOfWork.Save();
+
+            return Event.ConvertToDto();
+        }
+
+        public EventDTO SoftDeleteEvent(int id)
+        {
+            var Event = unitOfWork.EventRepository.GetByID(id);
+            if (Event == null) return null;
+
+            Event.IsActive = false;
+            unitOfWork.EventRepository.Update(Event);
+            unitOfWork.Save();
+
+            return Event.ConvertToDto();
+        }
+    }
+}

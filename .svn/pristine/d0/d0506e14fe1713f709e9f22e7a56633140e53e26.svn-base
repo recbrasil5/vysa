@@ -1,0 +1,49 @@
+﻿<div class="row" style="margin-top:20px">
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div>
+                <div class="ibox-title">
+                    <h5>Players</h5>
+                </div>
+                <div class="ibox-content" ng-controller="AdminPlayersController">
+                    <button type="button" ui-sref="ClubManagement.PlayerAddEdit">Add Player</button>
+                    <div>
+                        <table class="table table-hover table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Date of Birth</th>
+                                    <th>Guardian(s)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="p in players | itemsPerPage: recordsPerPage" total-items="totalRecords">
+                                    <td>
+                                        <div edit-item-btn item-to-edit="p" type2="Player"></div>
+                                    </td>
+                                    <td><a ng-click="delete(p.id)" ng-confirm-click="Are you sure you would like to delete {{p.firstName + ' ' + p.lastName}}?"><span class="glyphicon glyphicon-trash pull-left"></span></a></td>
+                                    <td>{{p.firstName}}</td>
+                                    <td>{{p.lastName}}</td>
+                                    <td>{{p.dateOfBirth | dateFormat }} </td>
+                                    <td>{{p.guardians }} </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"
+                                             template-url="/Templates/Common/dirPagination.tpl.html">
+                    </dir-pagination-controls>
+                    <div class="btn-group pull-right" role="group">
+                        <button type="button" ng-show="under15Records" data-ng-class="{'active':recordsPerPage === 15}" data-ng-click="recordsPerPage=15;" class="btn btn-xs-ms btn-default">15</button>
+                        <button type="button" ng-show="under25Records" data-ng-class="{'active':recordsPerPage === 25}" data-ng-click="recordsPerPage=25;" class="btn btn-xs-ms btn-default">25</button>
+                        <button type="button" ng-show="under50Records" data-ng-class="{'active':recordsPerPage === 50}" data-ng-click="recordsPerPage=50;" class="btn btn-xs-ms btn-default">50</button>
+                        <button type="button" ng-show="equals100Records" data-ng-class="{'active':recordsPerPage === 100}" data-ng-click="recordsPerPage=100;" class="btn btn-xs-ms btn-default">100</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,13 @@
+﻿(function () {
+    angular.module('admin', [
+        //'ngRoute',
+        'ngResource',
+        //'ngSanitize',
+        //'oc.lazyLoad',                  // ocLazyLoad
+        'ngCookies',
+        'ui.router',
+        'angularjs-dropdown-multiselect',
+        'ui.filters',
+        'AxelSoft',
+        'angularUtils.directives.dirPagination']);
+}());

@@ -1,0 +1,148 @@
+﻿using System.Collections.Generic;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Filters;
+using VYSA.WebApi.Models.Binding;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Models.ViewModel;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [ModelValidator]
+    [RoutePrefix("Admin/Players")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminPlayersController : ApiController
+    {
+        private readonly UnitOfWork unitOfWork = new UnitOfWork();
+        private readonly PlayerService playerService;
+
+        public AdminPlayersController()
+        {
+            playerService = new PlayerService(unitOfWork);
+        }
+
+        [HttpPost]
+        [Route("filter")]
+        [ResponseType(typeof(PlayersFilterViewModel))]
+        public IHttpActionResult GetPlayersFilter(FilterBindingModel bm)
+        {
+            var vm = new PlayersFilterViewModel();
+            vm.Players = playerService.GetPlayersFilter(bm);
+            if (bm.BoolCount)
+            {
+                vm.Count = playerService.GetPlayersFilterCount(bm);
+            }
+            return Ok(vm);
+        }
+
+        //[HttpPost]
+        //[Route("filter")]
+        //public IHttpActionResult GetPlayersGridView(PagingFilterDTO pfDto)
+        //{
+        //    PlayerGridDTO collection = new PlayerGridDTO();
+        //    collection.Players = playerService.GetListViewPlayers(pfDto);
+        //    if(pfDto.GetCount)
+        //    {
+        //        collection.Count = playerService.GetActivePlayerCount();
+        //    }
+        //    return Ok(collection);
+        //}
+
+        [HttpGet]
+        [Route("")]
+        public IEnumerable<PlayerResourceModel> GetPlayers()
+        {
+            return playerService.GetActivePlayers();
+        }
+
+        [HttpPost]
+        [Route("AutoComplete/Roster")]
+        [ResponseType(typeof(RosterFilterViewModel))]
+        public IHttpActionResult RosterFilter(AutoCompleteBindingModel autoCompleteBindingModel)
+        {
+            var list = autoCompleteBindingModel.LookupId == 0 ?  //if the lookupId == 0, this means the UI is in AddNew mode and there is no lookupId
+                playerService.GetActivePlayers() :
+                playerService.GetPlayersByRosterFilter(autoCompleteBindingModel);
+
+            return Ok(new RosterFilterViewModel { Players = list });
+        }
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetPlayerById")]
+        [ResponseType(typeof(PlayerResourceModel))]
+        public IHttpActionResult GetPlayer(int id)
+        {
+            PlayerResourceModel player = playerService.GetPlayer(id);
+
+            // return it if you got it
+            if (player == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(player);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(PlayerResourceModel))]
+        public IHttpActionResult UpdatePlayer(int id, PlayerResourceModel playerDto)
+        {
+            if (id != playerDto.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedPlayerDto = playerService.UpdatePlayer(playerDto, User.Identity.Name);
+
+            if (updatedPlayerDto == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedPlayerDto);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(PlayerResourceModel))]
+        public IHttpActionResult CreatePlayer(PlayerResourceModel playerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newPlayerDto = playerService.AddPlayer(playerDto, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetPlayerById
+            //return CreatedAtRoute("GetPlayerById", new { id = newPlayerDto.Id }, newPlayerDto);
+            return Ok(newPlayerDto);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(PlayerResourceModel))]
+        public IHttpActionResult DeletePlayer(int id)
+        {
+            var player = playerService.SoftDeletePlayer(id, User.Identity.Name);
+            if (player == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(player);
+        }
+
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

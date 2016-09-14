@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models
+{
+    public class MailingListMemberDto
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [Display(Name = "Name")]
+        public string Name { get; set; }
+
+        [Required]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        public bool Subscribed { get; set; }
+    }
+
+    public static class MailingListMemberDtoExtensions
+    {
+        public static MailingListMember UpdateValuesFromDTO(this MailingListMember member, MailingListMemberDto memberInView, string lastUpdateBy, bool onCreate)
+        {
+            member.Id = memberInView.Id;
+            member.Name = memberInView.Name;
+            member.Email = memberInView.Email;
+            
+            member.IsActive = true;
+            member.LastUpdateBy = lastUpdateBy;
+            member.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                member.Subscribed = true; //always true onCreate()...
+                member.CreatedBy = lastUpdateBy;
+                member.CreatedDateUtc = DateTime.UtcNow;
+            }
+            else
+            {
+                member.Subscribed = memberInView.Subscribed;
+            }
+
+            return member;
+        }
+
+        public static MailingListMemberDto ConvertToDto(this MailingListMember member)
+        {
+            return new MailingListMemberDto
+            {
+                Id = member.Id,
+                Name = member.Name,
+                Email = member.Email,
+                Subscribed = member.Subscribed
+            };
+        }
+    }
+}

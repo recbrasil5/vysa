@@ -1,0 +1,110 @@
+﻿using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+
+    [RoutePrefix("Admin/Teams")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminTeamsController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private TeamService teamService;
+        public AdminTeamsController()
+        {
+            teamService = new TeamService(unitOfWork);
+        }
+
+        //[HttpGet] //Admin/api/Team
+        //[Route("")]
+        //public IEnumerable<Team> GetTeams() //webApi hybrid call
+        //{
+        //    return TeamService.GetTeams();
+        //}
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetTeamById")]
+        [ResponseType(typeof(TeamDTO))]
+        public IHttpActionResult GetTeam(int id)
+        {
+            TeamDTO Team = teamService.GetTeamDto(id);
+
+            // return it if you got it
+            if (Team == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(Team);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(TeamDTO))]
+        public IHttpActionResult UpdateTeam(int id, TeamDTO teamDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != teamDto.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedTeamDTO = teamService.UpdateTeam(teamDto, User.Identity.Name);
+
+            if (updatedTeamDTO == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedTeamDTO);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(TeamDTO))]
+        public IHttpActionResult CreateTeam(TeamDTO teamDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newTeamDTO = teamService.AddTeam(teamDto, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetTeamById
+            //return CreatedAtRoute("GetTeamById", new { id = newTeamDTO.Id }, newTeamDTO);
+            return Ok(newTeamDTO);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(TeamDTO))]
+        public IHttpActionResult DeleteTeam(int id)
+        {
+            var team = teamService.SoftDeleteTeam(id, User.Identity.Name);
+
+            if (team == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(team);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+
+}

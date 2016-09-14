@@ -1,0 +1,34 @@
+﻿<div ng-controller="AdminClubManagementController">
+    <div id="loaderDiv" loader>
+        <img src="/assets/images/site/ajax-loader.gif" class="ajax-loader" />
+    </div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>Club Management</h2>
+            <ol class="breadcrumb">
+                <li>
+                    <a href="admin.html">Home</a>
+                </li>
+                <li class="active">
+                    <strong>Club Management</strong>
+                </li>
+            </ol>
+        </div>
+        <div class="col-lg-2">
+        </div>
+    </div>
+    <div class="pills">
+        <ul>
+            <li ng-class="{active:selected=='Player'}">
+                <a ng-click="selected = 'Player'">Players</a>
+            </li>
+            <li ng-class="{active:selected=='Coach'}">
+                <a ng-click="selected = 'Coach'">Coaches</a>
+            </li>
+            <li ng-class="{active:selected=='ParentRep'}">
+                <a ng-click="selected = 'ParentRep'">Parent Reps</a>
+            </li>
+        </ul>
+    </div>
+    <div ng-include="getTemplate()"></div>
+</div>

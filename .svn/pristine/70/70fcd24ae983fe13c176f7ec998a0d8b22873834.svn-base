@@ -1,0 +1,42 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysaApp").controller('loginController', function ($scope, $state, authService, notifierService) {
+
+        var onAuthenticated = function () {
+            var promise = authService.getTokenInfo();
+            promise.then(function (data) {
+                $scope.accountInfo = data;
+                $state.go('admin.home');
+            },
+            function (err) {
+                console.log(err.message);
+            });
+        };
+
+        if (authService.authTokenExists()) {
+            onAuthenticated();
+        }
+
+        $scope.login = function () {
+            var promise = authService.performLogin($scope.username, $scope.password);
+            promise.then(function (data) {
+                $scope.authenticated = data.access_token !== undefined;
+                if ($scope.authenticated) {
+                    onAuthenticated();
+                }
+            },
+                function (err) {
+                    console.log('login err:', err);
+                    console.log(JSON.stringify(err))
+                    if (err === null) {
+                        notifierService.error("Check to see if WebApi is running!");
+                    } else {
+                        notifierService.error(err.error_description);
+                    }
+                });
+        };
+
+    });
+
+}());

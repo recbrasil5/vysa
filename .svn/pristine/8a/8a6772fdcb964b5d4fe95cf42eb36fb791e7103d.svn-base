@@ -1,0 +1,8 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysa").value('config', {
+        //apiServerUri: 'http://localhost:52319/' //localURL
+        apiServerUri: 'http://www.holmenvysa.com/webapi/' //production
+    });
+}());

@@ -1,0 +1,83 @@
+﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.ExceptionServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Upload")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class UploadController : ApiController
+    {
+        //private UnitOfWork unitOfWork = new UnitOfWork();
+        private UploadService _uploadService;
+        private bool error = false;
+        public UploadController()
+        {
+            _uploadService = new UploadService();
+        }
+
+        [HttpPost]
+        [Route("test")]
+        public async Task<HttpResponseMessage> Post()
+        {
+            return await _uploadService.UploadImageTask(this.Request);
+            #region old code (handleExceptionAsync)
+            //await ExecuteAndHandleErrorAsync(
+            //    async () => await _uploadService.UploadImageTask(this.Request),
+            //    async (ex) =>
+            //    {
+            //        await ShowMessageAsync(ex); return false;
+            //    }
+            //    );
+
+            //return !error
+            //    ? new HttpResponseMessage { StatusCode = HttpStatusCode.OK }
+            //    : new HttpResponseMessage
+            //    {
+            //        StatusCode = HttpStatusCode.NotAcceptable,
+            //        Content = new StringContent("this sux")
+            //    };
+            #endregion
+        }
+
+        //public async Task<bool> ShowMessageAsync(Exception ex)
+        //{
+        //    var sb = new StringBuilder();
+        //    sb.AppendFormat("Unexpected error while uploading file(s) locally: {0}", ex.Message).AppendLine();
+        //    //sb.AppendFormat("subDirMap: {0}", subDirMap);
+        //    error = true;
+        //    return false;
+        //}
+
+        //public async Task ExecuteAndHandleErrorAsync(Func<Task> actionAsync,
+        //    Func<Exception, Task<bool>> errorHandlerAsync)
+        //{
+        //    //http://stackoverflow.com/questions/16626161/a-good-solution-for-await-in-try-catch-finally/16626313#16626313
+        //    ExceptionDispatchInfo capturedException = null;
+        //    try
+        //    {
+        //        await actionAsync().ConfigureAwait(false);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var s = _uploadService.Test;
+        //        capturedException = ExceptionDispatchInfo.Capture(ex);
+        //    }
+
+        //    if (capturedException != null)
+        //    {
+        //        var needsThrow = await errorHandlerAsync(capturedException.SourceException).ConfigureAwait(false);
+        //        if (needsThrow)
+        //        {
+        //            capturedException.Throw();
+        //        }
+        //    }
+        //}
+    }
+}

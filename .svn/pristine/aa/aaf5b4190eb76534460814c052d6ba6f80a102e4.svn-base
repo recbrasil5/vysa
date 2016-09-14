@@ -1,0 +1,104 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Net.Mail;
+using System.Configuration;
+using System.Text;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Util
+{
+    public static class EmailUtil
+    {
+        public static void SendMailingListMemberVerificationEmail(MailingListMemberDto mailingListMemberDto)
+        {
+            string from = "DoNotReply@holmenvysa.com";
+            string to = mailingListMemberDto.Email;
+            string subject = "VYSA Mailing List Member Verification Email";
+            StringBuilder msg = new StringBuilder();
+            msg.AppendFormat("Welcome {0},", mailingListMemberDto.Name).AppendLine().AppendLine();
+            msg.AppendFormat(
+                "You have been successfully added to the mailing list for the VIKING YOUTH SOCCER ASSOCIATION")
+                .AppendLine();
+            msg.AppendFormat(
+                "You will receive mass emails from the club every so often with information regarding tryouts, upcoming events and other news.")
+                .AppendLine();
+            msg.AppendFormat("Sincerely, VYSA Administration").AppendLine();
+
+            sendMailMessage(from, to, subject, msg.ToString());
+        }
+
+        public static void SendContactUsMessage(ContactUsMessageDTO contactUsMessageDto)
+        {
+            string from = contactUsMessageDto.EmailAddr;
+            string to = ConfigurationManager.AppSettings["EmailTo"];
+            string subject = String.Format("{0} [{1}]", contactUsMessageDto.Subject, contactUsMessageDto.Name);
+            string msg = contactUsMessageDto.Message;
+
+            sendMailMessage(from, to, subject, msg);
+        }
+
+        public static void SendErrorMessage(string controller, string action, bool post, string addtlInfo,
+                                            string userName, Exception e)
+        {
+            string from = ConfigurationManager.AppSettings["ErrorMsgFrom"];
+            string to = "recbrasil5@gmail.com";
+            string subject = "Exception on www.holmenvysa.com";
+            string msg = buildExceptionString(controller, action, post, e, userName, addtlInfo);
+
+            sendMailMessage(from, to, subject, msg);
+        }
+
+        private static void sendMailMessage(string from, string to, string subject, string msg)
+        {
+            try
+            {
+                MailMessage mail = new MailMessage(from, to, subject, msg);
+                new SmtpClient().Send(mail);
+            }
+            catch
+            { }
+        }
+
+        private static string buildExceptionString(string controller, string action, bool post,
+                                                    Exception ex, string userName, string addtlInfo)
+        {
+            HttpContext context = HttpContext.Current;
+            DateTime timestamp = DateTime.Now;
+            String source = !String.IsNullOrEmpty(ex.Source) ? ex.Source : "";
+            String htmlSrc = HttpUtility.HtmlEncode(source);
+            String target = !String.IsNullOrEmpty(ex.TargetSite.Name) ? ex.TargetSite.Name : "";
+            String htmlTarget = HttpUtility.HtmlEncode(target);
+            String exceptionType = ex.GetType().ToString();
+            String message = ex.Message;
+            String stackTrace = ex.StackTrace;
+            String requestIP = context.Request.UserHostAddress;
+            String requestURL = context.Request.Url.AbsoluteUri.ToString();
+
+            StringBuilder emailMsgBody = new StringBuilder();
+            emailMsgBody.AppendLine("api.holmenvysa.com exception:"); emailMsgBody.AppendLine();
+            emailMsgBody.AppendFormat("Controller: {0}", controller).AppendLine();
+            emailMsgBody.AppendFormat("Action: {0}", action).AppendLine();
+            emailMsgBody.AppendFormat("Post: {0}", post ? "true" : "false").AppendLine();
+            emailMsgBody.AppendLine();
+
+            emailMsgBody.AppendFormat("Server Date/Time: {0}", timestamp.ToString("MM/dd/yyyy HH:mm:ss")).AppendLine();
+            emailMsgBody.AppendFormat("Request from IP: {0}", requestIP).AppendLine();
+            emailMsgBody.AppendFormat("Request URL: {0}", requestURL).AppendLine();
+            emailMsgBody.AppendFormat("Client still connected: {0}", context.Response.IsClientConnected).AppendLine();
+            emailMsgBody.AppendFormat("Username: {0}", userName).AppendLine();
+            emailMsgBody.AppendFormat("Exception Type: {0}", exceptionType).AppendLine();
+            emailMsgBody.AppendFormat("Message: {0}", message).AppendLine();
+            emailMsgBody.AppendFormat("Source: {0}", source).AppendLine();
+            emailMsgBody.AppendFormat("StackTrace: {0}", stackTrace).AppendLine();
+
+            if (!string.IsNullOrEmpty(addtlInfo))
+                emailMsgBody.AppendFormat("AdditionalInfo: {0}", addtlInfo).AppendLine();
+
+            emailMsgBody.AppendLine();
+
+            return emailMsgBody.ToString();
+        }
+    }
+}

@@ -1,0 +1,590 @@
+/* It is recommended to place all your extra/additional CSS rules here */
+.pagination-no-top {
+    margin-top: 0;
+}
+
+/*--------------- Loader ------------------*/
+/*------------------------------------------*/
+#loaderDiv {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 280px;
+    left: 0;
+    z-index: 500;
+    background-color: transparent;
+    /*opacity: .9;*/
+}
+
+.ajax-loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: 0px; /* -1 * image width / 2 */
+    margin-top: -32px; /* -1 * image height / 2 */
+    display: block;
+}
+
+/***PILLS ***/
+.pills
+{ 
+    padding: 1px 1px !important;
+}
+
+.pills ul
+{
+    list-style-type: none !important;
+    margin-left: -45px !important;
+    margin-bottom: 10px !important;
+}
+
+.pills li
+{
+    display: inline-block !important;
+    margin-left: 5px !important;
+}
+
+.pills li a
+{
+    margin-right: 5px !important;
+    padding: 5px 10px !important;
+    text-decoration: none !important;
+    border-radius: 3px !important;
+    font-size: 13px !important;
+    background-color: #EEEEEE !important;
+    color: #666666 !important;
+} 
+
+.pills li .active, .pills .active:hover 
+{
+    background-color: #3E60B6 !important;
+    color: #FFFFFF !important;
+} 
+
+.pills li a:hover
+{
+    background-color: #DDDDDD !important;
+    color: #000000 !important;
+}
+
+/*Table header*/
+.inner-cell-left {
+    display: table-cell;
+}
+
+.inner-cell-right {
+    display: table-cell;
+    vertical-align: bottom;
+}
+
+.sort-asc {
+    background: url('/assets/images/site/sort_asc.png') no-repeat;
+    padding: 0;
+    margin: 0;
+    width: 19px;
+    height: 19px;
+}
+
+.sort-desc {
+    background: url('/assets/images/site/sort_desc.png') no-repeat;
+    padding: 0;
+    margin: 0;
+    width: 19px;
+    height: 19px;
+}
+
+.sort-both {
+    background: url('/assets/images/site/sort_both.png')no-repeat;
+    padding: 0;
+    margin: 0;
+    width: 19px;
+    height: 19px;
+}
+
+.margin-topbottom-sm {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.margin-topbottom-lg {
+    margin-top: 44px;
+    margin-bottom: 44px;
+}
+
+.top-buffer-xs {
+    margin-top: 4px;
+}
+
+.top-buffer-sm {
+    margin-top: 10px;
+}
+
+.top-buffer-md {
+    margin-top: 20px;
+}
+
+.top-buffer-lg {
+    margin-top: 60px;
+}
+
+.bottom-buffer-lg {
+    margin-bottom: 60px;
+}
+
+.left-buffer-sm {
+    margin-left: 12px;
+}
+
+.right-buffer-xs {
+    margin-right: 4px;
+}
+
+.margin-left-sm {
+    margin-left: 16px;
+}
+
+.margin-bottom-md {
+    margin-bottom: 13px;
+}
+
+.right-buffer-sm {
+    margin-right: 2px;
+}
+
+.no-margin {
+    margin: 0 !important;
+}
+
+.no-padding {
+    padding: 0;
+}
+
+.padding-sm {
+    padding: 16px;
+}
+
+.padding-ten-percent {
+    padding: 10%;
+}
+
+.width-auto {
+    width: auto;
+}
+
+.width-md {
+    width: 90px;
+}
+
+.width-xl {
+    width: 200px;
+}
+
+.tble-row {
+    display: table-row;
+}
+
+/******************* CUSTOM SELECT **************************/
+.custom-select {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 13px;
+	zoom: 1;
+	*display: inline;
+	width: 220px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.custom-select.small {
+	width: 104px;
+}
+.custom-select.medium {
+	width: 164px;
+}
+.custom-select.large {
+	width: 300px;
+}
+.custom-select.xlarge {
+	width: 380px;
+}
+.custom-select > select {
+	display: none !important;
+}
+.custom-select > a.dropdown-toggle {
+	border-radius: 0;
+	line-height: 28px;
+	box-shadow: none;
+	background: #ffffff;
+	position: relative;
+	display: block;
+	overflow: hidden;
+	padding: 0 0 0 8px;
+	border: 1px solid #aaa;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	color: #888;
+	width: 100%;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	height: 30px;
+}
+.custom-select > a.dropdown-toggle.disabled,
+.custom-select > a.dropdown-toggle.disabled:hover {
+	cursor: not-allowed;
+	color: #aaa;
+	background: #eee;
+}
+.custom-select > a.dropdown-toggle:hover, 
+.custom-select.open > a.dropdown-toggle {
+	color: #333;
+}
+.custom-select.open > a.dropdown-toggle {
+	border-bottom: 0;
+	line-height: 29px;
+}
+.control-group.error .custom-select > a.dropdown-toggle {
+	border-color: #f09784;
+	color: #d68273;
+}
+.custom-select > a.dropdown-toggle > span {
+	display: block;
+	overflow: hidden;
+	margin-right: 26px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.custom-select > a.dropdown-toggle > b {
+	position: absolute;
+	top: 0;
+	right: 0;
+	display: block;
+	width: 18px;
+	height: 100%;
+}
+.custom-select > a.dropdown-toggle > b:before {
+	content: "\f0d7";
+	display: inline-block;
+	font-family: FontAwesome;
+	font-size: 12px;
+	position: relative;
+	top: -1px;
+	left: 1px;
+}
+.custom-select.open > a.dropdown-toggle > b:before {
+	content: "\f0d8";
+}
+.custom-select > .dropdown-menu {
+	margin-top: 0;
+	border-color: #aaa;
+	border-top: 0;
+	padding-bottom: 0;
+	width: auto;
+	min-width: 100%;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	border-radius: 0;
+}
+.custom-select > .dropdown-menu > .custom-select-search {
+	position: relative;
+	z-index: 1010;
+	margin: 0;
+	padding: 0 4px;
+	white-space: nowrap;
+}
+.custom-select > .dropdown-menu > .custom-select-search > input {
+	width: 100%;
+	height: 30px;
+	margin: 0;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 4px 20px 4px 5px;
+	border-radius: 0;
+}
+.custom-select > .dropdown-menu > .custom-select-search:after {
+	content: "\f002";
+	display: inline-block;
+	color: #888;
+	font-family: FontAwesome;
+	font-size: 14px;
+	position: absolute;
+	top: 4px;
+	right: 10px;
+}
+.custom-select > .dropdown-menu > ul {
+	border-color: #aaa;
+	border-top: 0;
+	margin: 4px 0;
+	padding: 0;
+	list-style: none;
+	background-color: #fff;
+	overflow-x: hidden;
+	overflow-y: auto;
+	max-height: 240px;
+	padding-right: 14px;
+}
+.custom-select > .dropdown-menu > ul > li > a {
+	font-size: 13px;
+	margin-bottom: 1px;
+	margin-top: 1px;
+	display: block;
+	padding: 3px 8px;
+	clear: both;
+	font-weight: normal;
+	line-height: 20px;
+	color: #333;
+	cursor: pointer;
+	width: 100%;
+}
+.custom-select > .dropdown-menu > ul > li > a:hover, 
+.custom-select > .dropdown-menu > ul > li > a:focus {
+	color: #fff;
+	text-decoration: none;
+	background-repeat: repeat-x;
+}
+.custom-select > .dropdown-menu > ul > li > a:hover {
+	background: #4f99c6;
+}
+.custom-select > .dropdown-menu > ul > li > a:focus {
+	background: #2283c5;
+}
+.custom-select > .dropdown-menu > ul > li.empty-result > em {
+	text-align: center;
+	padding: 4px 8px;
+	display: block;
+}
+.custom-select > .dropdown-menu > .custom-select-action > button {
+	border-radius: 0;
+	background-image: none;
+}
+.my-drop-zone { border: dotted 3px lightgray; }
+.nv-file-over { border: dotted 3px red; } /* Default class applied to drop zones on over */
+.another-file-over-class { border: dotted 3px green; }
+
+html, body { height: 100%; }
+
+/*ng-file-upload*/
+body {
+    font-family: Helvetica, arial, freesans, clean, sans-serif;
+}
+
+/* object {
+	border: 3px solid red;
+} */
+
+.upload-buttons input[type="file"] {
+    width: 6.3em \0/ IE9;
+}
+
+.upload-button {
+    Height: 26px;
+    line-height: 30px;
+    padding: 0 10px;
+    background: #CCC;
+    appearance: button;
+    -moz-appearance: button; /* Firefox */
+    -webkit-appearance: button; /* Safari and Chrome */
+    position: relative;
+    text-align: center;
+    top: 7px;
+    cursor: pointer;
+}
+
+.sel-file {
+    padding: 1px 5px;
+    font-size: smaller;
+    color: grey;
+}
+
+.response {
+    padding: 0;
+    padding-top: 10px;
+    margin: 3px 0;
+    clear: both;
+}
+
+.response .sel-file li, .response .reqh {
+    color: blue;
+    padding-bottom: 5px;
+}
+
+fieldset {
+    border: 1px solid #DDD;
+    width: 620px;
+    padding: 10px;
+    line-height: 23px;
+}
+
+fieldset label {
+    /*font-size: smaller;*/
+}
+
+.progress {
+    display: inline-block;
+    width: 100px;
+    border: 3px groove #CCC;
+}
+
+.progress div {
+    font-size: smaller;
+    background: orange;
+    width: 0;
+}
+
+.drop-box {
+    background: #F8F8F8;
+    border: 5px dashed #DDD;
+    width: 170px;
+    height: 170px;
+    text-align: center;
+    padding: 100px 10px 0 10px;
+    margin-left: 10px;
+}
+
+.up-buttons {
+    float: right;
+}
+
+.drop-box.dragover {
+    border: 5px dashed blue;
+}
+
+.drop-box.dragover-err {
+    border: 5px dashed red;
+}
+
+/* for IE*/
+.js-fileapi-wrapper {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+button {
+    padding: 1px 5px;
+    font-size: smaller;
+    margin: 0 3px;
+}
+
+.ng-v {
+    float: right;
+}
+
+.thumb {
+    float: left;
+    width: 18px;
+    height: 18px;
+    padding-right: 10px;
+}
+
+form .thumb {
+    width: 24px;
+    height: 24px;
+    float: none;
+    position: relative;
+    top: 7px;
+}
+
+form .progress {
+    line-height: 15px;
+}
+
+.edit-area {
+    font-size: 14px;
+    background: black;
+    color: #f9f9f9;
+    padding: 5px 1px;
+}
+
+#htmlEdit {
+    margin-bottom: 25px;
+}
+
+.edit-div {
+    font-size: smaller;
+}
+
+.CodeMirror {
+    font-size: 14px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+}
+
+form button {
+    padding: 3px 10px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.sub {
+    font-size: smaller;
+    color: #777;
+    padding-top: 5px;
+    padding-left: 25px;
+}
+
+.err {
+    font-size: 12px;
+    color: #C53F00;
+    margin: 15px;
+    padding: 15px;
+    background-color: #F0F0F0;
+    border: 1px solid black;
+}
+
+.s3 {
+    font-size: smaller;
+    color: #333;
+    margin-left: 20px;
+}
+
+.s3 fieldset {
+    border: 1px solid #AAA;
+}
+
+.s3 label {
+    width: 180px;
+    display: inline-block;
+}
+
+.s3 input {
+    width: 300px;
+}
+
+.s3 .helper {
+    margin-left: 5px;
+}
+
+.howto {
+    margin-left: 10px;
+    line-height: 20px;
+}
+
+.server {
+    margin-bottom: 20px;
+}
+
+.srv-title {
+    font-weight: bold;
+    padding: 5px 0 10px 0;
+}
+
+:not(output):-moz-ui-invalid {
+    box-shadow: none;
+}
+
+.preview {
+    clear: both;
+}
+
+.preview img, .preview audio, .preview video {
+    max-width: 300px;
+    max-height: 150px;
+    float: right;
+}
+
+.custom {
+    font-size: 14px;
+    margin-left: 20px;
+}

@@ -1,0 +1,348 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Enums;
+using VYSA.WebApi.Models.Binding;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Util;
+
+namespace VYSA.WebApi.Services
+{
+    public class MailingListMemberService : BaseService
+    {
+        private readonly UnitOfWork _unitOfWork;
+        
+        public ICollection<MailingListResourceModel> FilteredMailingList { get; set; }
+        public HashSet<string> FilteredEmailHashSet
+        {
+            get
+            {
+                var hs = new HashSet<string>();
+                FilteredMailingList.ToList().ForEach(x =>
+                {
+                    if (!hs.Contains(x.Email))
+                    {
+                        hs.Add(x.Email);
+                    }
+                });
+                return hs;
+            }
+        }
+
+        public MailingListMemberService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = (UnitOfWork)unitOfWork;
+            FilteredMailingList = new List<MailingListResourceModel>();
+        }
+
+        public IEnumerable<MailingListResourceModel> GetMailingList(FilterBindingModel bm)
+        {
+            var mailingList = GetMailingListResourceModels(bm).ToList();
+
+            //TODO: Add ParentReps - now doing in SQL though but if you ever go back...
+
+            var coaches = new CoachService(_unitOfWork).GetMailingList();
+            mailingList.AddRange(coaches);
+
+            var boardMembers = new BoardService(_unitOfWork).GetMailingList();
+            mailingList.AddRange(boardMembers);
+
+            var guardians = new GuardianService(_unitOfWork).GetMailingList();
+            mailingList.AddRange(guardians);
+
+            return mailingList.OrderBy(z => z.Name);
+        }
+
+        public IEnumerable<MailingListResourceModel> GetMailingListResourceModels(FilterBindingModel bm)
+        {
+            return _unitOfWork.MailingListMemberRepository.Get(b => b.IsActive && b.Subscribed)
+                .Select(x => new MailingListResourceModel
+                {
+                    Name = x.Name,
+                    Email = x.Email
+                });
+        }
+
+        public IEnumerable<MailingListMember> GetMailingListMembers()
+        {
+            return _unitOfWork.MailingListMemberRepository.Get(b => b.IsActive);
+        }
+
+        public MailingListMemberResourceModel GetMailingListMember(int id)
+        {
+            var member = _unitOfWork.MailingListMemberRepository.GetByID(id);
+            return member == null ? null : member.ConvertToDto();
+        }
+
+        public Boolean EmailAlreadyExists(string email)
+        {
+            return _unitOfWork.MailingListMemberRepository.Get(x => x.Email.Equals(email)).Any();
+        }
+
+        public MailingListMemberResourceModel UpdateMailingListMember(MailingListMemberResourceModel updatedMailingListMemberDto, string lastUpdateBy)
+        {
+            var member = _unitOfWork.MailingListMemberRepository.GetByID(updatedMailingListMemberDto.Id);
+            if (member == null) return null;
+
+            //do update
+            member.UpdateValuesFromDTO(updatedMailingListMemberDto, lastUpdateBy, false);
+
+            _unitOfWork.MailingListMemberRepository.Update(member);
+            _unitOfWork.Save();
+
+            return updatedMailingListMemberDto;
+        }
+
+        public MailingListMemberResourceModel AddMailingListMember(MailingListMemberResourceModel newMailingListMemberDto, string lastUpdateBy)
+        {
+            var member = new MailingListMember().UpdateValuesFromDTO(newMailingListMemberDto, lastUpdateBy, true);
+            _unitOfWork.MailingListMemberRepository.Insert(member);
+            _unitOfWork.Save();
+
+            EmailUtil.SendMailingListMemberVerificationEmail(newMailingListMemberDto);
+
+            return member.ConvertToDto();
+        }
+
+        public MailingListMemberResourceModel SoftDeleteMailingListMember(int id, string lastUpdateBy)
+        {
+            var member = _unitOfWork.MailingListMemberRepository.GetByID(id);
+            if (member == null) return null;
+
+            member.IsActive = false;
+            member.LastUpdateUtc = DateTime.UtcNow;
+            member.LastUpdateBy = lastUpdateBy;
+            _unitOfWork.MailingListMemberRepository.Update(member);
+            _unitOfWork.Save();
+
+            return member.ConvertToDto();
+        }
+
+        public ICollection<MailingListResourceModel> GetMailingListFilter(MailingListMemberFilterBindingModel bm, Enums.FilterReturnType filterAction)
+        {
+            QueryObject queryObject = BuildFilterQuery(bm, filterAction);
+            return _unitOfWork.Context.Database.SqlQuery<MailingListResourceModel>(queryObject.Query, queryObject.FilterParameters.ToArray()).ToList();
+        }
+
+        public int GetMailingListFilterCount(MailingListMemberFilterBindingModel bm, Enums.FilterReturnType filterAction)
+        {
+            QueryObject queryObject = BuildFilterQuery(bm, filterAction);
+            return _unitOfWork.Context.Database.SqlQuery<int>(queryObject.Query, queryObject.FilterParameters.ToArray()).ToList().First();
+        }
+
+        public String GetMailingListFilterEmailList(MailingListMemberFilterBindingModel bm, Enums.FilterReturnType filterAction)
+        {
+            QueryObject queryObject = BuildFilterQuery(bm, filterAction);
+            var array = _unitOfWork.Context.Database.SqlQuery<String>(queryObject.Query, queryObject.FilterParameters.ToArray()).ToArray();
+            return string.Join(";", array);
+        }
+
+        private QueryObject BuildFilterQuery(MailingListMemberFilterBindingModel bm, Enums.FilterReturnType filterAction)
+        {
+            var filterParameters = new List<object>();
+            var orderBy = string.Empty;
+
+            filterParameters = FillOrderByFilterParameters(bm, filterAction == Enums.FilterReturnType.Count, filterParameters, ref orderBy);
+
+            // Inner From
+            var dynamicInnerFromClause = ReturnDynamicInnerFromSql(bm);
+
+            #region Select Clause
+
+            var sql = string.Empty;
+            switch (filterAction)
+            {
+                case Enums.FilterReturnType.Filter:
+                    sql = string.Format(@"DECLARE @now AS DATETIME = GETDATE()
+                                SELECT * 
+                                FROM (
+	                                SELECT ROW_NUMBER() OVER (ORDER BY {0}) AS RowNum, *
+	                                FROM (
+		                                SELECT ROW_NUMBER() OVER (PARTITION BY [Name] ORDER BY {0}) AS PartNum, *
+		                                FROM 
+                                        (
+                                            {1}
+                                        ) AS DataTbl
+		                                ) AS PartNumTbl
+		                                WHERE PartNum = 1
+                                 ) AS OrderByTbl
+                                WHERE [RowNum] >= @rowStart AND [RowNum] < @rowEnd",orderBy, dynamicInnerFromClause);
+                    break;
+                case Enums.FilterReturnType.Count:
+                    sql = string.Format(@"SELECT COUNT(*) FROM ({0}) AS DataTbl", dynamicInnerFromClause);
+                    break;
+                case Enums.FilterReturnType.DelimittedString:
+                    sql = string.Format(@"DECLARE @now AS DATETIME = GETDATE()
+                                SELECT DISTINCT [Email] 
+                                FROM (
+	                                SELECT ROW_NUMBER() OVER (ORDER BY {0}) AS RowNum, *
+	                                FROM (
+		                                SELECT ROW_NUMBER() OVER (PARTITION BY [Name] ORDER BY {0}) AS PartNum, *
+		                                FROM 
+                                        (
+                                            {1}
+                                        ) AS DataTbl
+		                                ) AS PartNumTbl
+		                                WHERE PartNum = 1
+                                 ) AS OrderByTbl", orderBy, dynamicInnerFromClause);
+                    break;
+            }
+            #endregion
+
+            var queryObject = new QueryObject { Query = sql, FilterParameters = filterParameters };
+            return queryObject;
+        }
+
+        private List<object> FillOrderByFilterParameters(MailingListMemberFilterBindingModel bm, bool count, List<object> filterParameters,
+            ref string orderBy)
+        {
+            if (count) return filterParameters;
+
+            // Paging Params
+            AddPagingParameters(bm, ref filterParameters);
+
+            if (string.IsNullOrEmpty(bm.OrderByFieldName)) bm.OrderByFieldName = string.Empty;
+
+            #region Ordering
+
+            switch (bm.OrderByFieldName.ToLower())
+            {
+                case "name":
+                    orderBy += "[Name]";
+                    break;
+                case "role":
+                    orderBy += "[Role]";
+                    break;
+                case "email":
+                    orderBy = "[Email]";
+                    break;
+                case "subscribed":
+                    orderBy = "[Subscribed]";
+                    break;
+                default:
+                    orderBy = "[Name]";
+                    break;
+            }
+
+            orderBy += (bm.Ascending == null || bm.Ascending) ? " ASC" : " DESC";
+
+            #endregion
+
+            return filterParameters;
+        }
+
+        private string ReturnDynamicInnerFromSql(MailingListMemberFilterBindingModel bm)
+        {
+            var filterFound = !bm.IsConfigDefined || false;
+
+            var sb = new StringBuilder();
+            if (bm.MailingList || !bm.IsConfigDefined)
+            {
+                #region MailingList
+                sb.AppendLine(@"SELECT DISTINCT m.Name,
+								m.Email,                
+								'MailingList' as [Role],
+								m.Subscribed
+                                FROM [dbo].[MailingListMembers] m
+                                WHERE m.[IsActive] = 1");
+                filterFound = true;
+                #endregion
+            }
+
+            if (bm.Guardians || !bm.IsConfigDefined)
+            {
+                #region Guardians
+                if (filterFound)
+                    sb.AppendLine("UNION");
+
+                sb.AppendLine(@"SELECT DISTINCT ltrim(rtrim(g.FirstName + ' ' + g.LastName)) as Name,
+								g.Email,                
+								'Guardian' as [Role],
+								cast(1 as bit) as Subscribed
+                                FROM [dbo].[Guardians] g
+                                WHERE g.[IsActive] = 1");
+                filterFound = true;
+                #endregion
+            }
+
+
+            if (bm.Coaches || !bm.IsConfigDefined)
+            {
+                #region Coaches
+                if (filterFound)
+                    sb.AppendLine("UNION");
+
+                sb.AppendLine(@"SELECT DISTINCT ltrim(rtrim(c.FirstName + ' ' + c.LastName)) as Name,
+								c.Email,                
+								'Coach' as [Role],
+								cast(1 as bit) as Subscribed
+                                FROM [dbo].[Coaches] c
+                                WHERE c.[IsActive] = 1");
+                filterFound = true;
+                #endregion
+            }
+
+            if (bm.ParentReps || !bm.IsConfigDefined)
+            {
+                #region ParentReps
+                if (filterFound)
+                    sb.AppendLine("UNION");
+
+                sb.AppendLine(@"SELECT DISTINCT ltrim(rtrim(p.FirstName + ' ' + p.LastName)) as Name,
+								p.Email,                
+								'Parent Rep' as [Role],
+								cast(1 as bit) as Subscribed
+                                FROM [dbo].[ParentReps] p
+                                WHERE p.[IsActive] = 1 ");
+                filterFound = true;
+                #endregion
+            }
+
+            if (bm.BoardMembers || !bm.IsConfigDefined)
+            {
+                #region
+                if (filterFound)
+                    sb.AppendLine("UNION");
+
+                sb.AppendLine(@"SELECT DISTINCT b.Name,
+								b.Email,                
+								'Board Member' as [Role],
+								cast(1 as bit) as Subscribed
+                                FROM [dbo].[BoardMembers] b
+                                WHERE b.[IsActive] = 1");
+                //filterFound = true;
+                #endregion
+            }
+
+            return sb.ToString();
+        }
+
+        private void AddPagingParameters(MailingListMemberFilterBindingModel bm, ref List<object> filterParameters)
+        {
+            int numofRecords = (bm.NumofRecords > 1000) ? 1000 : bm.NumofRecords;
+            int offset = (bm.PageNum - 1) * numofRecords;
+            int rowEnd = offset + numofRecords;
+
+            filterParameters.Add(new SqlParameter
+            {
+                ParameterName = "rowStart",
+                SqlDbType = SqlDbType.Int,
+                Value = offset
+            });
+
+            filterParameters.Add(new SqlParameter
+            {
+                ParameterName = "rowEnd",
+                SqlDbType = SqlDbType.Int,
+                Value = rowEnd
+            });
+        }
+
+    }
+}

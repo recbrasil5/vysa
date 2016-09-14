@@ -1,0 +1,130 @@
+﻿using System;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public static class DefaultBoardMembers
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static BoardMember bmAlHanson = new BoardMember
+        {
+            Name = "Al Hanson",
+            Title = "President",
+            Email = "allan.j.hanson@gmail.com",           
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmJoshKipp = new BoardMember
+        {
+            Name = "Josh Kipp",
+            Title = "Vice President",
+            Email = "joshkopp111379@gmail.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmTaraRieck = new BoardMember
+        {
+            Name = "Tara Rieck",
+            Title = "Treasurer",
+            Email = "timothyrieck@msn.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmStacyFoster = new BoardMember
+        {
+            Name = "Stacy Foster",
+            Title = "Secretary",
+            Email = "Fosterstace1979@yahoo.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmShannonSchneider = new BoardMember
+        {
+            Name = "Shannon Schneider",
+            Title = "Fundraising Director",
+            Email = "markandshop@yahoo.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmSteveOlson = new BoardMember
+        {
+            Name = "Steve Olson",
+            Title = "Tournament Director",
+            Email = "solson@mchughexcavating.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmAndyOlson = new BoardMember
+        {
+            Name = "Andy Olson",
+            Title = "Coaching Director",
+            Email = "andrew.olson@centurylink.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmPatRotering = new BoardMember
+        {
+            Name = "Pat Rotering",
+            Title = "Registrar",
+            Email = "patrick.rotering@gmail.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmKatieMalone = new BoardMember
+        {
+            Name = "Katie Malone",
+            Title = "Public Relations",
+            Email = "laesunmarie@yahoo.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static BoardMember bmDerekPeterson = new BoardMember
+        {
+            Name = "Derek Peterson",
+            Title = "Equipment Manager",
+            Email = "deekpowers@hotmail.com",
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+    }
+}

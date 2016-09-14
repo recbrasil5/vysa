@@ -1,0 +1,234 @@
+﻿using System;
+using System.Collections.Generic;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Cryptography;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public static class DefaultUsers
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static User debugSuperAdmin = new User
+        {
+            UserName = "superadmin",
+            Email = "recbrasil5@gmail.com",
+            PasswordHash = PasswordHash.CreateHash("pw"),
+            Roles = new List<Role>() { DefaultRoles.SuperAdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User debugAdmin = new User
+        {
+            UserName = "admin",
+            Email = "holmensoccer@yahoo.com",
+            PasswordHash = PasswordHash.CreateHash("pw"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User debugMe = new User
+        {
+            UserName = "recbrasil5@gmail.com",
+            Email = "recbrasil5@gmail.com",
+            PasswordHash = PasswordHash.CreateHash("pw"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userSuperAdmin = new User
+        {
+            UserName = "superadmin",
+            Email = "recbrasil5@gmail.com",
+            PasswordHash = PasswordHash.CreateHash("nike0584"),
+            Roles = new List<Role>() { DefaultRoles.SuperAdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userMe = new User
+        {
+            UserName = "recbrasil5@gmail.com",
+            Email = "recbrasil5@gmail.com",
+            PasswordHash = PasswordHash.CreateHash("nike0584"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userAdmin = new User
+        {
+            UserName = "admin",
+            Email = "holmensoccer@yahoo.com",
+            PasswordHash = PasswordHash.CreateHash("1vysa*"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userAl = new User
+        {
+            UserName = "allan.j.hanson@gmail.com",
+            Email = "allan.j.hanson@gmail.com",
+            PasswordHash = PasswordHash.CreateHash("ahanson_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userBruce = new User
+        {
+            UserName = "bruce@lacrossemail.com",
+            Email = "bruce@lacrossemail.com",
+            PasswordHash = PasswordHash.CreateHash("bwaldron_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userTara = new User
+        {
+            UserName = "timothyrieck@msn.com",
+            Email = "timothyrieck@msn.com",
+            PasswordHash = PasswordHash.CreateHash("trieck_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userStacey = new User
+        {
+            UserName = "Fosterstace1979@yahoo.com",
+            Email = "Fosterstace1979@yahoo.com",
+            PasswordHash = PasswordHash.CreateHash("sfoster_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userSteve = new User
+        {
+            UserName = "solson@mchughexcavating.com",
+            Email = "solson@mchughexcavating.com",
+            PasswordHash = PasswordHash.CreateHash("solson_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userPat = new User
+        {
+            UserName = "patrick.rotering@gmail.com",
+            Email = "patrick.rotering@gmail.com",
+            PasswordHash = PasswordHash.CreateHash("protering_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userKatie = new User
+        {
+            UserName = "laesunmarie@yahoo.com",
+            Email = "laesunmarie@yahoo.com",
+            PasswordHash = PasswordHash.CreateHash("kmalone_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userShannon = new User
+        {
+            UserName = "markandshop@yahoo.com",
+            Email = "markandshop@yahoo.com",
+            PasswordHash = PasswordHash.CreateHash("sschneider_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userDerek = new User
+        {
+            UserName = "deekpowers@hotmail.com",
+            Email = "deekpowers@hotmail.com",
+            PasswordHash = PasswordHash.CreateHash("dpeterson_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userAndyMeyer = new User
+        {
+            UserName = "andy@netkinetix.com",
+            Email = "andy@netkinetix.com",
+            PasswordHash = PasswordHash.CreateHash("andy_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static User userPatStrupp = new User
+        {
+            UserName = "patrickstrupp@charter.net",
+            Email = "patrickstrupp@charter.net",
+            PasswordHash = PasswordHash.CreateHash("pstrupp_v2015!"),
+            Roles = new List<Role>() { DefaultRoles.AdminRole },
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+    }
+}

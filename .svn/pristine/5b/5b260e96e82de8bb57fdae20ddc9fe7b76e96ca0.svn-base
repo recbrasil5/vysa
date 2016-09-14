@@ -1,0 +1,10 @@
+﻿using System;
+
+namespace VYSA.WebApi.Models
+{
+    public class DropdownItemVM
+    {
+        public int Id { get; set; }
+        public String Label { get; set; }
+    }
+}

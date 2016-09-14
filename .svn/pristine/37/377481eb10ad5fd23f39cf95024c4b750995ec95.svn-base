@@ -1,0 +1,35 @@
+﻿using System;
+using System.Data.Entity;
+using System.Threading.Tasks;
+using Microsoft.Owin;
+using Owin;
+using VYSA.Domain.Concrete;
+using VYSA.Web.Configuration;
+using VYSA.Web.Infrastructure;
+
+[assembly: OwinStartup(typeof(VYSA.Web.Startup))]
+
+namespace VYSA.Web
+{
+    public class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=316888
+            OAuthConfig.Configure(app);
+            WebApiConfig.Configure(app);
+
+#if DEBUG
+            Database.SetInitializer(new DropCreateIfChangeInitializer()); //rebuilds database if model changes
+#else
+            //Database.SetInitializer(new CreateInitializer()); //production - only creates database if it doesn't exist.
+            Database.SetInitializer<EFDbContext>(null); //production - do nothing
+#endif
+
+            using (EFDbContext dbContext = new EFDbContext())
+            {
+                dbContext.Database.Initialize(true);
+            }
+        }
+    }
+}

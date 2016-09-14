@@ -1,0 +1,105 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Security;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Infrastructure;
+using VYSA.WebApi.Infrastructure.Service;
+using VYSA.WebApi.Models.Resource;
+
+namespace VYSA.WebApi.Services
+{
+    public class UsersService
+    {
+        private readonly UnitOfWork _unitOfWork;
+        private readonly EFMembershipProvider _membershipProvider;
+
+        public UsersService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = (UnitOfWork)unitOfWork;
+            _membershipProvider = new EFMembershipProvider(unitOfWork);
+        }
+
+        public User GetUser(int id)
+        {
+            return _unitOfWork.UserRepository.GetUser(id);
+        }
+
+        public IEnumerable<User> GetUsers()
+        {
+            return _unitOfWork.UserRepository.ActiveUsers.AsEnumerable();
+        }
+
+        public IEnumerable<UserResourceModel> GetUserResourceModels()
+        {
+            var list = new List<UserResourceModel>();
+            var users = GetUsers().ToList();
+            users.ForEach(x => list.Add(x.ConvertToResourceModel()));
+            return list;
+        }
+
+        public UserResourceModel GetUserResourceModel(int id)
+        {
+            var user = _unitOfWork.UserRepository.GetUser(id);
+            return user == null ? null : user.ConvertToResourceModel();
+        }
+
+        //public UserResourceModel UpdateUser(UserResourceModel updatedUserDto, string lastUpdateBy)
+        //{
+        //    var user = _unitOfWork.UserRepository.GetUser(updatedUserDto.Id);
+        //    if (user == null) return null;
+
+        //    //do update
+        //    user.PopulateEntityWithResourceModel(updatedUserDto, lastUpdateBy, false);
+
+        //    //todo: how to do an update, what changed? perhaps i need specific calls instead.
+        //    //_unitOfWork.UserRepository.(User);
+        //    _unitOfWork.Save();
+
+        //    return updatedUserDto;
+        //}
+
+        public UserResourceModel AddUser(UserResourceModel newUserDto, string lastUpdateBy)
+        {
+            var user = new User().PopulateEntityWithResourceModel(newUserDto, lastUpdateBy, true);
+            MembershipCreateStatus status =
+                new AccountMembershipService(_membershipProvider, lastUpdateBy)
+                .CreateUser(newUserDto.UserName, "password", newUserDto.Email);
+
+            #region todo
+            //todo: handle staus on failure
+            //switch (status)
+            //{
+            //    case MembershipCreateStatus.DuplicateEmail:
+            //        break;
+            //    case MembershipCreateStatus.DuplicateUserName:
+            //        break;
+            //    case MembershipCreateStatus.InvalidPassword:
+            //        break;
+            //}
+            #endregion
+
+            return user.ConvertToResourceModel();
+        }
+
+        public UserResourceModel SoftDeleteUser(int id, string lastUpdateBy)
+        {
+            var user = _unitOfWork.UserRepository.GetUser(id);
+            _membershipProvider.DeleteUser(user.UserName, false);
+            return user.ConvertToResourceModel();
+        }
+
+        //public IEnumerable<MailingListDto> GetMailingList()
+        //{
+        //    return _unitOfWork.UserRepository.ActiveUsers.ToList()
+        //        .Select(x => new MailingListDto
+        //        {
+        //            Name = string.Format("{0} {1}", x.FirstName, x.LastName),
+        //            Email = x.Email
+        //        });
+        //}
+
+    }
+}

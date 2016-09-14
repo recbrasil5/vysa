@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
+
+namespace VYSA.Web.Models
+{
+    public class BoardMemberDTO
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [Display(Name = "Name")]
+        public string Name { get; set; }
+
+        [Required]
+        [Display(Name = "Title")]
+        public string Title { get; set; }
+
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+    }
+
+    public static class BoardMemberDTOExtensions
+    {
+        public static BoardMember UpdateValuesFromDTO(this BoardMember boardMember, BoardMemberDTO memberInView, string lastUpdateBy, bool onCreate)
+        {
+            boardMember.ID = memberInView.Id;
+            boardMember.Name = memberInView.Name;
+            boardMember.Title = memberInView.Title;
+            //boardMember.Description = string.Empty; //not yet used.
+            boardMember.Email = memberInView.Email;
+            boardMember.IsActive = true;
+            boardMember.LastUpdateBy = lastUpdateBy;
+            boardMember.LastUpdate = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                boardMember.CreatedBy = lastUpdateBy;
+                boardMember.CreatedDate = DateTime.UtcNow;
+            }
+
+            return boardMember;
+        }
+
+        public static BoardMemberDTO ConvertToDto(this BoardMember member)
+        {
+            return new BoardMemberDTO
+            {
+                Id = member.ID,
+                Name = member.Name,
+                Title = member.Title,
+                Email = member.Email
+            };
+        }
+    }
+}

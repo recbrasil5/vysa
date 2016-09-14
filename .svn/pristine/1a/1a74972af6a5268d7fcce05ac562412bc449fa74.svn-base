@@ -1,0 +1,32 @@
+﻿using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Services
+{
+    public class UserService
+    {
+        private readonly UnitOfWork _unitOfWork = new UnitOfWork();
+
+       public UserService(IUnitOfWork unitOfWork)
+        {
+            this._unitOfWork = (UnitOfWork)unitOfWork;
+        }
+
+        public User GetUser(string username)
+        {
+            return _unitOfWork.UserRepository.GetUser(username);
+        }
+
+        //public IEnumerable<MailingListDto> GetMailingList()
+        //{
+        //    return _unitOfWork.UserRepository.ActiveUsers.ToList()
+        //        .Select(x => new MailingListDto
+        //        {
+        //            Name = string.Format("{0} {1}", x.FirstName, x.LastName),
+        //            Email = x.Email
+        //        });
+        //}
+
+    }
+}

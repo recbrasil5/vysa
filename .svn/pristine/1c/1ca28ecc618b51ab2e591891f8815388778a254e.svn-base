@@ -1,0 +1,8 @@
+﻿<div class="row  border-bottom white-bg dashboard-header">
+    <div class="col-sm-3">
+        <h2>WELCOME to VYSA Administration Home</h2>
+    </div>
+    <div class="jumbotron">
+        <h1 style="color: red;">Hello</h1>
+    </div>
+</div>

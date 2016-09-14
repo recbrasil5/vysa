@@ -1,0 +1,33 @@
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Properties;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Upload")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class UploadController : ApiController
+    {
+        //private UnitOfWork unitOfWork = new UnitOfWork();
+        private UploadService _uploadService;
+        public UploadController()
+        {
+            _uploadService = new UploadService();
+        }
+
+        [HttpPost]
+        [Route("test")]
+        public async Task<HttpResponseMessage> Post()
+        {
+            return await _uploadService.UploadTestImage(this.Request);
+        }
+    }
+}

@@ -1,0 +1,134 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Linq;
+using System.Net;
+using System.Web;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Abstract;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebUApi.Controllers
+{
+    [RoutePrefix("Admin/Announcements")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminAnnouncementsController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private AnnouncementService announcementsService;
+        public AdminAnnouncementsController()
+        {
+            announcementsService = new AnnouncementService(unitOfWork);
+        }
+
+        [HttpGet]
+        [Route("")]
+        public IEnumerable<Announcement> GetAnnouncements()
+        {
+            return announcementsService.GetAnnouncements(true);
+        }
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetAnnouncementById")]
+        [ResponseType(typeof(AnnouncementDTO))]
+        public IHttpActionResult GetAnnouncement(int id)
+        {
+            AnnouncementDTO announcement = announcementsService.GetAnnouncement(id);
+
+            // return it if you got it
+            if (announcement == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(announcement);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(AnnouncementDTO))]
+        public IHttpActionResult UpdateAnnouncement(int id, AnnouncementDTO announcementDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != announcementDto.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedAnnouncementDto = announcementsService.UpdateAnnouncement(announcementDto, User.Identity.Name);
+
+            if (updatedAnnouncementDto == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedAnnouncementDto);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(AnnouncementDTO))]
+        public IHttpActionResult CreateAnnouncement(AnnouncementDTO announcementDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newAnnouncementDto = announcementsService.AddAnnouncement(announcementDto, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetAnnouncementById
+            //return CreatedAtRoute("GetAnnouncementById", new { id = newAnnouncementDto.Id }, newAnnouncementDto);
+            return Ok(newAnnouncementDto);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(AnnouncementDTO))]
+        public IHttpActionResult DeleteAnnouncement(int id)
+        {
+            var announcement = announcementsService.SoftDeleteAnnouncement(id, User.Identity.Name);
+            if (announcement == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(announcement);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+
+        //[HttpPatch]
+        //[Route("{id:int}")]
+        //[ResponseType(typeof(LeadDTO))]
+        //public IHttpActionResult PatchLead(int id, IEnumerable<OperationDTO> operations)
+        //{
+        //    var updatedLeadDto = ServiceManager.LeadService.UpdateLead(id, operations);
+        //    if (updatedLeadDto == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return Ok(updatedLeadDto);
+
+        //    return StatusCode(HttpStatusCode.NoContent);
+        //}
+
+        //Add
+    }
+}

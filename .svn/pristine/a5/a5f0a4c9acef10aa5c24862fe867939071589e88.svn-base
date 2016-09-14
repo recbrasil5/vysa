@@ -1,0 +1,241 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data.Entity;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Util;
+using VYSA.Domain.Extensions;
+using System.Data.SqlTypes;
+using VYSA.Domain.Enums;
+using VYSA.WebApi.Infrastructure.Seed;
+
+namespace VYSA.WebApi.Infrastructure
+{
+    public class DropCreateIfChangeInitializer : DropCreateDatabaseIfModelChanges<EFDbContext>
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        protected override void Seed(EFDbContext context)
+        {
+            //EF figures out that Roles need to save before Users :-)
+            setupDefaultRoles(context);
+            setupDefaultUsers(context);
+            
+            //Site Management
+            setupDefaultAnnouncements(context);
+            setupDefaultBoardMembers(context);
+
+            //Club Management
+            setupDefaultGuardians(context);
+            setupDefaultPlayers(context);
+            //setupDefaultPlayerGuardians(context);
+            setupDefaultCoaches(context);
+            setupDefaultParentReps(context);
+
+            setupDefaultSeason(context);
+            setupDefaultDivisions(context);
+            setupDefaultEvents(context);
+            setupDefaultTeams(context);
+
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                //TODO: LOG EXCEPTION
+                var x = e;
+            }
+        }
+
+        private void setupDefaultGuardians(EFDbContext context)
+        {
+            new List<Guardian>
+            {
+                DefaultGuardians.GuardianBrianClements,
+                DefaultGuardians.GuardianSaraClements
+            }.ForEach(a => context.Guardians.Add(a));
+        }
+
+        private void setupDefaultPlayers(EFDbContext context)
+        {
+            new List<Player>
+            {
+                DefaultPlayers.PlayerJacobClements,
+                DefaultPlayers.PlayerBraxtonStrupp
+            }.ForEach(a => context.Players.Add(a));
+        }
+
+        private void setupDefaultParentReps(EFDbContext context)
+        {
+            new List<ParentRep>
+            {
+                DefaultParentReps.ParentRepU10Boys,
+                DefaultParentReps.ParentRepU11Coed,
+                DefaultParentReps.ParentRepU11Girls,
+                DefaultParentReps.ParentRepU13Boys,
+                DefaultParentReps.ParentRepU14Boys
+            }.ForEach(a => context.ParentReps.Add(a));
+        }
+
+        private void setupDefaultCoaches(EFDbContext context)
+        {
+            new List<Coach>
+            {
+                DefaultCoaches.CoachAndy,
+                DefaultCoaches.CoachBruce,
+                DefaultCoaches.CoachLori,
+                DefaultCoaches.CoachManuel,
+                DefaultCoaches.CoachMark,
+                DefaultCoaches.CoachNick,
+                DefaultCoaches.CoachZach
+            }.ForEach(a => context.Coaches.Add(a));
+        }
+
+        private void setupDefaultTeams(EFDbContext context)
+        {
+            new List<Team>
+            {
+                DefaultTeams.TeamU10Boys,
+                DefaultTeams.TeamU11Coed,
+                DefaultTeams.TeamU11Girls,
+                DefaultTeams.TeamU12Boys,
+                DefaultTeams.TeamU13Boys,
+                DefaultTeams.TeamU14Boys
+            }.ForEach(a => context.Teams.Add(a));
+        }
+        
+        private void setupDefaultEvents(EFDbContext context)
+        {
+           DefaultEvents.Spring2015Events.ForEach(a => context.Events.Add(a));
+        }
+
+        private void setupDefaultDivisions(EFDbContext context)
+        {
+            new List<Division>
+            {
+                DefaultDivisions.U10Boys,
+                DefaultDivisions.U11Coed,
+                DefaultDivisions.U11Girls,
+                DefaultDivisions.U12Boys,
+                DefaultDivisions.U13Boys,
+                DefaultDivisions.U14Boys,
+                DefaultDivisions.U17Boys
+            }.ForEach(a => context.Divisions.Add(a));
+        }
+
+        private void setupDefaultAnnouncements(EFDbContext context)
+        {
+            new List<Announcement>
+            {
+                DefaultAnnouncements.SummerRegistrationAnnouncement,
+                DefaultAnnouncements.FallTryoutsAnnouncement
+            }.ForEach(a => context.Announcements.Add(a));
+        }
+
+        private void setupDefaultSeason(EFDbContext context)
+        {
+            new List<Season>()
+            {
+                DefaultSeasons.Spring2015
+            }.ForEach(s => context.Seasons.Add(s));
+        }
+
+        private void setupDefaultBoardMembers(EFDbContext context)
+        {
+            #region BoardMembers
+            List<BoardMember> members = new List<BoardMember>()
+            {
+                DefaultBoardMembers.bmAlHanson,
+                DefaultBoardMembers.bmJoshKipp,
+                DefaultBoardMembers.bmStacyFoster,
+                DefaultBoardMembers.bmTaraRieck,
+                DefaultBoardMembers.bmSteveOlson,
+                DefaultBoardMembers.bmPatRotering,
+                DefaultBoardMembers.bmKatieMalone,
+                DefaultBoardMembers.bmShannonSchneider,
+                DefaultBoardMembers.bmDerekPeterson,
+                DefaultBoardMembers.bmAndyOlson
+            };
+            #endregion
+
+            members.ForEach(m => context.BoardMembers.Add(m));
+        }
+
+        private void setupDefaultRoles(EFDbContext context)
+        {
+            #region Roles
+            new List<Role>()
+            {
+               DefaultRoles.AdminRole,                
+               DefaultRoles.SuperAdminRole,
+               DefaultRoles.MemberRole
+            }.ForEach(r => context.Roles.Add(r));
+            #endregion
+        }
+
+        private void setupDefaultUsers(EFDbContext context)
+        {
+            #region users
+            new List<User>()
+            {
+                new User
+                {
+                    UserName = "superadmin",
+                    Email = "vysa@gmail.com",
+                    Password = RandomPassword.EncryptPasswordSHA("pw"),
+                    Approved = true,
+                    Role = DefaultRoles.SuperAdminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDateUtc = DateTime.UtcNow,
+                    LastUpdateUtc = DateTime.UtcNow                   
+                },
+
+                new User
+                {
+                    UserName = "admin",
+                    Email = "holmensoccer@yahoo.com",
+                    Password = RandomPassword.EncryptPasswordSHA("pw"),
+                    Approved = true,
+                    Role = DefaultRoles.AdminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDateUtc = DateTime.UtcNow,
+                    LastUpdateUtc = DateTime.UtcNow 
+                },
+
+                new User()
+                {
+                    UserName = "recbrasil5@gmail.com",
+                    Email = "recbrasil5@gmail.com",
+                    Password = RandomPassword.EncryptPasswordSHA("pw"),
+                    Approved = true,
+                    Role = DefaultRoles.MemberRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDateUtc = DateTime.UtcNow,
+                    LastUpdateUtc = DateTime.UtcNow 
+                },
+                DefaultUsers.userAl,
+                DefaultUsers.userJosh,
+                DefaultUsers.userStacey,
+                DefaultUsers.userTara,
+                DefaultUsers.userKatie,
+                DefaultUsers.userSteve,
+                DefaultUsers.userPat,
+                DefaultUsers.userShannon,
+                DefaultUsers.userDerek,
+                DefaultUsers.userPatStrupp
+
+            }.ForEach(u => context.Users.Add(u));
+            #endregion
+        }
+
+    }
+}

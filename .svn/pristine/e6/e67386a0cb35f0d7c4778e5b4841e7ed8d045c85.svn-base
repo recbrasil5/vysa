@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
+
+namespace VYSA.WebApi.Models
+{
+    public class PlayersViewModel
+    {
+        public IEnumerable<Player> Players { get; set; }
+        public Boolean AnyInList { get; set; }
+    }
+
+    public class PlayerInView
+    {
+        public ICollection<Guardian> Guardians { get; set; }
+        public User User { get; set; }
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Required")]
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; }
+
+        [Display(Name = "Middle Name")]
+        public string MiddleName { get; set; }
+
+        [Required(ErrorMessage = "Required")]
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Required")]
+        [Display(Name = "Date of Birth")]
+        [DataType(DataType.Date)]
+        public DateTime DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "Required")]
+        public string Gender { get; set; }
+
+        //[Required(ErrorMessage = "Required")]
+        //[Display(Name = "Mother's Date of Birth")]
+        //[DataType(DataType.Date)]
+        //public DateTime MothersDateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "Required")]
+        [Display(Name = "Emergency Contact")]
+        public string EmergencyContact { get; set; }
+
+        [Required(ErrorMessage = "Required")]
+        [Display(Name = "Emergency Phone")]
+        [DataType(DataType.PhoneNumber)]
+        public string EmergencyPhone { get; set; }
+        
+        public string Doctor { get; set; }
+
+        [Display(Name = "Doctor Phone")]
+        [DataType(DataType.PhoneNumber)]
+        public string DoctorPhone { get; set; }
+
+        [Display(Name = "Medical Conditions")]
+        public string MedicalConditions { get; set; }
+
+        public bool IsActive { get; set; }
+    }
+}

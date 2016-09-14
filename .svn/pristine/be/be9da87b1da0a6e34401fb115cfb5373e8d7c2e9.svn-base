@@ -1,0 +1,75 @@
+﻿<div class="row" style="margin-top: 20px">
+    <div id="loaderDiv" loader>
+        <img src="../../../assets/images/site/ajax-loader.gif" class="ajax-loader" />
+    </div>
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div>
+                <div class="ibox-title">
+                    <h5>Mailing List Members</h5>
+                    <div class="pull-right">
+                        <span>Count: {{totalRecords}}</span>
+                    </div>
+                </div>
+                <!--<pre>roles: {{roles}}</pre>
+                <pre>filter: {{filter}}</pre>-->
+                <div class="ibox-content">
+                    <label ng-repeat="role in roles" class="padding-sm">
+                        {{role.name}}
+                        <input type="checkbox" ng-model="role.isChecked" ng-change="change(role)"/>
+                        <br/>
+                    </label>
+                    <div ng-show="noData" class="warningDiv"><p>There were no records returned.</p></div>
+                    <div ng-show="!noData" id="grid">
+                        <div class="pull-left">
+                            <button class="btn-success" type="button" clipboard text="emailList" on-copied="success()" on-error="fail(err)">Copy Email List to Clipboard</button>
+                        </div>
+                        <div class="top-buffer-sm">
+                            <table class="col-sm-8 top-buffer-sm table table-hover table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th data-ng-repeat="item in gridHeaderItems">
+                                            <div ng-show="sort.column === item.field" ng-hide="sort.column !== item.field">
+                                                <div class="inner-cell-left">
+                                                    <a href="#" ng-click="orderBy(item.field);">{{item.name}}</a>
+                                                </div>
+                                                <div class="inner-cell-right">
+                                                    <div ng-class="sort.ascending ? 'sort-asc' : 'sort-desc'"></div>
+                                                </div>
+                                            </div>
+                                            <div class="tble-row" ng-show="sort.column !== item.field">
+                                                <div class="inner-cell-left">
+                                                    <a href="#" ng-click="orderBy(item.field);">{{item.name}}</a>
+                                                </div>
+                                                <div class="inner-cell-right">
+                                                    <div class="sort-both"></div>
+                                                </div>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="p in gridData | itemsPerPage: recordsPerPage" total-items="totalRecords">
+                                        <td class="col-sm-2">{{p.name}}</td>
+                                        <td class="col-sm-2">{{p.email}}</td>
+                                        <td class="col-sm-2">{{p.role}}</td>
+                                        <td class="col-sm-2"><input ng-disabled="true" type="checkbox" ng-model="p.subscribed" /></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"
+                                                 template-url="/Templates/Common/dirPagination.tpl.html">
+                        </dir-pagination-controls>
+                        <div class="btn-group pull-right" role="group">
+                            <button type="button" ng-show="under15Records" data-ng-class="{'active':recordsPerPage === 15}" data-ng-click="recordsPerPage=15;" class="btn btn-xs-ms btn-default">15</button>
+                            <button type="button" ng-show="under25Records" data-ng-class="{'active':recordsPerPage === 25}" data-ng-click="recordsPerPage=25;" class="btn btn-xs-ms btn-default">25</button>
+                            <button type="button" ng-show="under50Records" data-ng-class="{'active':recordsPerPage === 50}" data-ng-click="recordsPerPage=50;" class="btn btn-xs-ms btn-default">50</button>
+                            <button type="button" ng-show="equals100Records" data-ng-class="{'active':recordsPerPage === 100}" data-ng-click="recordsPerPage=100;" class="btn btn-xs-ms btn-default">100</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

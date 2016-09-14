@@ -1,0 +1,48 @@
+﻿<div>
+    <div id="loaderDiv" loader>
+        <img src="~/assets/images/site/ajax-loader.gif" class="ajax-loader" />
+    </div>
+    <div class="page-header">
+        <h1>
+            Website Maintenance
+            <small> | Board Members</small>
+        </h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div>
+                <div class="ibox-title">
+                    <h5>Board Members</h5>
+                    <!--<div ibox-tools></div>-->
+                </div>
+                <div class="ibox-content" ng-controller="AdminBoardMembersController">
+                    <button type="button" ui-sref="websitemaintenance.boarmembers.addedit">Add Board Member</button>
+                    <table class="table table-hover table-responsive">
+                        <thead>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>&nbsp;</th>
+                                <th>Name</th>
+                                <th>Title</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="member in boardMembers">
+                                <td>
+                                    <div edit-item-btn item-to-edit="member" type2="Board"></div>
+                                </td>
+                                <td><a ng-click="delete(member.id)" ng-confirm-click="Are you sure you would like to delete {{member.name}}?"><span class="glyphicon glyphicon-trash pull-left"></span></a></td>
+                                <td>{{member.name}}</td>
+                                <td>{{member.title}}</td>
+                                <td>{{member.email}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

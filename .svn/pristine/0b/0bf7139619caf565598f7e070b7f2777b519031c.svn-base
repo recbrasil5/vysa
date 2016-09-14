@@ -1,0 +1,33 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.ComponentModel.DataAnnotations;
+//using System.Data.Objects.DataClasses;
+using System.Data;
+
+namespace VYSA.Domain.Entities
+{
+    public class User : EntityBase 
+    {
+        // Foreign Key
+        public int RoleId { get; set; }
+
+        // Columns
+        public string UserName { get; set; }
+        public byte[] Password { get; set; }
+        public string Email { get; set; }
+        public string PasswordQuestion { get; set; }
+        public string PasswordAnswer { get; set; }
+        public bool Approved { get; set; } 
+        public DateTime? LastLoginDate { get; set; }
+        public DateTime? LastActivityDate { get; set; }
+        public DateTime? LastPasswordChangeDate { get; set; }
+        
+        //Navigation Properties
+        public virtual Role Role { get; set; }
+        public ICollection<Coach> Coaches { get; set; }
+        public ICollection<ParentRep> ParentReps { get; set; }
+        public ICollection<Player> Players { get; set; }
+    }
+}

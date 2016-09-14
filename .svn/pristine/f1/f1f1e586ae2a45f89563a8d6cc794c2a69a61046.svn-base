@@ -1,0 +1,116 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("admin").controller('adminMailingListController',
+        function ($scope, $location, metaDataService, notifierService, adMailingListDataDeliveryService) {
+
+            loadForm();
+
+            function loadForm() {
+                setupScopeVars();
+                getGridData(1);
+            }
+
+            function getGridData(pageNo) {
+
+                pageNo = pageNo || $scope.pagination.current;
+
+                // loadAll
+                handleDataCallback(adMailingListDataDeliveryService.getGridView(pageNo, $scope.recordsPerPage, $scope.sort));
+            }
+
+            function handleDataCallback(promise) {
+                promise.then(function (data) {
+                    if (data.count > 0) {
+                        $scope.gridData = data.mailingList;
+                        $scope.totalRecords = data.count;
+                        togglePagingDisplaySettings(data.count);
+                    }
+                },
+                    function (error) {
+                        $scope.gridContent = false;
+                        $scope.gridData = [];
+                        console.log(error);
+                        notifierService.error('There was an error loading the gird');
+                    }
+                );
+            }
+
+            function setupScopeVars() {
+                $scope.gridContent = true;
+                $scope.gridData = [];
+                setupPagingScopeVars();
+                $scope.gridHeaderItems = metaDataService.getMailingListGridHeaders;
+            }
+
+            function setupPagingScopeVars() {
+                $scope.totalRecords = 0;
+                $scope.recordsPerPage = 15;
+                $scope.pagination = { current: 1 };
+                $scope.sort = {
+                    column: '',
+                    ascending: true //default setting for Name
+                };
+            }
+
+            function togglePagingDisplaySettings(count) {
+                if (count > 50) {
+                    $scope.equals100Records = true;
+                    $scope.under50Records = true;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count > 25) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = true;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count > 15) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = false;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count < 15) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = false;
+                    $scope.under25Records = false;
+                    $scope.under15Records = false;
+                }
+            }
+
+            $scope.delete = function (playerId) {
+                AdminPlayerRepository.players.delete({ id: parseInt(playerId) })
+                    .$promise.then(function () {
+                        notifierService.success('Record has been removed!');
+                        getGridData(1);
+                    }, function (error) {
+                        notifierService.error('Ex: ' + error.message);
+                    });
+            };
+
+            $scope.orderBy = function (column) {
+                this.sort.column = column;
+                this.sort.ascending = !this.sort.ascending;
+                getGridData(1);
+            }
+
+            $scope.pageChanged = function (pageNo) {
+                getGridData(pageNo);
+            };
+
+            //$scope.newRow = false;
+            //$scope.selected = {};
+            //loadMailingList();
+
+            //function loadMailingList() {
+            //    adminMailingListRepository.mailingList.query().$promise.then(function (data) {
+            //        $scope.gridData = data;
+            //        $scope.totalRecords = data.length;
+            //    }, function (error) {
+            //        //TODO
+            //        console.log('Failure to load grid data: ' + JSON.stringify(error));
+            //    });
+            //}
+
+        });
+
+}());

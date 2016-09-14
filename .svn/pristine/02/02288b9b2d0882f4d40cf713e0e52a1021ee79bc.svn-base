@@ -1,0 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public static class DefaultAnnouncements
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static Announcement FallTryoutsAnnouncement = new Announcement
+        {
+            Title = "Fall 2015 and Spring 2016 Try Out", 
+            Message = @"VYSA will be holding Fall 2015 and Spring 2016 try outs June 2-4 from 5:30-7:30pm, June 7 from 6:00-8:00pm, June 8 & 9 from 5:50-7:30pm at Viking Elementary. Kids must attend a minimum of 2 sessions. Registration is free until May 15th, 2015. After May 15th there will be a $10 late registration fee to be applied. To register please email Al Hanson at Allan.j.hanson@gmail.comThe following information must be inclosed: Player NameAge Group (for fall)Spring Team (if applicable)Phone # and Parents Contact info", 
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow.AddDays(30),
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static Announcement SummerRegistrationAnnouncement = new Announcement
+        {
+            Title = "Summer Registration/Practice", 
+            Message = "Summer registration (age u9-u17) forms are being emailed out today. If you do not receive the email and would like your son or daughter to play, please leave a comment below. Summer practice times is Tuesday, Wednesday, and Thursday at Viking Elementary. U9-U12 5:30-7:00pm U13-17 7:00-9:00 pm",
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow.AddDays(30),
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+    }
+}

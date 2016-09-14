@@ -1,0 +1,21 @@
+﻿using System.Collections.Generic;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models
+{
+    public class UsersViewModel
+    {
+        public IEnumerable<User> Users { get; set; }
+    }
+
+    public class UserInView
+    {
+        public int Id { get; set; }
+
+        public string UserName { get; set; }
+
+        public string Email { get; set; }
+
+        public string RoleName { get; set; }
+    }
+}

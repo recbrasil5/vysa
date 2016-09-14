@@ -1,0 +1,39 @@
+﻿<fieldset>
+    <h2>Account Information</h2>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="form-group">
+                <label>Email *</label>
+                <input id="email" ng-model="email" ng-change="checkDups()" name="email" type="email" class="form-control required" required>
+                <p ng-show="signupForm.email.$error" class="help-block">Must be a valid email.</p>
+                <p ng-show="exists === true" class="help-block">Email already exists.</p>
+            </div>
+            <div class="form-group">
+                <label>Password *</label>
+                <input id="password" ng-model="password" name="password" type="password" class="form-control" required>
+                <p ng-show="signupForm.password.$error.required" class="help-block">Password is required.</p>
+            </div>
+            <div class="form-group"> 
+                <label>Confirm Password *</label>
+                <input id="verify" name="verify" ng-model="confirmPassword" type="password" class="form-control" required nx-equal-ex="password">
+                <span ng-show="signupForm.verify.$error.nxEqualEx">Passwords do not match.</span>
+                <p ng-show="signupform.verify.$error.required || signupform.verify.$error.nxEqualEx" class="error help-block">
+                    <span ng-show="signupForm.verify.$error.required">Confirm Password is required.</span><br />
+                    <span ng-show="signupForm.verify.$error.nxEqualEx">Passwords do not match.</span>
+                </p>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="text-center">
+                <div style="margin-top: 20px">
+                    <i class="fa fa-sign-in" style="font-size: 180px; color: #e5e5e5"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a ui-sref="registration.wizard.step_two" class="btn btn-primary" ng-click="validateEmail()"
+       ng-disabled="signupForm.email.$error === undefined && 
+                    signupform.verify.$error.required === undefined && 
+                    signupform.verify.$error.nxEqualEx">Next</a>
+</fieldset>

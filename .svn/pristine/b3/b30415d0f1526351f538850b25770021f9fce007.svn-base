@@ -1,0 +1,31 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysa")
+        .factory('directiveRoutingService', function () {
+            return {
+                getPath: function (type) {
+                    var path = '/';
+                    switch (type) {
+                        case 'announcement':
+                            path += 'Admin/Home/WebsiteMaintenance/Announcements/AddEdit';
+                            break;
+                        case 'board':
+                            path += 'Admin/Home/WebsiteMaintenance/Board/AddEdit';
+                            break;
+                        case 'season':
+                            path += 'Admin/Home/ClubManagement/SeasonManagement/SeasonSetup';
+                            break;
+                        case 'event':
+                            path += 'Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/Events';
+                            break;
+                        case 'team':
+                            path += 'Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/TeamSetup';
+                            break;
+                    }
+                    return path;
+                }
+            }
+        });
+}());

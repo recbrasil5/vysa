@@ -1,0 +1,80 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Enums;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class SeasonService
+    {
+        private UnitOfWork unitOfWork;
+
+        public SeasonService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<SeasonDTO> GetSeasonDtos()
+        {
+            var seasonDtos = new List<SeasonDTO>();
+            var seasonEntitys = unitOfWork.SeasonRepository.Get(a => a.IsActive).OrderByDescending(s => s.StartDate).ToList();
+            seasonEntitys.ForEach(s => seasonDtos.Add(s.ConvertToDto()));
+            return seasonDtos;
+        }
+
+        public SeasonDTO GetSeason(int id)
+        {
+            var season = unitOfWork.SeasonRepository.GetByID(id);
+            return season == null ? null : season.ConvertToDto(unitOfWork); //pass unitOfWork to call other Services here
+        }
+
+        public SeasonDTO UpdateSeason(SeasonDTO updatedSeasonDto, string lastUpdateBy)
+        {
+            var season = unitOfWork.SeasonRepository.GetByID(updatedSeasonDto.Id);
+            if (season == null) return null;
+
+            //do update
+            season.UpdateValuesFromDTO(updatedSeasonDto, lastUpdateBy, false);
+
+            unitOfWork.SeasonRepository.Update(season);
+            unitOfWork.Save();
+
+            return updatedSeasonDto;
+        }
+
+        public SeasonDTO AddSeason(SeasonDTO newSeasonDto, string lastUpdateBy)
+        {
+            Season season = new Season().UpdateValuesFromDTO(newSeasonDto, lastUpdateBy, true);
+            unitOfWork.SeasonRepository.Insert(season);
+            unitOfWork.Save();
+
+            return season.ConvertToDto();
+        }
+
+        public SeasonDTO SoftDeleteSeason(int id, string lastUpdateBy)
+        {
+            var season = unitOfWork.SeasonRepository.GetByID(id);
+            if (season == null) return null;
+
+            season.IsActive = false;
+            season.LastUpdateUtc = DateTime.UtcNow;
+            season.LastUpdateBy = lastUpdateBy;
+            unitOfWork.SeasonRepository.Update(season);
+            unitOfWork.Save();
+
+            return season.ConvertToDto();
+        }
+
+        public Boolean AlreadyExists(int year, Enums.SeasonType seasonType)
+        {
+            return unitOfWork.SeasonRepository
+                    .Get(x => x.IsActive)
+                    .Any(x => x.Year == year && x.SeasonType == seasonType);
+        }
+    }
+}

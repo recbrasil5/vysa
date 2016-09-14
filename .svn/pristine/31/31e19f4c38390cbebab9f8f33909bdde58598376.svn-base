@@ -1,0 +1,48 @@
+﻿<div class="pull-left">
+    <div id="loaderDiv" loader>
+        <img src="../../../../assets/images/site/ajax-loader.gif" class="ajax-loader" />
+    </div>
+    <div class="page-header">
+        <h1>
+            Website Maintenance<small> | Announcements</small>
+        </h1>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div>
+                    <div class="ibox-title">
+                        <h5>Announcements</h5>
+                    </div>
+                    <div class="ibox-content" ng-controller="AdminAnnouncementsController">
+                        <button type="button" ui-sref="websitemaintenance.announcements.addedit">Add Announcement</button>
+                        <table class="table table-hover table-responsive">
+                            <thead>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>&nbsp;</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="a in announcements">
+                                <td>
+                                    <div edit-item-btn item-to-edit="a" type2="Announcement"></div>
+                                </td>
+                                <td><a ng-click="delete(a.id)" ng-confirm-click><span class="glyphicon glyphicon-trash pull-left"></span></a></td>
+                                <td>{{a.title}}</td>
+                                <td>{{a.message}}</td>
+                                <td>{{a.startTime | dateFormat }} </td>
+                                <td>{{a.endTime | dateFormat }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

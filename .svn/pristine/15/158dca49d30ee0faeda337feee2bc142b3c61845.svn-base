@@ -1,0 +1,10 @@
+﻿using System.Collections.Generic;
+
+namespace VYSA.WebApi.Models
+{
+    public class PlayersFilterResponseDto
+    {
+        public ICollection<PlayerInGridViewDTO> Players{ get; set; }
+        public int Count { get; set; }
+    }
+}

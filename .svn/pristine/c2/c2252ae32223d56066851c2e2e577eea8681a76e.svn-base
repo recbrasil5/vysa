@@ -1,0 +1,29 @@
+﻿using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Util;
+
+namespace VYSA.WebApi.Services
+{
+    public class ContactUsService
+    {
+        private readonly UnitOfWork _unitOfWork;
+
+        public ContactUsService(IUnitOfWork unitOfWork)
+        {
+            this._unitOfWork = (UnitOfWork)unitOfWork;
+        }
+
+        public ContactUsMessageResourceModel SendAndSaveContactUsMessage(ContactUsMessageResourceModel newContactUsMessageDto)
+        {
+            EmailUtil.SendContactUsMessage(newContactUsMessageDto);
+
+            var contactUsMessage = new ContactUsMessage().PopulateEntityWithResourceModel(newContactUsMessageDto);
+            _unitOfWork.ContactUsMessageRepository.Insert(contactUsMessage);
+            _unitOfWork.Save();
+
+            return contactUsMessage.ConvertToResourceModel();
+        }
+    }
+}

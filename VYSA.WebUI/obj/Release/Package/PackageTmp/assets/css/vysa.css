@@ -1,0 +1,107 @@
+﻿body {
+}
+
+input {
+    display: inline;
+}
+
+.vysaNavLink {
+    margin-top: 10px;
+    margin-left: 80px;
+}
+
+#authenticatedDiv {
+    margin-top: 10px;
+    margin-right: 150px;
+}
+
+.vysa-article-padding-top {
+    padding-top: 20px !important;
+}
+
+/* mailing-list */
+.mailing-list-div {
+    /*-moz-box-shadow: 8px 13px 0px #000000 !important;
+    -webkit-box-shadow: 8px 13px 0px #000000 !important;
+    box-shadow: 8px 13px 0px #000000 !important;*/
+    border:solid 1px #000000 !important;
+    -moz-border-radius-topleft: 4px !important; 
+    -moz-border-radius-topright:5px !important; 
+    -moz-border-radius-bottomleft:5px !important; 
+    -moz-border-radius-bottomright:5px !important; 
+    -webkit-border-top-left-radius:4px !important; 
+    -webkit-border-top-right-radius:5px !important; 
+    -webkit-border-bottom-left-radius:5px !important;
+    -webkit-border-bottom-right-radius:5px !important;
+    border-top-left-radius:4px !important; 
+    border-top-right-radius:5px !important; 
+    border-bottom-left-radius:5px !important;
+    border-bottom-right-radius:5px !important;
+}
+
+
+.mailing-list-control {
+    display: inline !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.mailing-success-btn {
+    margin-top: 25px;
+}
+
+.mailing-list-font {
+    color: black;
+}
+
+.errorDiv {
+    border: solid 1px #CD0000;
+    background-color: #FFF0F5;
+    /*background-image: url(../images/exclaimation_point_sm.gif);*/
+    background-position: 5px center;
+    background-repeat: no-repeat;
+    padding: 5px 5px 5px 10px;
+    margin: 5px 5px 5px 0;
+}
+
+.warningDiv {
+    border: solid 1px #B2B300;
+    background-color: #FEFFBF;
+    /*background-image: url(../images/warn_sm.png);*/
+    background-position: 5px center;
+    background-repeat: no-repeat;
+    padding: 5px 5px 5px 10px;
+    margin: 5px 5px 5px 0;
+}
+
+.successDiv {
+    border: solid 1px #24B200;
+    background-color: #CCFEBF;
+    /*background-image: url(../images/check_sm.png);*/
+    background-position: 5px center;
+    background-repeat: no-repeat;
+    padding: 5px 5px 5px 10px;
+    margin: 5px 5px 5px 0;
+}
+
+.vysa-nav-head {
+    margin-left: 20px;
+}
+
+.vysa-inline-edit-cancel-button {
+    padding-left: 5px;
+}
+
+#outer-container {
+    padding-right: 10px;
+}
+
+.two-dimensional {
+    display: inline-block;
+    width: 50%;
+}
+
+.clear-line-xs {
+    clear: both;
+    min-height: 2px;
+}

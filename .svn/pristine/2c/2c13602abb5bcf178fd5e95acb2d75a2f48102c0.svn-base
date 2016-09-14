@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Entities;
+using System.Data.Entity;
+using System.Data;
+
+namespace VYSA.Domain.Concrete
+{
+    public class EfRoleRepository : IRoleRepository
+    {
+        private EfDbContext context;
+
+        public EfRoleRepository(EfDbContext context)
+        {
+            this.context = context;
+        }
+
+        public IQueryable<Role> Roles 
+        { 
+            get 
+            {
+                return context.Roles;
+            } 
+        }
+
+        public Role GetRole(int Id)
+        {
+            return context.Roles.SingleOrDefault(r => r.Id == Id);
+        }
+
+        public Role GetRole(string roleName)
+        {
+            return context.Roles.Include(r => r.Users).SingleOrDefault(r => r.Name.ToLower() == roleName.ToLower());
+        }
+
+        public void Save(Role role)
+        {
+            if (context.Roles.Any(r => r.Name.ToLower() == role.Name.ToLower()))
+            {
+                context.Entry(role).State = EntityState.Modified;  
+            }
+            else
+            {
+                role.LastUpdateBy = "VYSA EFRoleRepository";
+                role.CreatedBy = "VYSA EFRoleRepository";
+                context.Roles.Add(role);
+            }
+            context.SaveChanges();            
+        }
+
+        public void Delete(Role role)
+        {
+            context.Roles.Remove(role);
+            context.SaveChanges();
+        }  
+    
+    }
+}

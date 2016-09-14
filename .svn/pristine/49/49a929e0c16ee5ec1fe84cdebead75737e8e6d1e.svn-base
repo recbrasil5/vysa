@@ -1,0 +1,14 @@
+﻿using System;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+
+namespace VYSA.Domain.Abstract
+{
+    public interface IUnitOfWork
+    {
+        EFUserRepository UserRepository { get; }
+        EFRoleRepository RoleRepository { get; }
+        void Save();
+        void Dispose();
+    }
+}

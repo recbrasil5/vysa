@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace VYSA.WebApi.Models
+{
+    public class DropdownItemVM
+    {
+        public int Id { get; set; }
+        public String Label { get; set; }
+    }
+}

@@ -1,0 +1,5 @@
+﻿<td><a data-ng-click="edit(coach)"><span class="glyphicon glyphicon-pencil"></span></a></td>
+<td>{{coach.firstName }}</td>
+<td>{{coach.lastName }}</td>
+<td>{{coach.email }}</td>
+<td>{{coach.phone }}</td>

@@ -1,0 +1,80 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysa")
+        .factory('httpInterceptorService', ['$q', '$location', '$cookieStore', '$rootScope',
+    function ($q, $location, $cookieStore, $rootScope) {
+
+        //var numLoadings = 0;
+
+        return {
+
+            // On request success
+            request: function (config) {
+                //numLoadings++;
+                //alert('numLoading: ' + numLoadings);
+
+                config.headers = config.headers || {};
+                var token = $cookieStore.get('_Token');
+                if (token) {
+                    config.headers.Authorization = 'Bearer ' + token;
+                }
+
+                //// Show loader
+                //$rootScope.$broadcast("loader_show");
+
+                //return config;
+                return config || $q.when(config);
+            },
+
+            // On request failure
+            requestError: function (rejection) {
+                // console.log(rejection); // Contains the data about the error on the request.
+                console.log("Bad Request!!");
+                // Return the promise rejection.
+                return $q.reject(rejection);
+            },
+
+            // On response success
+            response: function (response) {
+                //if (response.status === 400) {
+                //    // handle the case where the user is not authenticated
+                //    alert('400 response returned');
+                //}
+
+
+                //if ((--numLoadings) === 0) {
+                //    // Hide loader
+                //    $rootScope.$broadcast("loader_hide");
+                //}
+
+                return response || $q.when(response);
+            },
+
+            // On response failure
+            responseError: function (response) {
+                if (response.status === 401) {
+                    // handle the case where the user is not authenticated
+                    //need to remove the cookie and log the person out
+                    $cookieStore.remove('_Token');
+                    console.log('401: cookie has been removed. User should have to re-authenticate');
+                } else {
+                    //reroute to a different page for other responses
+                    console.log("Something bad happened.");
+
+                    //if (response.status === 500) {
+                    //    // handle the case where the user is not authenticated
+                    //    alert('500 response returned');
+                    //}
+                }
+
+                //if (!(--numLoadings)) {
+                 //   // Hide loader
+                 //   $rootScope.$broadcast("loader_hide");
+                //}
+
+            }
+        }
+    }]);
+}());

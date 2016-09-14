@@ -1,0 +1,105 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class GuardianService
+    {
+        private UnitOfWork unitOfWork;
+
+        public GuardianService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<GuardianDTO> GetGuardiansByFilter(FilterDTO filterDto)
+        {
+            var list = new List<GuardianDTO>();
+
+            var playerDto = new PlayerService(unitOfWork).GetPlayer(filterDto.LookupId);
+            var playerGuardianIdList = new List<Int32>();
+            if(playerDto.Guardians != null)
+            {
+                playerGuardianIdList = playerDto.Guardians.Select(x => x.GuardianId).ToList();
+            }
+
+            unitOfWork.GuardianRepository.Get(b => b.IsActive && !playerGuardianIdList.Contains(b.Id) &&
+                                                   (b.FirstName.StartsWith(filterDto.SearchTerm) || b.LastName.StartsWith(filterDto.SearchTerm)))
+                   .ToList().ForEach(x => list.Add(x.ConvertToDto()));
+            return list;
+        }
+
+        public IEnumerable<GuardianDTO> GetGuardians()
+        {
+            var list = new List<GuardianDTO>();
+            unitOfWork.GuardianRepository.Get(b => b.IsActive)
+                   .ToList().ForEach(x => list.Add(x.ConvertToDto()));
+            return list;
+        }
+
+        public String GetListViewPlayerDTOGuardians(List<Int32> guardianIdList)
+        {
+            var guardianList = new List<String>();
+
+            unitOfWork.GuardianRepository
+                .Get(b => b.IsActive && guardianIdList.Contains(b.Id)).ToList()
+                .ForEach(x => guardianList.Add(x.ConvertToDto().FullName));
+
+            return guardianList.Count > 0 ? string.Join(", ", guardianList.ToArray()) : "";
+        }
+
+        public Guardian GetGuardian(int id)
+        {
+            return unitOfWork.GuardianRepository.GetByID(id);
+        }
+
+        public GuardianDTO GetGuardianDto(int id)
+        {
+            var guardian = unitOfWork.GuardianRepository.GetByID(id);
+            return guardian == null ? null : guardian.ConvertToDto();
+        }
+
+        public GuardianDTO UpdateGuardian(GuardianDTO updatedGuardianDTO, string lastUpdateBy)
+        {
+            var guardian = unitOfWork.GuardianRepository.GetByID(updatedGuardianDTO.Id);
+            if (guardian == null) return null;
+
+            //do update
+            guardian.UpdateValuesFromDTO(updatedGuardianDTO, lastUpdateBy, false);
+
+            unitOfWork.GuardianRepository.Update(guardian);
+            unitOfWork.Save();
+
+            return updatedGuardianDTO;
+        }
+
+        public GuardianDTO AddGuardian(GuardianDTO newGuardianDTO, string lastUpdateBy)
+        {
+            Guardian guardian = new Guardian().UpdateValuesFromDTO(newGuardianDTO, lastUpdateBy, true);
+            unitOfWork.GuardianRepository.Insert(guardian);
+            unitOfWork.Save();
+
+            return guardian.ConvertToDto();
+        }
+
+        public GuardianDTO SoftDeleteGuardian(int id, string lastUpdateBy)
+        {
+            var guardian = unitOfWork.GuardianRepository.GetByID(id);
+            if (guardian == null) return null;
+
+            guardian.IsActive = false;
+            guardian.LastUpdateUtc = DateTime.UtcNow;
+            guardian.LastUpdateBy = lastUpdateBy;
+            unitOfWork.GuardianRepository.Update(guardian);
+            unitOfWork.Save();
+
+            return guardian.ConvertToDto();
+        }
+    }
+}

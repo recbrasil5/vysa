@@ -1,0 +1,116 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Abstract;
+using VYSA.WebApi.Models;
+using System.Web.Http;
+using System.Web.Http.Description;
+using System.Web.UI.WebControls;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebUApi.Controllers
+{
+    [RoutePrefix("Admin/Board")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminBoardController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private BoardService boardService;
+        public AdminBoardController()
+        {
+            boardService = new BoardService(unitOfWork);
+        }
+
+        [HttpGet] //Admin/api/Board
+        [Route("")]
+        public IEnumerable<BoardMember> GetBoardMembers() //webApi hybrid call
+        {
+            return boardService.GetBoardMembers();
+        }
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetBoardById")]
+        [ResponseType(typeof(BoardMemberDTO))]
+        public IHttpActionResult GetBoardMember(int id)
+        {
+            BoardMemberDTO boardMember = boardService.GetBoardMember(id);
+
+            // return it if you got it
+            if (boardMember == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(boardMember);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ResponseType(typeof(BoardMemberDTO))]
+        public IHttpActionResult UpdateBoardMember(int id, BoardMemberDTO boardMemberDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != boardMemberDTO.Id)
+            {
+                return BadRequest();
+            }
+
+            var updatedBoardMemberDTO = boardService.UpdateBoardMember(boardMemberDTO, User.Identity.Name);
+
+            if (updatedBoardMemberDTO == null)
+            {
+                //can't find the record to update
+                return NotFound();
+            }
+
+            return Ok(updatedBoardMemberDTO);
+        }
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(BoardMemberDTO))]
+        public IHttpActionResult CreateBoardMember(BoardMemberDTO boardMemberDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newBoardMemberDTO = boardService.AddBoardMember(boardMemberDTO, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetBoardById
+            //return CreatedAtRoute("GetBoardById", new { id = newBoardMemberDTO.Id }, newBoardMemberDTO);
+            return Ok(newBoardMemberDTO);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(BoardMemberDTO))]
+        public IHttpActionResult DeleteBoardMember(int id)
+        {
+            var boardMember = boardService.SoftDeleteBoardMember(id, User.Identity.Name);
+            if (boardMember == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(boardMember);
+        }
+       
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

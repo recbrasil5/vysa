@@ -1,0 +1,264 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data.Entity;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Util;
+using VYSA.Domain.Extensions;
+
+namespace VYSA.Web.Infrastructure
+{
+    public class CreateInitializer : CreateDatabaseIfNotExists<EFDbContext>
+    {
+        #region private members
+        private string lastUpdateBy = "VYSA.CreateInitializer";
+
+        private Role adminRole = new Role
+        {
+            Name = "Admin",
+            IsActive = true,
+            CreatedBy = "VYSA.CreateInitializer",
+            LastUpdateBy = "VYSA.CreateInitializer",
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private Role superAdminRole = new Role
+        {
+            Name = "SuperAdmin",
+            IsActive = true,
+            CreatedBy = "VYSA.CreateInitializer",
+            LastUpdateBy = "VYSA.CreateInitializer",
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+
+        private Role memberRole = new Role
+        {
+            Name = "Member",
+            IsActive = true,
+            CreatedBy = "VYSA.CreateInitializer",
+            LastUpdateBy = "VYSA.CreateInitializer",
+            CreatedDate = DateTime.UtcNow,
+            LastUpdate = DateTime.UtcNow
+        };
+        #endregion
+
+        protected override void Seed(EFDbContext context)
+        {
+            //EF figures out that Roles need to save before Users :-)
+            setupDefaultRoles(context);
+            setupDefaultBoardMembers(context);
+            setupDefaultUsers(context);
+            setupDefaultSeason(context);
+
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                var x = e;
+            }
+
+        }
+
+        private void setupDefaultSeason(EFDbContext context)
+        {
+            new List<Season>()
+            {
+                new Season()
+                {
+                    //Name = "Summer '12",
+                    Year = 2012,
+                    //PricePerPlayer = 160M,
+                    StartDate = DateTime.Parse("06/02/2012").ConvertToUtcFromCentralStandardTime(),
+                    EndDate = DateTime.Parse("06/24/2012").ConvertToUtcFromCentralStandardTime(),
+                    IsActive = true,
+                    CreatedBy = "VYSA.CreateInitializer",
+                    LastUpdateBy = "VYSA.CreateInitializer",
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                }
+            }.ForEach(s => context.Seasons.Add(s));
+
+        }
+
+        private void setupDefaultUsers(EFDbContext context)
+        {
+            #region Create Users (SuperAdmin, Admin, freddi, pstrupp, mbyom)
+            new List<User>()
+            {
+                new User()
+                {
+                    UserName = "superadmin",
+                    Email = "recbrasil5@gmail.com",
+                    Password = RandomPassword.EncryptPasswordSHA("Saudade5"),
+                    Approved = true,
+                    HasRegistered = true,
+                    Role = superAdminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow                   
+                },
+
+                new User()
+                {
+                    UserName = "admin",
+                    Email = "holmensoccer@yahoo.com",
+                    Password = RandomPassword.EncryptPasswordSHA("1vysa*"),
+                    Approved = true,
+                    HasRegistered = true,
+                    Role = adminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow 
+                },
+
+                new User()
+                {
+                    UserName = "freddi",
+                    Email = "fredericka@redcore.com.mx",
+                    Password = RandomPassword.EncryptPasswordSHA("EnglishF1"),
+                    Approved = true,
+                    HasRegistered = true,
+                    Role = adminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow 
+                },
+
+                new User()
+                {
+                    UserName = "pstrupp",
+                    Email = "patrickstrupp@charter.net",
+                    Password = RandomPassword.EncryptPasswordSHA("pstrupp12"),
+                    Approved = true,
+                    HasRegistered = true,
+                    Role = adminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow 
+                },
+
+                new User()
+                {
+                    UserName = "mbyom",
+                    Email = "michellebyom@gmail.com",
+                    Password = RandomPassword.EncryptPasswordSHA("mbyom12"),
+                    Approved = true,
+                    HasRegistered = true,
+                    Role = adminRole,
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow 
+                }
+            }.ForEach(u => context.Users.Add(u));
+
+            #endregion
+        }
+
+        private void setupDefaultBoardMembers(EFDbContext context)
+        {
+            #region BoardMembers
+            List<BoardMember> members = new List<BoardMember>()
+            {
+                new BoardMember 
+                {
+                    Name = "Patrick Strupp",
+                    Title = "President", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Dwight Lenz",
+                    Title = "Vice President", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Tara Rieck",
+                    Title = "Treasurer", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Michelle Byom",
+                    Title = "Secretary", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Katie Malone",
+                    Title = "Fundraising Director", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                },
+
+                new BoardMember 
+                {
+                    Name = "Steve Olson",
+                    Title = "Tournament Director", 
+                    IsActive = true, 
+                    CreatedBy = lastUpdateBy,
+                    LastUpdateBy = lastUpdateBy,
+                    CreatedDate = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
+                }
+            };
+            #endregion
+
+            members.ForEach(m => context.BoardMembers.Add(m));
+        }
+
+        private void setupDefaultRoles(EFDbContext context)
+        {
+            #region Roles
+            List<Role> roles = new List<Role>()
+            {
+                adminRole,                
+                superAdminRole,
+                memberRole
+            };
+            #endregion
+
+            roles.ForEach(r => context.Roles.Add(r));
+        }
+
+    }
+}

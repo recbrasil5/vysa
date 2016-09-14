@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="IIS Web Application Name" description="" value="holmenvysa.com" tags="IisApp">
+    <parameterEntry kind="ProviderPath" scope="IisApp" match="^C:\\vysa\\VYSA\.WebUI\\obj\\Release\\Package\\PackageTmp$" />
+  </parameter>
+</parameters>

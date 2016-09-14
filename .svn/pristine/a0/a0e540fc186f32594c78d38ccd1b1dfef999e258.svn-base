@@ -1,0 +1,35 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("admin")
+        .factory('directiveRoutingService', function () {
+            return {
+
+                getState: function (type) {
+                    var state;
+                    switch (type) {
+                        case 'announcement':
+                            state = 'WebsiteMaintenance.AnnouncementAddEdit';
+                            break;
+                        case 'board':
+                            state = 'WebsiteMaintenance.BoardAddEdit';
+                            break;
+                        case 'event':
+                            state = 'ClubManagement.SeasonEventSetup';
+                            break;
+                        case 'player':
+                            state = 'ClubManagement.PlayerAddEdit';
+                            break;
+                        case 'season':
+                            state = 'ClubManagement.SeasonSetup';
+                            break;
+                        case 'team':
+                            state = 'ClubManagement.SeasonTeamSetup';
+                            break;
+                    }
+                    return state;
+                }                
+            }
+        });
+}());

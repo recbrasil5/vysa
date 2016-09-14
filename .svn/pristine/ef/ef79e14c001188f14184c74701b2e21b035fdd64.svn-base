@@ -1,0 +1,141 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Properties;
+
+namespace VYSA.WebApi.Services
+{
+    public class UploadService
+    {
+        private UnitOfWork unitOfWork;
+
+        #region Constructor(s)
+        public UploadService()
+        {
+        }
+
+        public UploadService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+        #endregion
+
+        public async Task<HttpResponseMessage> UploadTestImage(HttpRequestMessage request)
+        {
+            var subDirMap = string.Empty;
+
+            try
+            {
+                string[] acceptedTypes = { ".jpg", ".jpeg", ".png", ".gif" };
+                if (!request.Content.IsMimeMultipartContent())
+                {
+                    return new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.NotAcceptable,
+                        Content =
+                            new StringContent(
+                                "File was not in the correct format. Allowable image formats are jpg, jpeg, gif and png.")
+                    };
+                }
+
+                subDirMap = HttpContext.Current.Server.MapPath("../../App_Data");
+                //subDirMap = HttpContext.Current.Server.MapPath(Settings.Default.VirtualUploadDirectory);
+                if (!Directory.Exists(subDirMap))
+                    Directory.CreateDirectory(subDirMap);
+
+                var streamProvider = new MultipartFormDataStreamProvider(subDirMap);
+                await request.Content.ReadAsMultipartAsync(streamProvider);
+
+                //if (streamProvider.FileData.Count > 1)
+                //{
+                //    return Request.CreateResponse(HttpStatusCode.NotAcceptable, "Only one file may be uploaded.");
+                //}
+
+                foreach (MultipartFileData fileData in streamProvider.FileData)
+                {
+                    if (string.IsNullOrEmpty(fileData.Headers.ContentDisposition.FileName))
+                    {
+                        //return Request.CreateResponse(HttpStatusCode.NotAcceptable, "This request is not properly formatted");
+                        return new HttpResponseMessage
+                        {
+                            StatusCode = HttpStatusCode.NotAcceptable,
+                            Content = new StringContent("This request is not properly formatted")
+                        };
+                    }
+
+                    var fileName = fileData.Headers.ContentDisposition.FileName;
+                    var fileType = fileName.Substring(fileName.Length - 5, 4).ToLower();
+
+                    if (!acceptedTypes.Contains(fileType))
+                    {
+                        return new HttpResponseMessage
+                        {
+                            StatusCode = HttpStatusCode.NotAcceptable,
+                            Content = new StringContent("File was not in the correct format. Allowable image formats are JPG, JPEG, GIF and PNG.")
+                        };
+                    }
+                    if (fileName.StartsWith("\"") && fileName.EndsWith("\""))
+                    {
+                        fileName = fileName.Trim('"');
+                    }
+                    if (fileName.Contains(@"/") || fileName.Contains(@"\"))
+                    {
+                        fileName = Path.GetFileName(fileName);
+                    }
+
+                    //get rid of fileExtensions in the name
+                    foreach (var a in acceptedTypes)
+                    {
+                        if (fileName.ToLower().EndsWith(a))
+                        {
+                            fileName = fileName.ToLower().Replace(a, string.Empty);
+                        }
+                    }
+
+                    var virtualPath = Path.Combine(subDirMap, fileName + fileType);
+
+                    try
+                    {
+                        /*http://stackoverflow.com/questions/275781/server-mappath-server-mappath-server-mappath-server-mappath*/
+                        File.Delete(virtualPath);
+                        File.Move(fileData.LocalFileName, virtualPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = string.Format("Unexpected error while uploading file: {0}\texception:{1}\n vPath:{2}", 
+                                                fileName + fileType, ex, virtualPath);
+                        return new HttpResponseMessage
+                        {
+                            StatusCode = HttpStatusCode.NotAcceptable,
+                            Content = new StringContent(msg)
+                        };
+                    }
+                }
+                return new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK
+                };
+            }
+            catch (Exception ex)
+            {
+                var msg = string.Format("Unexpected error while streaming file(s) locally: {0}\n\nsubDirMap:{1}", ex, subDirMap);
+                return new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.NotAcceptable,
+                    Content = new StringContent(msg)
+                };
+            }
+
+            
+        }
+
+    }
+}

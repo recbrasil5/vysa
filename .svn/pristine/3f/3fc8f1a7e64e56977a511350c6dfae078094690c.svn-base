@@ -1,0 +1,347 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Models.Binding;
+using VYSA.WebApi.Models.Resource;
+
+namespace VYSA.WebApi.Services
+{
+    public class PlayerService : BaseService
+    {
+        private readonly UnitOfWork _unitOfWork;
+
+        public PlayerService(IUnitOfWork unitOfWork)
+        {
+            this._unitOfWork = (UnitOfWork)unitOfWork;
+        }
+
+        public Int32 GetActivePlayerCount()
+        {
+            return _unitOfWork.PlayerRepository.Get(b => b.IsActive).Count();
+        }
+
+        public IEnumerable<PlayerResourceModel> GetActivePlayers()
+        {
+            var list = new List<PlayerResourceModel>();
+            _unitOfWork.PlayerRepository.Get(b => b.IsActive)
+                   .ToList().ForEach(x => list.Add(x.ConvertToResourceModel(_unitOfWork)));
+            return list;
+        }
+
+        public IEnumerable<PlayerResourceModel> GetPlayersByRosterFilter(AutoCompleteBindingModel autoCompleteBindingModel)
+        {
+            var list = new List<PlayerResourceModel>();
+
+            var teamDto = new TeamService(_unitOfWork).GetTeamResourceModel(autoCompleteBindingModel.LookupId);
+            var playerIdList = new List<Int32>();
+            if (teamDto.Roster != null)
+            {
+                playerIdList = teamDto.Roster.Select(x => x.PlayerId).ToList();
+            }
+            _unitOfWork.PlayerRepository.Get(b => b.IsActive && !playerIdList.Contains(b.Id) &&
+                                                (b.FirstName.StartsWith(autoCompleteBindingModel.SearchTerm) || b.LastName.StartsWith(autoCompleteBindingModel.SearchTerm)))
+                   .ToList().ForEach(x => list.Add(x.ConvertToResourceModel(_unitOfWork)));
+            return list;
+        }
+
+        //NOTE: Sorting in memory here - not yet used.
+        //public IEnumerable<PlayerListViewResourceModel> GetListViewPlayers(PlayersListViewBindingModel pfDto)
+        //{
+        //    Func<IQueryable<Player>, IOrderedQueryable<Player>> defaultOrderingFunc =  
+        //                    query => query.OrderBy(player => player.DateOfBirth);
+
+        //    var listViewPlayerDtos = new List<PlayerListViewResourceModel>();
+
+        //    var playerData = _unitOfWork.PlayerRepository
+        //        .Get(b => b.IsActive, defaultOrderingFunc, "PlayerGuardians").ToList();
+
+        //    var originalSkipCount = (pfDto.PageNum - 1) * pfDto.NumRecs;
+        //    var skipCount = playerData.Count < originalSkipCount 
+        //                    ? originalSkipCount - playerData.Count 
+        //                    : originalSkipCount;
+
+        //    var players = playerData.Skip(skipCount)
+        //                            .Take(pfDto.NumRecs).ToList();
+
+        //    players.ForEach(x => listViewPlayerDtos.Add(x.ConvertToListViewPlayerResourceModel(_unitOfWork)));
+        //    return listViewPlayerDtos;
+        //}
+
+        public PlayerResourceModel GetPlayer(int id)
+        {
+            var player = _unitOfWork.PlayerRepository.Get(b => b.Id.Equals(id), null, "PlayerGuardians").SingleOrDefault();
+            return player == null ? null : player.ConvertToResourceModel(_unitOfWork);
+        }
+
+        public PlayerResourceModel UpdatePlayer(PlayerResourceModel updatedPlayerDto, string lastUpdateBy)
+        {
+            var player = _unitOfWork.PlayerRepository.GetByID(updatedPlayerDto.Id);
+            if (player == null) return null;
+
+            //do update
+            player.PopulateEntityWithResourceModel(updatedPlayerDto, lastUpdateBy, false);
+
+            _unitOfWork.PlayerRepository.Update(player);
+            _unitOfWork.Save();
+
+            return updatedPlayerDto;
+        }
+
+        public PlayerResourceModel AddPlayer(PlayerResourceModel newPlayerDto, string lastUpdateBy)
+        {
+            var player = new Player().PopulateEntityWithResourceModel(newPlayerDto, lastUpdateBy, true);
+
+            _unitOfWork.PlayerRepository.Insert(player);
+            _unitOfWork.Save();
+
+            //make sure they all have PlayerIds
+            newPlayerDto.Guardians
+                .ToList().ForEach(x => x.PlayerId = player.Id);
+
+            //add all the players' guardians
+            new PlayerGuardianService(_unitOfWork)
+                .AddPlayerGuardians(newPlayerDto.Guardians, lastUpdateBy);
+
+            return GetPlayer(player.Id);
+        }       
+
+        public PlayerResourceModel SoftDeletePlayer(int id, string lastUpdateBy)
+        {
+            var player = _unitOfWork.PlayerRepository.Get(b => b.Id.Equals(id), null, "PlayerGuardians").SingleOrDefault();
+            if (player == null) return null;
+
+            player.IsActive = false;
+            player.LastUpdateUtc = DateTime.UtcNow;
+            player.LastUpdateBy = lastUpdateBy;
+            _unitOfWork.PlayerRepository.Update(player);
+
+            //deactivate the PlayerGuardians as well. 
+            player.PlayerGuardians.ToList().ForEach(x =>
+            {
+                x.IsActive = false;
+                x.LastUpdateUtc = DateTime.UtcNow;
+                x.LastUpdateBy = lastUpdateBy;
+            });
+            player.PlayerGuardians.ToList().ForEach(x => _unitOfWork.PlayerGuardianRepository.Update(x));
+
+            _unitOfWork.Save();
+
+            return player.ConvertToResourceModel(_unitOfWork);
+        }
+
+        public PlayerGuardianResourceModel AddPlayerGuardian(PlayerGuardianResourceModel playerGuardianDto, string lastUpdateBy)
+        {
+            return new PlayerGuardianService(_unitOfWork)
+                .AddPlayerGuardian(playerGuardianDto, lastUpdateBy);
+        }
+
+        public PlayerGuardianResourceModel UpdatePlayerGuardian(PlayerGuardianResourceModel playerGuardianDto, string lastUpdateBy)
+        {
+            return new PlayerGuardianService(_unitOfWork)
+                .UpdatePlayerGuardian(playerGuardianDto, lastUpdateBy);
+        }
+
+        public ICollection<PlayerListViewResourceModel> GetPlayersFilter(FilterBindingModel bm)
+        {
+            QueryObject queryObject = BuildFilterQuery(bm, false);
+            return _unitOfWork.Context.Database.SqlQuery<PlayerListViewResourceModel>(queryObject.Query, queryObject.FilterParameters.ToArray()).ToList();
+        }
+
+        public int GetPlayersFilterCount(FilterBindingModel bm)
+        {
+            QueryObject queryObject = BuildFilterQuery(bm, true);
+            return _unitOfWork.Context.Database.SqlQuery<int>(queryObject.Query, queryObject.FilterParameters.ToArray()).ToList().First();
+        }
+
+        private QueryObject BuildFilterQuery(FilterBindingModel bm, bool count)
+        {
+            var filterConditionList = new List<string>();
+            var filterParameters = new List<object>();
+            var orderBy = string.Empty;
+
+            // Where Clause
+            BuildFilterWhereClause(bm, out filterConditionList, out filterParameters);
+
+            if (!count)
+            {
+                // Paging Params
+                AddPagingParameters(bm, ref filterParameters);
+
+                if (string.IsNullOrEmpty(bm.OrderByFieldName)) bm.OrderByFieldName = string.Empty;
+
+                #region Ordering
+                switch (bm.OrderByFieldName.ToLower())
+                {
+                    case "firstname":
+                        orderBy += "[FirstName]";
+                        break;
+                    case "lastname":
+                        orderBy += "[LastName]";
+                        break;
+                    case "dateofbirth":
+                        orderBy = "[DateOfBirth]";
+                        break;
+                    case "age":
+                        orderBy = "[Age]";
+                        break;
+                    case "guardians":
+                        orderBy = "[Guardians]";
+                        break;
+                    default:
+                        orderBy = "[Id]";
+                        break;
+                }
+
+                orderBy += (bm.Ascending == null || bm.Ascending) ? " ASC" : " DESC";
+
+                #endregion
+            }
+
+            #region Select
+            // Select Clause
+            var sql = count ?
+                string.Format(@"SELECT COUNT(p.[Id])
+                                FROM [dbo].[Players] p 
+                                WHERE {0}", string.Join(" AND ", filterConditionList))
+                :
+                string.Format(@"DECLARE @now AS DATETIME = GETDATE()
+                                SELECT * 
+                                FROM (
+	                                SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS RowNum, *
+	                                FROM (
+		                                SELECT ROW_NUMBER() OVER (PARTITION BY [Id] ORDER BY {1}) AS PartNum, *
+		                                FROM (
+			                                SELECT DISTINCT p.[Id]
+				                                  ,[FirstName]
+				                                  ,[LastName]
+				                                  ,[DateOfBirth]
+				                                  ,(SELECT  DATEDIFF(YEAR, [DateOfBirth],@now)
+						                                   +
+						                                   CASE
+							                                  WHEN [DateOfBirth]<@now AND DATEADD(YEAR, DATEDIFF(YEAR,[DateOfBirth], @now), [DateOfBirth]) > @now
+							                                  THEN - 1
+							                                  WHEN [DateOfBirth]>@now AND DATEADD(YEAR, DATEDIFF(YEAR,[DateOfBirth], @now), [DateOfBirth]) < @now
+							                                  THEN 1
+							                                  ELSE 0
+						                                   END
+					                                FROM [dbo].[Players] WHERE Id = p.Id) as Age
+				                                  ,(select stuff((
+						                                SELECT ',' + [FirstName] + ' ' + [LastName]
+						                                FROM [dbo].[Guardians] as g2
+						                                where g2.Id in (select GuardianId 
+										                                from [dbo].[PlayerGuardians]  
+										                                where PlayerId = p2.id)
+						                                for xml path('')
+					                                ),1,1,'') as name_csv
+					                                FROM [dbo].[Players] p2
+					                                where p.Id = p2.Id) as Guardians
+			                                FROM [dbo].[Players] p 
+			                                WHERE {0}
+			                                ) AS DataTbl
+		                                ) AS PartNumTbl
+		                                WHERE PartNum = 1
+                                 ) AS OrderByTbl
+                                WHERE [RowNum] >= @rowStart AND [RowNum] < @rowEnd", 
+            string.Join(" AND ", filterConditionList), orderBy);
+            #endregion
+
+            var queryObject = new QueryObject { Query = sql, FilterParameters = filterParameters };
+            return queryObject;
+        }
+
+        private void BuildFilterWhereClause(FilterBindingModel bm, out List<string> filterConditionList, out List<object> filterParameters)
+        {
+            filterParameters = new List<object>();
+            filterConditionList = new List<string> { "p.[IsActive] = 1" };
+
+            #region old code
+            //if (dto.CategoryId.HasValue)
+            //{
+            //    filterConditionList.Add("ls.[LeadSourceCategoryId] = " + dto.CategoryId);
+            //}
+            //else if (dto.LeadSourceId.HasValue)
+            //{
+            //    filterConditionList.Add("adv.[LeadSourceId] = " + dto.LeadSourceId);
+            //}
+            //else if (dto.AdvertisementId.HasValue)
+            //{
+            //    filterConditionList.Add("cost.[AdvertisementId] = " + dto.AdvertisementId);
+            //}
+
+            //FromExpenseUtcDate
+            //if (dto.FromDateTime != DateTime.MinValue)
+            //{
+            //    filterConditionList.Add("cost.[ExpenseUtcDate] >= @fromExpenseUtcDate");
+
+            //    filterParameters.Add(new SqlParameter
+            //    {
+            //        ParameterName = "fromExpenseUtcDate",
+            //        SqlDbType = SqlDbType.DateTime,
+            //        Value = dto.FromDateTime
+            //    });
+            //}
+
+            ////ToExpenseUtcDate
+            //if (dto.ToDateTime != DateTime.MinValue)
+            //{
+            //    filterConditionList.Add("cost.[ExpenseUtcDate] <= @toExpenseUtcDate");
+
+            //    filterParameters.Add(new SqlParameter
+            //    {
+            //        ParameterName = "toExpenseUtcDate",
+            //        SqlDbType = SqlDbType.DateTime,
+            //        Value = dto.ToDateTime
+            //    });
+            //}
+            #endregion
+        }
+        
+        private void AddPagingParameters(FilterBindingModel bm, ref List<object> filterParameters)
+        {
+            int numofRecords = (bm.NumofRecords > 1000) ? 1000 : bm.NumofRecords;
+            int offset = (bm.PageNum - 1) * numofRecords;
+            int rowEnd = offset + numofRecords;
+
+            filterParameters.Add(new SqlParameter
+            { 
+                ParameterName = "rowStart",
+                SqlDbType = SqlDbType.Int,
+                Value = offset
+            });
+
+            filterParameters.Add(new SqlParameter
+            {
+                ParameterName = "rowEnd",
+                SqlDbType = SqlDbType.Int,
+                Value = rowEnd
+            });
+        }
+
+        //private void AddPagingParameters2012(PlayersFilteringParametersDto dto, ref List<object> filterParameters)
+        //{
+        //    int? numofRecords = (dto.NumofRecords > 1000) ? 1000 : dto.NumofRecords;
+        //    int? offset = (dto.PageNum - 1) * numofRecords;
+
+        //    filterParameters.Add(new SqlParameter
+        //    {
+        //        ParameterName = "offset",
+        //        SqlDbType = SqlDbType.Int,
+        //        Value = offset
+        //    });
+
+        //    filterParameters.Add(new SqlParameter
+        //    {
+        //        ParameterName = "numofRecords",
+        //        SqlDbType = SqlDbType.Int,
+        //        Value = numofRecords
+        //    });
+        //}
+
+    }
+}

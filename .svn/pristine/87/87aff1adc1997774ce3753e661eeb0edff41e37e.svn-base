@@ -1,0 +1,77 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Util;
+
+namespace VYSA.WebApi.Services
+{
+    public class MailingListMemberService
+    {
+        private readonly UnitOfWork _unitOfWork;
+
+        public MailingListMemberService(IUnitOfWork _unitOfWork)
+        {
+            this._unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<MailingListMember> GetMailingListMembers()
+        {
+            var list = _unitOfWork.MailingListMemberRepository.Get(b => b.IsActive).ToList();
+            return list;
+        }
+
+        public MailingListMemberDto GetMailingListMember(int id)
+        {
+            var member = _unitOfWork.MailingListMemberRepository.GetByID(id);
+            return member == null ? null : member.ConvertToDto();
+        }
+
+        public Boolean EmailAlreadyExists(string email)
+        {
+            return _unitOfWork.MailingListMemberRepository.Get(x => x.Email.Equals(email)).Any();
+        }
+
+        public MailingListMemberDto UpdateMailingListMember(MailingListMemberDto updatedMailingListMemberDto, string lastUpdateBy)
+        {
+            var member = _unitOfWork.MailingListMemberRepository.GetByID(updatedMailingListMemberDto.Id);
+            if (member == null) return null;
+
+            //do update
+            member.UpdateValuesFromDTO(updatedMailingListMemberDto, lastUpdateBy, false);
+
+            _unitOfWork.MailingListMemberRepository.Update(member);
+            _unitOfWork.Save();
+
+            return updatedMailingListMemberDto;
+        }
+
+        public MailingListMemberDto AddMailingListMember(MailingListMemberDto newMailingListMemberDto, string lastUpdateBy)
+        {
+            var member = new MailingListMember().UpdateValuesFromDTO(newMailingListMemberDto, lastUpdateBy, true);
+            _unitOfWork.MailingListMemberRepository.Insert(member);
+            _unitOfWork.Save();
+
+            EmailUtil.SendMailingListMemberVerificationEmail(newMailingListMemberDto);
+
+            return member.ConvertToDto();
+        }
+
+        public MailingListMemberDto SoftDeleteMailingListMember(int id, string lastUpdateBy)
+        {
+            var member = _unitOfWork.MailingListMemberRepository.GetByID(id);
+            if (member == null) return null;
+
+            member.IsActive = false;
+            member.LastUpdateUtc = DateTime.UtcNow;
+            member.LastUpdateBy = lastUpdateBy;
+            _unitOfWork.MailingListMemberRepository.Update(member);
+            _unitOfWork.Save();
+
+            return member.ConvertToDto();
+        }
+    }
+}

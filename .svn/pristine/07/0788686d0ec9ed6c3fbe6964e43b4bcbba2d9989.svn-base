@@ -1,0 +1,70 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models
+{
+    public class CoachDTO
+    {
+        public int Id { get; set; }
+
+        public string FullName
+        {
+            get { return String.Format("{0} {1}", FirstName, LastName); }
+        }
+
+        [Required]
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; }
+
+        [Required]
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; }
+
+        [Required]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Display(Name = "Phone")]
+        public string Phone { get; set; }
+
+    }
+
+    public static class CoachDTOExtensions
+    {
+        public static Coach UpdateValuesFromDTO(this Coach coach, CoachDTO coachInView, string lastUpdateBy, bool onCreate)
+        {
+            coach.Id = coachInView.Id;
+            coach.FirstName = coachInView.FirstName;
+            coach.LastName = coachInView.LastName;
+            coach.Email = coachInView.Email;
+            coach.Phone = coachInView.Phone;
+            coach.IsActive = true;
+            coach.LastUpdateBy = lastUpdateBy;
+            coach.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                coach.CreatedBy = lastUpdateBy;
+                coach.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return coach;
+        }
+
+        public static CoachDTO ConvertToDto(this Coach coach)
+        {
+            return new CoachDTO
+            {
+                Id = coach.Id,
+                FirstName = coach.FirstName,
+                LastName = coach.LastName,
+                Email = coach.Email,
+                Phone = coach.Phone
+            };
+        }
+    }
+}

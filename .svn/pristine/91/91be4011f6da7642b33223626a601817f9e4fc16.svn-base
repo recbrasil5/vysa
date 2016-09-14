@@ -1,0 +1,278 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysaApp")
+        .controller('AdminPlayersAddEditController',
+        function ($scope, $timeout, $state, $stateParams, metaDataService, notifierService, AdminPlayerRepository, AdminGuardianRepository, AdminPlayerGuardianRepository) {
+
+            var playerId = $stateParams.id;
+            $scope.editing = playerId !== undefined;
+            loadForm();
+
+            function loadForm() {
+                $scope.term = {};
+                $scope.relationshipTypes = metaDataService.getRelationshipTypes();
+                $scope.genderTypes = metaDataService.getGenderTypes();
+                $scope.selected = { id: {} };
+                setupCustomFilter();
+                $scope.playerGuardianIdList = [];
+                loadPlayer();                
+            }
+
+            function loadGuardians() {
+
+                if ($scope.editing) {
+                    var lookupId =  $scope.player.id;
+
+                    //autoComplete
+                    AdminGuardianRepository.autoComplete.post({ lookupId: lookupId, searchTerm: '' }).$promise.then(function (data) {
+                        updateGuardianScope(data.guardians);
+                    }, function (error) {
+                        notifierService.error('Communication error while filtering list.');
+                    });
+                } else {
+                    AdminGuardianRepository.guardians.query().$promise.then(function (data) {
+                        updateGuardianScope(data);
+                    }, function (error) {
+                        //TODO
+                        console.log('Failure to load players table' + error.message);
+                    });
+                }
+            };
+                      
+            function loadPlayer() {
+                if ($scope.editing) {
+                    AdminPlayerRepository.players.get({ id: playerId }, function (data) {
+                        data.dateOfBirth = new Date(data.dateOfBirth);
+                        $scope.player = data;
+                    });
+                } else {
+                    $scope.player = {};
+                    $scope.player.guardians = [];
+                    $scope.playerHasGuardian = false;
+                }
+            };
+
+            function setupCustomFilter() {
+
+                $scope.isCustomEnabled = true;
+                $scope.selectedFilterItem = {};
+                $scope.selectedFilterItem.id = {};
+                $scope.clickedAddNewGuardian = false;
+                $scope.async = [];
+
+                $scope.asyncOptions = {
+                    displayText: 'Select or add new guardian...',
+                    addText: 'Add New Guardian',
+                    onAdd: function () {
+                        //$scope.term = '"$0"';
+                        //split the text into first name and last name
+                        $scope.newGuardian = { firstName:{}, lastName: {}};
+                        var strArray = $scope.term.split(' ');
+                        if (strArray.length == 2) {
+                            $scope.newGuardian.lastName = strArray[1];
+                        }
+                        $scope.newGuardian.firstName = strArray[0];
+                        $scope.displaySearch = false; //user is longer going to use the search
+                    },
+                    emptyListText: 'Oops! The list is empty',
+                    emptySearchResultText: 'Sorry, couldn\'t find "$0"',
+                    onSearch: function (term) {
+                        $scope.term = term;
+                        // No search term: restore original items
+                        if (!term) {
+                            $scope.async = angular.copy($scope.copyOfAsync); //back to original
+                            return;
+                        }
+                        else {
+
+                            var lookupId = $scope.editing ? $scope.player.id : 0;                            
+
+                            //autoComplete
+                            AdminGuardianRepository.autoComplete.post({ lookupId: lookupId, searchTerm: term }).$promise.then(function (data) {
+                                updateGuardianScope(data.guardians);
+                            }, function (error) {
+                                notifierService.error('Communication error while filtering list.');
+                            });
+                        }
+                    }
+                };
+            };
+
+            $scope.asyncChanged = function () {
+                if (!$scope.selectedFilterItem !== undefined) {
+                    //fill out the form and let the user decide if they'd like to save...                    
+                    $scope.newGuardian.guardianId = $scope.selectedFilterItem.id;
+                    $scope.newGuardian.firstName = $scope.selectedFilterItem.firstName;
+                    $scope.newGuardian.lastName = $scope.selectedFilterItem.lastName;
+                    $scope.newGuardian.fullName = $scope.selectedFilterItem.fullName;
+                    $scope.newGuardian.email = $scope.selectedFilterItem.email;
+                    $scope.newGuardian.phone = $scope.selectedFilterItem.phone;
+
+                    $scope.displaySearch = false;
+                }
+            };
+
+            $scope.getTemplate = function (guardian) {
+                if ($scope.selected.id !== undefined && guardian.id === $scope.selected.id) {
+                    return '/templates/Admin/ClubManagement/Guardians/guardian-edit-view.html';
+                }
+                else {
+                    return '/templates/Admin/ClubManagement/Guardians/guardian-list-view.html';
+                }
+            }            
+
+            //this is called when the user chooses in the custom-select to Add new player
+            $scope.addNew = function () {
+                $scope.newRow = true;
+                $scope.displaySearch = true;
+                $scope.selectedFilterItem = undefined;
+
+                $scope.newGuardian = {};
+                $scope.newGuardian.playerId = {};
+                $scope.newGuardian.guardianId = {};
+                $scope.newGuardian.firstName = {};
+                $scope.newGuardian.lastName = {};
+                $scope.newGuardian.fullName = {};
+                $scope.newGuardian.relationshipStr = {};
+
+                loadGuardians();
+            };
+
+
+            $scope.cancel = function () {
+                $scope.newRow = false;
+                $scope.displaySearch = false;
+                $scope.newGuardian = {};
+                $scope.selectedFilterItem = undefined;
+            };
+
+            $scope.edit = function (guardian) {
+                $scope.selected = angular.copy(guardian);
+            };
+
+            $scope.reset = function () {
+                $scope.selected = {};
+            };
+
+            $scope.create = function () {
+
+                if (!isValidGuardian($scope.newGuardian)) return;
+
+                if ($scope.editing) {
+                    //create the new guardian in the database since we can assign playerId
+                    $scope.newGuardian.playerId = $scope.player.id;
+
+                    AdminPlayerGuardianRepository.save($scope.newGuardian, function (data) {
+                        $scope.player.guardians.push(data);
+                        notifierService.success("The guardian has been added!");
+                    }, function () {
+                        notifierService.error("Error while adding guardian!");
+                    });
+                } else {
+                    $scope.newGuardian.id = 0;
+                    $scope.newGuardian.playerId = 0;
+                    $scope.player.guardians.push($scope.newGuardian);
+                    $scope.playerHasGuardian = true;
+                }
+
+                $scope.newRow = false;
+                $scope.newGuardian = {};
+                $scope.displaySearch = false;
+            }
+
+            $scope.update = function (guardian) {
+
+                if (!isValidGuardian(guardian)) return;
+
+                if ($scope.editing) {
+                    guardian.playerId = $scope.player.id;
+                    $scope.updateGuardian = angular.copy(guardian);
+
+                    AdminPlayerGuardianRepository.update($scope.updateGuardian, function () {
+                        notifierService.success("The guardian has been updated!");
+                    }, function () {
+                        notifierService.error("Error while updating guardian!");
+                    });
+                } 
+                $scope.selected = {};
+            }
+
+            $scope.delete = function (idx) {
+
+                if ($scope.editing) {
+                    var playerGuardianToDelete = $scope.player.guardians[idx];
+                    AdminPlayerGuardianRepository.delete({ id: playerGuardianToDelete.id })
+                    .$promise.then(function () {
+                        notifierService.success('Record has been removed!');
+                        $scope.player.guardians.splice(idx, 1);
+                        loadGuardians();
+                    }, function (error) {
+                        notifierService.error('Ex: ' + error.message);
+                    });
+                } else {
+                    notifierService.success('Record has been removed!');
+                    $scope.player.guardians.splice(idx, 1);
+                }
+            }
+
+            function isValidGuardian(guardian) {
+                var isValid = true;
+                if (guardian.relationshipStr === undefined || guardian.relationshipStr === '') {
+                    isValid = false;
+                    notifierService.error('The guardian needs to have Relationship defined');
+                }
+
+                if (guardian.firstName === undefined || guardian.firstName === '') {
+                    isValid = false;
+                    notifierService.error('The guardian needs to have First Name defined');
+                }
+
+                if (guardian.lastName === undefined || guardian.lastName === '') {
+                    isValid = false;
+                    notifierService.error('The guardian needs to have Last Name defined');
+                }
+
+
+                return isValid;
+            }
+
+            $scope.save = function () {
+                if ($scope.editing) {
+                    updatePlayer($scope.player);
+                } else {
+                    addPlayer($scope.player);
+                }
+            }
+
+            $scope.displaySaveButton = function () {
+                return ($scope.editing || (!$scope.editing && $scope.playerHasGuardian));
+            }
+
+            function addPlayer(player) {
+                AdminPlayerRepository.players.save(player, function () {
+                    $state.go('clubmanagement.default');
+                    notifierService.success("The player has been added!");
+                }, function () {
+                    notifierService.error("Error while adding player!");
+                });
+            }
+
+            function updatePlayer(player) {
+                AdminPlayerRepository.players.update(player, function () {
+                    $state.go('clubmanagement.default');
+                    notifierService.success("The player has been updated!");
+                }, function () {
+                    notifierService.error("Error while updating player!");
+                });
+            }
+            
+            function updateGuardianScope(data) {
+                $scope.async = data;
+                $scope.copyOfAsync = angular.copy($scope.async);
+            }
+
+        });
+
+}());

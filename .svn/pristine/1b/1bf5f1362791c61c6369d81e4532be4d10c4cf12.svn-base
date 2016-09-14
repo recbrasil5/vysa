@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html lang="en" ng-app="admin">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>VYSA | Admin</title>
+
+
+    <!-- Summernote -->
+    <link href="assets/css/plugins/summernote/summernote.css" rel="stylesheet" />
+    <link href="assets/css/plugins/summernote/summernote-bs3.css" rel="stylesheet" />
+
+    <!-- Font awesome -->
+    <link href="assets/css/font-awesome/css/font-awesome.css" rel="stylesheet" />
+
+    <!-- Bootstrap and Fonts -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- jQuery -->
+    <script src="assets/js/jquery-2.1.1.min.js"></script>
+    <script src="assets/js/jquery-ui-1.10.4.min.js"></script>
+    <!-- toastr -->
+    <script src="assets/js/toastr.js"></script>
+
+    <!-- angular -->
+    <script src="assets/js/angular/angular.min.js"></script>
+    <script src="assets/js/angular/angular-route.min.js"></script>
+    <script src="assets/js/angular/angular-resource.js"></script>
+    <script src="assets/js/angular/angular-cookies.min.js"></script>
+    <script src="assets/js/ui-router/angular-ui-router.min.js"></script>
+    <script src="assets/js/lodash.min.js"></script>
+    <script src="assets/bootstrap/js/ui-bootstrap-tpls-0.11.0.min.js"></script>
+    <script src="assets/js/angular/angularjs-dropdown-multiselect.min.js"></script>
+
+    <!-- custom library scripts -->
+    <!-- customSelect (autocorrect)-->
+    <script>
+        // This is needed in order to use the format filter
+        angular.module('ui.filters', []);
+    </script>
+    <script src="assets/js/format.js"></script>
+    <script src="assets/js/customSelect.js"></script>
+    <script src="assets/js/dirPagination.js"></script>
+
+    <!-- app definition ng-app -->
+    <script src="app/Admin/admin.js"></script>
+    <script src="app/Admin/aConfig.js"></script>
+    <script src="app/Admin/data.js"></script>
+    <script src="app/Admin/adminConfig.js"></script>
+    <script src="app/Admin/admin-main-controller.js"></script>
+    <script src="app/Admin/WebsiteMaintenance/Announcements/admin-announcement-repository.js"></script>
+    <script src="app/Admin/WebsiteMaintenance/Announcements/admin-announcements-add-edit-controller.js"></script>
+    <script src="app/Admin/WebsiteMaintenance/Announcements/admin-announcements-controller.js"></script>
+    <script src="app/Admin/WebsiteMaintenance/Board/admin-boardmember-repository.js"></script>
+    <script src="app/Admin/WebsiteMaintenance/Board/admin-boardmembers-add-edit-controller.js"></script>
+    <script src="app/Admin/WebsiteMaintenance/Board/admin-boardmembers-controller.js"></script>
+    <script src="app/Admin/ClubManagement/admin-club-management-controller.js"></script>
+    <script src="app/Admin/ClubManagement/Seasons/admin-season-repository.js"></script>
+    <script src="app/Admin/ClubManagement/Seasons/admin-season-setup-controller.js"></script>
+    <script src="app/Admin/ClubManagement/Seasons/admin-seasons-controller.js"></script>
+    <script src="app/Admin/ClubManagement/Teams/admin-team-repository.js"></script>
+    <script src="app/Admin/ClubManagement/Teams/admin-team-setup-controller.js"></script>
+    <script src="app/Admin/ClubManagement/Events/admin-event-repository.js"></script>
+    <script src="app/Admin/ClubManagement/Events/admin-events-add-edit-controller.js"></script>
+    <script src="app/Admin/ClubManagement/Divisions/admin-division-repository.js"></script>
+    <script src="app/Admin/ClubManagement/Coaches/admin-coaches-controller.js"></script>
+    <script src="app/Admin/ClubManagement/Coaches/admin-coach-repository.js"></script>
+    <script src="app/Admin/ClubManagement/ParentReps/admin-parent-reps-controller.js"></script>
+    <script src="app/Admin/ClubManagement/ParentReps/admin-parent-rep-repository.js"></script>
+    <script src="app/Admin/ClubManagement/Players/admin-player-repository.js"></script>
+    <script src="app/Admin/ClubManagement/Players/admin-players-dd-service.js"></script>
+    <script src="app/Admin/ClubManagement/Players/admin-players-add-edit-controller.js"></script>
+    <script src="app/Admin/ClubManagement/Players/admin-players-controller.js"></script>
+    <script src="app/Admin/ClubManagement/Guardians/admin-guardian-repository.js"></script>
+    <script src="app/Admin/ClubManagement/PlayerGuardians/admin-player-guardian-repository.js"></script>
+    <script src="app/Admin/ClubManagement/Rosters/admin-roster-repository.js"></script>
+    <script src="app/Admin/Shared/httpInterceptorService.js"></script>
+    <script src="app/Admin/Shared/Authentication/authService.js"></script>
+    <script src="app/Admin/Shared/directiveRoutingService.js"></script>
+    <script src="app/Admin/Shared/directives.js"></script>
+    <script src="app/Admin/Shared/editItemBtnDirective.js"></script>
+    <script src="app/Admin/Shared/filters.js"></script>
+    <script src="app/Admin/Shared/metaDataService.js"></script>
+    <script src="app/Admin/Shared/notifierService.js"></script>
+    <script src="app/Admin/Shared/services.js"></script>
+
+    <!-- place your extra custom styles in this file -->
+    <link href="assets/css/toastr.css" rel="stylesheet" />
+    <!-- vysa custom styles-->
+    <!-- Main Inspinia CSS files -->
+    <link href="assets/js/wow/animate.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
+
+    <!-- Custom CSS from Libraries and such... -->
+    <link href="assets/css/custom.css" rel="stylesheet" />
+    <!--
+     You need to include this script on any page that has a Google Map.
+     When using Google Maps on your own site you MUST signup for your own API key at:
+     https://developers.google.com/maps/documentation/javascript/tutorial#api_key
+     After your sign up replace the key in the URL below..
+
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQTpXj82d8UpCi97wzo_nKXL7nYrd4G70"></script>
+    <script src="js/plugins/uimaps/ui-map.js"></script>-->
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse" ng-controller="AdminMainController">
+                <ul side-navigation class="nav" id="side-menu">
+                    <li class="nav-header">
+                        <div class="dropdown profile-element">
+                            <!--<img alt="image" class="img-circle" src="img/profile_small.jpg"/>-->
+                            <a class="dropdown-toggle" href="/admin.html">
+                                <span class="clear">
+                                    <span class="block m-t-xs">
+                                        <strong class="font-bold">VYSA</strong>
+                                    </span>
+                                </span>
+                            </a>
+                        </div>
+                        <div class="logo-element">
+                            <a href="/admin.html">VYSA</a>
+                        </div>
+                    </li>
+
+                    <li ng-class="{active: $state.includes('ClubManagement')}">
+                        <a ui-sref="ClubManagement.default"><i class="fa fa-th-large"></i> <span class="nav-label">Club Management</span></a>
+                        <ul class="nav nav-second-level" ng-class="{in: $state.includes('ClubManagement')}">
+                            <li ui-sref-active="active"><a ui-sref="ClubManagement.SeasonManagement">Season Management</a></li>
+                        </ul>
+                    </li>
+                    <li ng-class="{active: $state.includes('WebsiteMaintenance')}">
+                        <a ui-sref="WebsiteMaintenance.default"><i class="fa fa-th-large"></i> <span class="nav-label">Website Maintenance</span></a>
+                    </li>
+                    <li>
+                        <a ng-click="goHome()"><i class="fa fa-th-large"></i> <span class="nav-label">Main Site</span></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Page wraper -->
+        <div id="page-wrapper">
+
+            <!-- Page wrapper -->
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0;">
+                    <div class="navbar-header vysa-nav-head">
+                        <h1>VIKING YOUTH SOCCER ASSOCIATION | ADMINISTRATION</h1>
+                        <div class="pull-right">
+
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Main view  -->
+            <div ui-view></div>
+
+            <div style="min-height:50px; clear:both; margin-left:20px;"></div>
+            <!-- Footer -->
+            <div class="footer">
+                <div class="pull-left">
+                    Site Designed by <strong>Nick Turner.</strong>
+                </div>
+                <div>
+                    <strong>Copyright www.holmenvysa.com.</strong> &copy; 2015 All rights reserved.
+                </div>
+            </div>
+
+        </div>
+        <!-- End page wrapper-->
+
+    </div>
+
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Custom and plugin javascript -->
+    <script src="app/inspinia.js"></script>
+</body>
+</html>

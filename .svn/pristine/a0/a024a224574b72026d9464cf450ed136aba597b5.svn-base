@@ -1,0 +1,187 @@
+﻿<div class="pull-left">
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>Team Setup</h2>
+            <ol class="breadcrumb">
+                <li>
+                    <a href="admin.html">Home</a>
+                </li>
+                <li>
+                    <a ui-sref="clubmanagement.default">Club Management</a>
+                </li>
+                <li>
+                    <a ui-sref="clubmanagement.seasonmanagement.default">Season Management</a>
+                </li>
+                <li>
+                    <a ui-sref="clubmanagement.seasonmanagement.seasons.setup">Season Setup</a>
+                </li>
+                <li class="active">
+                    <strong>Team Setup</strong>
+                </li>
+            </ol>
+        </div>
+        <div class="col-lg-2">
+        </div>
+    </div>
+    <div class="container pull-left">
+        <form class="form-horizontal" role="form">
+            <div class="panel-group">
+                <div class="panel-group">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h2 data-ng-if="!editing" class="panel-title">New Team Setup</h2>
+                            <h2 data-ng-if="editing" class="panel-title">Team Setup</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-sm-6 col-lg-12">
+                                <div class="panel panel-primary panel-margin">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Team Information</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="ibox float-e-margins">
+                                                <div>
+                                                    <div class="ibox-content">
+                                                        <h3>Team Information</h3>
+                                                        <div class="col-sm-6 col-lg-4">
+                                                            <div class="form-group">
+                                                                <input type="hidden" name="seasonId" data-ng-model="season.id"/>
+                                                                <label for="division" class="col-md-4 control-label">Division: </label>
+                                                                <div class="col-md-8">
+                                                                    <label data-ng-if="editing" class="control-label">{{teamDivision}}</label>
+                                                                    <select data-ng-if="!editing" id="division" class="form-control"
+                                                                            data-ng-model="teamDivision.id"
+                                                                            data-ng-options="d.label for d in availableDivisions"></select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!--<div class="col-sm-6 col-lg-4">
+                                                            <div class="form-group">
+                                                                <label for="cost" class="col-md-4 control-label">Cost: </label>
+                                                                <div class="col-md-8">
+                                                                    <input only-digits id="cost" class="form-control" type="text" placeholder="Cost" data-ng-model="team.cost" required/>
+                                                                </div>
+                                                            </div>
+                                                        </div>-->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-6 col-lg-4">
+                                                <label for="coaches" class="col-md-4 control-label">Coach(es): </label>
+                                                <div ng-dropdown-multiselect="" options="availableCoaches" selected-model="teamCoaches" extra-settings="coachsettings"></div>
+                                            </div>
+                                            <div class="col-sm-6 col-lg-4">
+                                                <label for="parentReps" class="col-md-4 control-label">Parent Rep(s): </label>
+                                                <div ng-dropdown-multiselect="" options="availableParentReps" selected-model="teamParentReps" extra-settings="parentRepsettings"></div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-ng-if="editing" class="col-sm-6 col-lg-12">
+                                <div class="panel panel-primary panel-margin">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Event Schedule</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="ibox float-e-margins">
+                                                <div>
+                                                    <div class="ibox-content">
+                                                        <div class="pull-left">
+                                                            <h3>Event Schedule</h3>
+                                                            <table class="table table-striped table-hover table-condensed">
+                                                                <thead>
+                                                                <tr>
+                                                                    <td>Date</td>
+                                                                    <td>Name</td>
+                                                                    <td>Location</td>
+                                                                    <td>Attending</td>
+                                                                </tr>
+                                                                </thead>
+                                                                <tr ng-repeat="e in seasonEvents">
+                                                                    <td>{{e.dateRange}}</td>
+                                                                    <td>{{e.name}}</td>
+                                                                    <td>{{e.location}}</td>
+                                                                    <td><input type="checkbox" ng-model="teamEventArray[$index].going" ng-change="updateTeamEvent(e.id)"/></td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-ng-if="editing" class="col-sm-6 col-lg-12">
+                                <div class="panel panel-primary panel-margin">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Roster</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="ibox float-e-margins">
+                                                <div>
+                                                    <div class="ibox-content">
+                                                        <div class="pull-left">
+                                                            <h3>Roster</h3>
+
+                                                            <table class="table table-striped table-hover table-condensed">
+                                                                <thead>
+                                                                <tr>
+                                                                    <td>Name</td>
+                                                                    <td>Age</td>
+                                                                    <td>&nbsp;</td>
+                                                                </tr>
+                                                                </thead>
+                                                                <tr ng-repeat="r in team.roster">
+                                                                    <td>{{r.fullName}}</td>
+                                                                    <td>{{r.age}}</td>
+                                                                    <td>
+                                                                        <button ng-click="deleteFromRoster($index)" class="btn btn-primary btn-xs" ng-confirm-click="Are you sure you would like to remove {{r.fullName}} from the roster?">Remove</button>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                        <div class="pull-left">
+                                                            <h4>Add Players to Roster</h4>
+                                                            <div custom-select="asyncOptions" ng-change="asyncChanged(selectedFilterItem)" ng-model="selectedFilterItem" ng-options="a as a.fullName for a in async" ng-disabled="!isCustomEnabled">
+                                                                <div class="pull-left" style="width: 40px">
+                                                                    <span></span>
+                                                                </div>
+                                                                <div>
+                                                                    <strong>{{ a.fullName }}</strong><br/>
+                                                                    <span>Age: {{ a.age }}</span>
+                                                                </div>
+                                                                <div class="clearfix"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer" style="text-align: right;">
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button type="submit" data-ng-show="!editing && updateTeamScope()" class="btn btn-success btn-sm" data-ng-click="create()">Create Team</button>
+                                    <button type="submit" data-ng-show="editing && updateTeamScope()" class="btn btn-success btn-sm" data-ng-click="save()">Save Changes</button>
+                                    <button type="button" class="btn btn-default btn-sm" data-ng-click="cancel()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

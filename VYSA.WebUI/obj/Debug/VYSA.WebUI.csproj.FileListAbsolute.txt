@@ -1,0 +1,7 @@
+C:\vysa\VYSA.WebUI\bin\VYSA.WebUI.dll.config
+C:\vysa\VYSA.WebUI\bin\VYSA.WebUI.dll
+C:\vysa\VYSA.WebUI\bin\VYSA.WebUI.pdb
+C:\vysa\VYSA.WebUI\bin\Antlr3.Runtime.dll
+C:\vysa\VYSA.WebUI\obj\Debug\VYSA.WebUI.dll
+C:\vysa\VYSA.WebUI\obj\Debug\VYSA.WebUI.pdb
+C:\vysa\VYSA.WebUI\obj\Debug\VYSA.WebUI.csprojResolveAssemblyReference.cache

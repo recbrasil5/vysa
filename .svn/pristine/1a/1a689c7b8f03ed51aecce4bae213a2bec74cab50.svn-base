@@ -1,0 +1,86 @@
+﻿(function () {
+    angular.module('vysa', ['ngRoute', 'ngResource', 'ngCookies'])
+        .config([
+            '$routeProvider', '$locationProvider', '$httpProvider',
+            function($routeProvider, $locationProvider, $httpProvider) {
+                //================================================
+                // Routes
+                //================================================
+                //$routeProvider
+                //    .when("/Admin/Home/", {
+                //        template: "<div class='page-header jumbotron'>Welcome to VYSA Administration Home!</div>"
+                //        //templateUrl: "../../../templates/Admin/WebsiteMaintenance/announcements.html"
+                //    })
+                //    .when("/Admin/Home/ClubManagement", {
+                //        templateUrl: "../../../templates/Admin/ClubManagement/club-management.html"
+                //    })
+                //    .when("/Admin/Home/ClubManagement/SeasonManagement", {
+                //        templateUrl: "../../../templates/Admin/ClubManagement/SeasonManagement/seasons.html",
+                //        controller: "AdminSeasonsController"
+                //    })
+                //    .when("/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup", {
+                //        templateUrl: "../../../../../templates/Admin/ClubManagement/SeasonManagement/season-setup.html",
+                //        controller: "AdminSeasonSetupController"
+                //    })
+                //    .when("/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/:id", {
+                //        templateUrl: "../../../../../templates/Admin/ClubManagement/SeasonManagement/season-setup.html",
+                //        controller: "AdminSeasonSetupController"
+                //    })
+                //    .when("/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/Events/:id/:seasonId", {
+                //        templateUrl: "../../../../../../../templates/Admin/ClubManagement/SeasonManagement/Events/events-add-edit.html",
+                //        controller: "AdminEventsAddEditController"
+                //    })
+                //    .when("/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/Events/:id", {
+                //        templateUrl: "../../../../../../templates/Admin/ClubManagement/SeasonManagement/Events/events-add-edit.html",
+                //        controller: "AdminEventsAddEditController"
+                //    })
+                //    .when("/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/TeamSetup/:id/:seasonId", {
+                //        templateUrl: "../../../../../../../templates/Admin/ClubManagement/SeasonManagement/Teams/team-setup.html",
+                //        controller: "AdminTeamSetupController"
+                //    })
+                //    .when("/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/TeamSetup/:id", {
+                //        templateUrl: "../../../../../../../templates/Admin/ClubManagement/SeasonManagement/Teams/team-setup.html",
+                //        controller: "AdminTeamSetupController"
+                //    })
+                //    .when("/Admin/Home/WebsiteMaintenance", {
+                //        templateUrl: "../../../templates/Admin/WebsiteMaintenance/website-maintenance.html",
+                //    })
+                //    .when("/Admin/Home/WebsiteMaintenance/Announcements/AddEdit", {
+                //        templateUrl: "../../../../templates/Admin/WebsiteMaintenance/announcements-add-edit.html",
+                //        controller: "AdminAnnouncementsAddEditController"
+                //    })
+                //    .when("/Admin/Home/WebsiteMaintenance/Announcements/AddEdit/:id", {
+                //        //special call from a directive
+                //        templateUrl: "../../../../../templates/Admin/WebsiteMaintenance/announcements-add-edit.html",
+                //        controller: "AdminAnnouncementsAddEditController"
+                //    })
+                //    .when("/Admin/Home/WebsiteMaintenance/Board/AddEdit", {
+                //        templateUrl: "../../../../templates/Admin/WebsiteMaintenance/board-add-edit.html",
+                //        controller: "AdminBoardMembersAddEditController"
+                //    })
+                //    .when("/Admin/Home/WebsiteMaintenance/Board/AddEdit/:id", {
+                //        //special call from a directive
+                //        templateUrl: "../../../../../templates/Admin/WebsiteMaintenance/board-add-edit.html",
+                //        controller: "AdminBoardMembersAddEditController"
+                //    })
+                //.otherwise({ redirectTo: "/Admin/Home" });
+                //.otherwise({ redirectTo: "/" });
+
+                $locationProvider.html5Mode({ enabled: true, requireBase: false }); //hash signs no-longer needed in 
+
+                //$httpProvider.interceptors.push('httpInterceptorService');
+            }
+        ]);
+    //.run(['$http', '$cookies', '$cookieStore', 'authService', function ($http, $cookies, $cookieStore, authService) {
+    //    /*if authToken (cookie) exists, get it and add to request headers when the app is loaded 
+    //     note: the user may leave and come back and as long as the cookie exists and is valid, then they are allowed to navigate inside the site*/
+    //    //console.log('config.run()...');
+    //    //authService.fillAuthData();
+    //}]);
+    //.run(['$rootScope', function ($rootScope) {
+    //    //prevent scrolling to ui-view on click - not sure if needed
+    //    //$rootScope.$on('$stateChangeSuccess', function () {
+    //    //    $("html, body").animate({ scrollTop: 0 }, 200);
+    //    //})
+    //}]);
+}());

@@ -1,0 +1,134 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models
+{
+    public class EventListViewSimpleDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Location { get; set; }
+        public string DateRange { get; set; }
+    }
+
+    public class EventListViewDTO
+    {
+        public int Id { get; set; }
+        public int SeasonId { get; set; }
+        public string Name { get; set; }
+        public string Location { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime StartDate { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime EndDate { get; set; }
+    }
+
+    public class EventDTO
+    {
+        public int Id { get; set; }
+        public int SeasonId { get; set; }
+
+        [Required]
+        [Display(Name = "Name")]
+        public string Name { get; set; }
+
+        [Required]
+        [Display(Name = "City")]
+        public string City { get; set; }
+
+        [Display(Name = "State")]
+        public string State { get; set; }
+
+        [Display(Name = "TournamentUrl")]
+        public string TournamentUrl { get; set; }
+
+        [Display(Name = "GoogleMapUrl")]
+        public string GoogleMapUrl { get; set; }
+
+        [Required(ErrorMessage = "StartDate Required.")]
+        [Display(Name = "StartDate")]
+        [DataType(DataType.Date)]
+        public DateTime StartDate { get; set; }
+
+        [Required(ErrorMessage = "EndDate Required.")]
+        [Display(Name = "EndDate")]
+        [DataType(DataType.Date)]
+        public DateTime EndDate { get; set; }
+    }
+
+    public static class EventDTOExtensions
+    {
+        public static Event UpdateValuesFromDTO(this Event Event, EventDTO eventInView, string lastUpdateBy, bool onCreate)
+        {
+            Event.Id = eventInView.Id;
+            Event.SeasonId = eventInView.SeasonId;
+            Event.Name = eventInView.Name;
+            Event.City = eventInView.City;
+            Event.State = eventInView.State;
+            Event.TournamentUrl = eventInView.TournamentUrl;
+            Event.GoogleMapUrl = eventInView.GoogleMapUrl;
+            Event.StartDate = eventInView.StartDate;
+            Event.EndDate = eventInView.EndDate;
+
+            Event.IsActive = true;
+            Event.LastUpdateBy = lastUpdateBy;
+            Event.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                Event.CreatedBy = lastUpdateBy;
+                Event.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return Event;
+        }
+
+        public static EventDTO ConvertToDto(this Event eventEntity)
+        {
+            return new EventDTO
+            {
+                Id = eventEntity.Id,
+                SeasonId = eventEntity.SeasonId,
+                Name = eventEntity.Name,
+                City =  eventEntity.City,
+                State = eventEntity.State,
+                TournamentUrl = eventEntity.TournamentUrl,
+                GoogleMapUrl = eventEntity.GoogleMapUrl,
+                StartDate = eventEntity.StartDate.Value,
+                EndDate = eventEntity.EndDate.Value
+            };
+        }
+
+        public static EventListViewDTO ConvertToEventListViewDto(this Event eventEntity)
+        {
+            return new EventListViewDTO
+            {
+                Id = eventEntity.Id,
+                SeasonId = eventEntity.SeasonId,
+                Name = eventEntity.Name,
+                Location = string.Format("{0}{1}", eventEntity.City, !string.IsNullOrWhiteSpace(eventEntity.State) ? ", " + eventEntity.State : ""),
+                StartDate = eventEntity.StartDate.Value,
+                EndDate = eventEntity.EndDate.Value
+            };
+        }
+
+        public static EventListViewSimpleDTO ConvertToEventListViewSimpleDto(this Event eventEntity)
+        {
+            return new EventListViewSimpleDTO
+            {
+                Id = eventEntity.Id,
+                Name = eventEntity.Name,
+                Location = string.Format("{0}{1}", eventEntity.City, !string.IsNullOrWhiteSpace(eventEntity.State) ? ", " + eventEntity.State : ""),
+                DateRange = string.Format(@"{0}/{1}-{2}/{3}",
+                                    eventEntity.StartDate.Value.Month,
+                                    eventEntity.StartDate.Value.Day,
+                                    eventEntity.EndDate.Value.Month,
+                                    eventEntity.EndDate.Value.Day)
+            };
+        }
+    }
+}

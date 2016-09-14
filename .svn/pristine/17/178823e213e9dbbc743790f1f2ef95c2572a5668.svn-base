@@ -1,0 +1,176 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Web.Security;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Entities;
+using System.Configuration.Provider;
+using VYSA.Domain.Concrete;
+
+namespace VYSA.Web.Infrastructure
+{
+    public class EFRoleProvider : RoleProvider
+    {
+        private IUnitOfWork unitOfWork;
+        private string applicationName = "VYSA";
+
+        public EFRoleProvider() : this(new UnitOfWork()) { }
+
+        public EFRoleProvider(IUnitOfWork unitOfWork)
+        {
+            this.unitOfWork = unitOfWork;
+        }
+
+        public override string ApplicationName
+        {
+            get
+            {
+                return applicationName;
+            }
+            set
+            {
+                applicationName = value;
+            }
+        }
+
+        public override void AddUsersToRoles(string[] usernames, string[] roleNames)
+        {
+            if (roleNames.Length != 1)
+            {
+                throw new ArgumentException("roleNames should only contain one element", "roleNames");
+            }
+
+            AddUsersToRole(usernames, roleNames[0]);
+        }
+
+        public override void CreateRole(string roleName)
+        {
+            Role role = new Role()
+            {
+                Name = roleName,
+                IsActive = true,
+                CreatedDate = DateTime.UtcNow,
+                LastUpdate = DateTime.UtcNow
+            };
+
+            unitOfWork.RoleRepository.Save(role);
+        }
+
+        public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
+        {
+            Role role = unitOfWork.RoleRepository.GetRole(roleName);
+            if (null != role)
+            {
+                if (throwOnPopulatedRole && role.Users.Any())
+                {
+                    throw new ProviderException();
+                }
+                unitOfWork.RoleRepository.Delete(role);
+                return true;
+            }
+            return false;
+        }
+
+        public override string[] FindUsersInRole(string roleName, string usernameToMatch)
+        {
+            bool matchUserName = !string.IsNullOrEmpty(usernameToMatch);
+            IList<string> users = new List<string>();
+            Role role = unitOfWork.RoleRepository.GetRole(roleName);
+            
+            if (null != role)
+            {
+                foreach (User user in role.Users)
+                {
+                    if (!matchUserName || (user.UserName.Contains(usernameToMatch)))
+                    {
+                        users.Add(user.UserName);
+                    }
+                }
+            }
+            return users.ToArray();
+        }
+
+        public override string[] GetAllRoles()
+        {
+            IList<string> roles = new List<string>();
+
+            foreach (Role role in unitOfWork.RoleRepository.Roles.AsEnumerable())
+	        {
+                roles.Add(role.Name);
+	        }
+
+            return roles.ToArray();
+        }
+
+        public override string[] GetRolesForUser(string username)
+        {
+            User user = unitOfWork.UserRepository.GetUser(username);
+            if (null != user)
+            {
+                return new string[] { user.Role.Name };
+            }
+            return new string[0];
+        }
+
+        public override string[] GetUsersInRole(string roleName)
+        {
+            //return unitOfWork.UserRepository.GetUsersInRole(roleName);
+            throw new NotImplementedException();
+        }
+
+        public override bool IsUserInRole(string username, string roleName)
+        {
+            return GetRolesForUser(username).Contains(roleName);
+            //return GetUsersInRole(roleName).Contains(username);
+        }
+
+        public override void RemoveUsersFromRoles(string[] usernames, string[] roleNames)
+        {
+            if (roleNames.Length != 1)
+            {
+                throw new ArgumentException("roleNames should only contain one element", "roleNames");
+            }
+
+            RemoveUsersFromRole(usernames, roleNames[0]);
+        }
+
+        public override bool RoleExists(string roleName)
+        {
+            return unitOfWork.RoleRepository.Roles.Any(r => r.Name.ToLower() == roleName.ToLower());
+        }
+
+        private void RemoveUsersFromRole(string[] usernames, string roleName)
+        {
+            Role role = unitOfWork.RoleRepository.GetRole(roleName);
+
+            foreach (string username in usernames)
+            {
+                User user = unitOfWork.UserRepository.GetUser(username);
+                if (null != user)
+                {
+                    role.Users.Remove(user);
+                    unitOfWork.RoleRepository.Save(role);
+                }
+            }
+        }
+
+        private void AddUsersToRole(string[] usernames, string roleName)
+        {
+            Role role = unitOfWork.RoleRepository.GetRole(roleName);
+
+            foreach (string username in usernames)
+            {
+                User user = unitOfWork.UserRepository.GetUser(username);
+                if (null != user)
+                {
+                    if(role.Users == null)
+                        role.Users = new List<User>(); //don't new up the list unless it's empty
+
+                    role.Users.Add(user);
+                }
+            }
+            unitOfWork.RoleRepository.Save(role);
+        }
+    }
+}

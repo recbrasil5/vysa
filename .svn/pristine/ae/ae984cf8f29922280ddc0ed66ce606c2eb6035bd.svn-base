@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models.Resource
+{
+    public class PaymentResourceModel
+    {
+        [Required(ErrorMessage = "Required")]
+        public String SeasonId { get; set; }
+
+        [Required(ErrorMessage = "Required")]
+        public String PlayerIds { get; set; }
+
+        public String PlayerDisplay { get; set; }
+        public IEnumerable<Player> UnregisteredPlayers { get; set; }
+        public Season Season { get; set; }
+        public Decimal TotalPrice { get; set; }
+    }
+}

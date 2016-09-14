@@ -1,0 +1,373 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("admin")
+        .controller('AdminTeamSetupController',
+        function ($scope, $state, $stateParams, notifierService, AdminTeamRepository, AdminDivisionRepository,
+                   AdminCoachRepository, AdminParentRepRepository, AdminEventRepository, AdminPlayerRepository, AdminRosterRepository) {
+
+            //loadForm
+            var teamId;
+            loadForm();
+
+            //custom-select setup
+            function setupCustomFilter() {
+
+                $scope.isCustomEnabled = true;
+                $scope.selectedFilterItem = {};
+                //$scope.selectedFilterItem.id = {};
+                $scope.async = [];
+
+                $scope.asyncOptions = {
+                    displayText: 'Select a player...',
+                    emptyListText: 'Oops! The list is empty',
+                    emptySearchResultText: 'Sorry, couldn\'t find "$0"',
+                    onSearch: function (term) {
+                        // No search term: restore original items
+                        if (!term) {
+                            $scope.async = angular.copy($scope.copyOfAsync); //back to original
+                            return;
+                        }
+                        else {
+
+                            var lookupId = $scope.editing ? $scope.team.id : 0;
+
+                            //filter
+                            AdminPlayerRepository.rosterFilter.post({ lookupId: lookupId, searchTerm: term }).$promise.then(function (data) {
+                                $scope.async = data.players;
+                            }, function (error) {
+                                notifierService.error('Communication error while filtering list.');
+                            });
+                        }
+                    }
+                };
+            };
+
+            //custom-select ng-change
+            $scope.asyncChanged = function (selectedFilterItem) {
+
+                $scope.selectedFilterItem = selectedFilterItem;
+
+                var txt;
+                var r = confirm("Are you sure you'd like to add '" + $scope.selectedFilterItem.fullName + "to the roster?");
+                if (r == true) {
+                    if ($scope.selectedFilterItem !== undefined) {
+                        $scope.newRoster = {};
+                        $scope.newRoster.teamId = $scope.team.id;
+                        $scope.newRoster.playerId = $scope.selectedFilterItem.id;
+
+                        AdminRosterRepository.save($scope.newRoster, function (data) {
+                            $scope.newRoster = data;
+                            $scope.rosterPlayerIdList.push(data.playerId);
+
+                            loadData(); //reload                             
+
+                            notifierService.success("The player has been added to the roster!");
+                        }, function () {
+                            notifierService.error("Error while adding player to the roster!");
+                        });
+                    }
+                } else {
+                    $scope.selectedFilterItem = {};
+                }
+            };
+
+            //CRUD opertations
+
+            $scope.deleteFromRoster = function (idx) {
+                var playerFromRosterToDelete = $scope.team.roster[idx];
+                AdminRosterRepository.delete({ id: playerFromRosterToDelete.id })
+                    .$promise.then(function () {
+                        notifierService.success('The Player has been removed from the roster!');
+                        $scope.team.roster.splice(idx, 1);
+                    }, function (error) {
+                        notifierService.error('Ex: ' + error.message);
+                    });
+            };
+
+            $scope.create = function () {
+                if ($scope.teamDivision === undefined) {
+                    alert('You must select a Division!');
+                }
+                else {
+                    $scope.teamDivision = $scope.teamDivision.id; //undo ng-options/ng-model bullshit
+                    $scope.team.divisionId = $scope.teamDivision.id;
+
+                    AdminTeamRepository.save($scope.team, function (response) {
+                        //$location.url('/Admin/Home/ClubManagement/TeamManagement');
+                        $scope.team.id = response.id; //set season.id which is returned in response object
+                        notifierService.success("The team has been created. You may now setup the Roster and add a Coach & Parent Rep to the team!");
+                        $scope.teamDivision = $scope.teamDivision.label;
+                        $scope.editing = true;
+                    }, function (error) {
+                        var duplicate = error.data.modelState.duplicate;
+                        if (duplicate !== undefined) {
+                            console.log(duplicate[0]);
+                            notifierService.error("Error: " + duplicate[0]);
+                        } else {
+                            notifierService.error("Error while creating season!");
+                        }
+                    });
+                }
+            }
+
+            $scope.save = function () {
+                //console.log($scope.team);
+                //if (isNaN($scope.team.cost)) {
+                //    alert('Cost must be a decimal.')
+                //}
+                AdminTeamRepository.update($scope.team, function () {
+
+                    //$state.go('ClubManagement.SeasonSetup', { id: $scope.team.seasonId }); //comment this line out if debugging
+                    //$location.url('/Admin/Home/ClubManagementSeasonManagement/SeasonSetup/' + $scope.team.seasonId); //comment this line out while debugging so you don't move
+                    notifierService.success("The team has been updated!");
+                }, function () {
+                    notifierService.error("Error while updating team!");
+                }
+                );
+            }
+
+            $scope.cancel = function () {
+                $state.go('clubmanagement.seasonmanagement.seasons.setup', { id: $scope.team.seasonId });
+            }
+
+            $scope.updateTeamScope = function () {
+                //update team.teamCoaches [delete]
+                for (var i = $scope.team.teamCoaches.length - 1; i > -1; i--) {
+                    var index = $scope.teamCoaches.indexOf($scope.team.teamCoaches[i]);
+                    var found = index !== -1;
+                    if (!found) {
+                        $scope.team.teamCoaches.splice(index, 1);
+                    }
+                }
+
+                //update team.teamCoaches [add]
+                for (var i = 0; i < $scope.teamCoaches.length; i++) {
+                    var index = $scope.team.teamCoaches.indexOf($scope.teamCoaches[i].id);
+                    var found = index !== -1;
+                    if (!found) {
+                        $scope.team.teamCoaches.push($scope.teamCoaches[i].id);
+                    }
+                }
+
+                //update team.teamParentReps [delete]
+                for (var i = $scope.team.teamParentReps.length - 1; i > -1; i--) {
+                    var index = $scope.teamParentReps.indexOf($scope.team.teamParentReps[i]);
+                    var found = index !== -1;
+                    if (!found) {
+                        $scope.team.teamParentReps.splice(index, 1);
+                    }
+                }
+
+                //update team.teamParentReps [add]
+                for (var i = 0; i < $scope.teamParentReps.length; i++) {
+                    var index = $scope.team.teamParentReps.indexOf($scope.teamParentReps[i].id);
+                    var found = index !== -1;
+                    if (!found) {
+                        $scope.team.teamParentReps.push($scope.teamParentReps[i].id);
+                    }
+                }
+
+                return true;
+            }
+
+            //ng-change="updateTeamEvents(eventId)" 
+            $scope.updateTeamEvent = function (eventId) {
+
+                var index = $scope.team.teamEvents.indexOf(eventId);
+                var found = index !== -1;
+
+                //if (!$scope.dirtyTeamEvent) {
+                //    $scope.dirtyTeamEvent = true;
+                //}
+
+                if (found) {
+                    //remove it
+                    $scope.team.teamEvents.splice(index, 1);
+                } else {
+                    //add it
+                    $scope.team.teamEvents.push(eventId);
+                }
+            }
+
+            //load Functions
+            function loadForm() {
+                //get teamId --> editing
+                teamId = parseInt($stateParams.teamId);
+                $scope.editing = teamId !== -1;
+                initializeScopeVars();
+                setupCustomFilter();
+                loadData();
+            };
+
+            function loadData() {
+
+                AdminDivisionRepository.query().$promise.then(function (divisionData) {
+
+                    //set scope for dropdown selection
+                    $scope.availableDivisions = divisionData;
+
+                    AdminCoachRepository.coachDropdownVms.query().$promise.then(function (coachData) {
+                        $scope.availableCoaches = coachData;
+
+                        AdminParentRepRepository.parentRepDropdownVms.query().$promise.then(function (parentRepData) {
+
+                            $scope.availableParentReps = parentRepData;
+
+                            if ($scope.editing) {
+
+                                //get Team & loadFormOnEdit
+                                AdminTeamRepository.get({ id: teamId }, function (teamData) {
+
+                                    $scope.originalTeam = angular.copy(teamData); //track changes
+                                    $scope.team = teamData;
+
+                                    setupTeamInEditMode();
+
+                                    AdminEventRepository.eventSimpleListViewDtos.query({ seasonId: $scope.team.seasonId }, function (eventData) {
+                                        $scope.seasonEvents = eventData;
+
+                                        //set $scope.teamEvents
+                                        for (var i = 0; i < $scope.seasonEvents.length; i++) {
+                                            var found = $scope.team.teamEvents.indexOf($scope.seasonEvents[i].id) !== -1;
+                                            var teamEvent = { eventId: $scope.seasonEvents[i].id, going: found };
+                                            $scope.teamEventArray.push(teamEvent);
+                                        }
+
+                                        //filter
+                                        AdminPlayerRepository.rosterFilter.post({ lookupId: $scope.team.id, searchTerm: '' }).$promise.then(function (data) {
+                                            $scope.async = data.players;
+                                            $scope.copyOfAsync = angular.copy($scope.async);
+
+
+                                        }, function (error) {
+                                            notifierService.error('Communication error while filtering list.');
+                                        });
+
+                                    },
+                                    function (error) {
+                                        console.log('Failure to load events ' + error);
+                                    });
+
+                                }, function (error) {
+                                    console.log('Failure to load team ' + error);
+                                });
+                            } else {
+                                AdminEventRepository.eventSimpleListViewDtos.query({ seasonId: parseInt($stateParams.seasonId) }, function (eventData) {
+                                    $scope.seasonEvents = eventData;
+
+                                    AdminPlayerRepository.players.query().$promise.then(function (playerData) {
+                                        $scope.async = playerData;
+                                        $scope.copyOfAsync = angular.copy($scope.async);
+
+                                        //get loadFormOnNew
+                                        setupNewTeam(parseInt($stateParams.seasonId));
+
+                                    }, function (error) {
+                                        //TODO
+                                        console.log('Failure to load players' + error);
+                                    });
+                                },
+                                    function (error) {
+                                        console.log('Failure to load events ' + error);
+                                    });
+                            }
+
+                        }, function (error) {
+                            console.log('Failure to load parentReps ' + error);
+                        });
+
+
+                    }, function (error) {
+                        console.log('Failure to load coaches' + error);
+                    });
+
+
+                }, function (error) {
+                    console.log(error.toString());
+                });
+            }
+
+            function setupTeamInEditMode() {
+
+                //selected Division
+                for (var i = 0; i < $scope.availableDivisions.length; i++) {
+                    if ($scope.availableDivisions[i].id === $scope.team.divisionId) {
+                        $scope.teamDivision = $scope.availableDivisions[i].label;
+                    }
+                }
+
+                //set $scope.teamCoaches
+                for (var i = 0; i < $scope.availableCoaches.length; i++) {
+                    if ($scope.team.teamCoaches.indexOf($scope.availableCoaches[i].id) !== -1) {
+                        $scope.teamCoaches.push($scope.availableCoaches[i]);
+                    }
+                }
+
+                //set $scope.teamParentReps
+                for (var i = 0; i < $scope.availableParentReps.length; i++) {
+                    if ($scope.team.teamParentReps.indexOf($scope.availableParentReps[i].id) !== -1) {
+                        $scope.teamParentReps.push($scope.availableParentReps[i]);
+                    }
+                }
+                
+            };
+
+            function setupNewTeam(seasonId) {
+                $scope.team.seasonId = seasonId;
+                $scope.originalTeam.seasonId = seasonId;
+            };
+
+            function initializeScopeVars() {
+
+                $scope.rosterPlayerIdList = [];
+                $scope.teamEventArray = [];
+                $scope.teamCoaches = [];
+                $scope.teamParentReps = [];
+
+                $scope.originalTeam = {};
+
+                $scope.team = {};
+                $scope.team.divisionId = {};
+                $scope.team.teamCoaches = [];
+                $scope.team.teamParentReps = [];
+                $scope.team.teamEvents = [];
+
+                //$scope.originalTeam.cost = {};
+                //scope.team.cost = {};
+                $scope.teamDivision = {};
+
+                //this will contain an teamEventObj per each item in $scope.seasonEvents
+                $scope.teamEvents = [];
+
+                $scope.coachsettings = {
+                    dynamicTitle: "Select Coach",
+                    smartButtonMaxItems: 3,
+                    smartButtonTextConverter: function (itemText, originalItem) {
+                        if (itemText === 'Jhon') {
+                            return 'Jhonny!';
+                        }
+                        //could limit char length or something if we want or possible do something with originalItem
+
+                        return itemText;
+                    }
+                };
+
+                $scope.parentRepsettings = {
+                    dynamicTitle: "Select Rep",
+                    smartButtonMaxItems: 3,
+                    smartButtonTextConverter: function (itemText, originalItem) {
+                        if (itemText === 'Jhon') {
+                            return 'Jhonny!';
+                        }
+                        //could limit char length or something if we want or possible do something with originalItem
+
+                        return itemText;
+                    }
+                };
+            };
+
+        });
+
+}());

@@ -1,0 +1,47 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Models.Binding;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Models.ViewModel;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Admin/MailingListMember")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class AdminMailingListMemberController : ApiController
+    {
+        private UnitOfWork _unitOfWork = new UnitOfWork();
+        private MailingListMemberService mlmService;
+        public AdminMailingListMemberController()
+        {
+            mlmService = new MailingListMemberService(_unitOfWork);
+        }
+
+        //[HttpGet]
+        //[Route("")]
+        //public IEnumerable<MailingListResourceModel> GetMailingList()
+        //{
+        //    return mlmService.GetMailingList();
+        //}
+
+        [HttpPost]
+        [Route("filter")]
+        [ResponseType(typeof(MailingListViewModel))]
+        public IHttpActionResult GetMailingListFilter(FilterBindingModel bm)
+        {
+            //return mlmService.GetMailingList();
+            var vm = new MailingListViewModel();
+            vm.Members = mlmService.GetMailingList(bm);
+            if (bm.BoolCount)
+            {
+                vm.Count = vm.Members.Count();
+                //vm.Count = mlmService.GetMailingListFilterCount(bm);
+            }
+            return Ok(vm);
+        }
+    }
+}

@@ -1,0 +1,553 @@
+﻿<!DOCTYPE html>
+<html lang="en" ng-app="vysa">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>VYSA | N.C.E.</title>
+
+    <!--jQuery -->
+    <script src="Scripts/jquery/jquery-2.1.0.js"></script>
+    <!-- toastr -->
+    <script src="assets/js/toastr.js"></script>
+    <!-- angular -->
+    <script src="Scripts/angular/angular.js"></script>
+    <script src="Scripts/angular/angular-route.js"></script>
+    <script src="Scripts/angular/angular-resource.js"></script>
+    <script src="Scripts/angular/angular-cookies.min.js"></script>
+    <!--<script src="Scripts/AngularUI/ui-router.min.js"></script>-->
+    <!-- ng-app -->
+    <script src="Scripts/app/vysa.js"></script>
+    <script src="Scripts/app/config.js"></script> 
+    <script src="Scripts/app/Main/main-controller.js"></script>
+    <script src="Scripts/app/Announcements/announcements-controller.js"></script>
+    <script src="Scripts/app/Announcements/announcement-repository.js"></script>
+    <script src="Scripts/app/Board/boardmembers-controller.js"></script>
+    <script src="Scripts/app/Board/boardmember-repository.js"></script>
+    <script src="Scripts/app/ContactUs/contact-us-controller.js"></script>
+    <script src="Scripts/app/ContactUs/contact-us-repository.js"></script>
+    <script src="Scripts/app/Shared/httpInterceptorService.js"></script>
+    <script src="Scripts/app/Shared/Authentication/authService.js"></script>
+    <script src="Scripts/app/Shared/notifierService.js"></script>
+    <script src="Scripts/app/Shared/services.js"></script>
+    <!-- favicon -->
+    <!--<link href="@Url.Content(" assets />images/favicon.ico")" rel="shortcut icon" type="image/x-icon" />-->
+    <link rel="icon" type="image/png" href="assets/images/logo/logoSm.png" />
+    <!-- Bootstrap core CSS -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap theme -->
+    <link href="assets/bootstrap/css/bootstrap-theme.css" rel="stylesheet" />
+    <!-- owl carousel css -->
+    <link href="assets/js/owl-carousel/owl.carousel.css" rel="stylesheet" />
+    <link href="assets/js/owl-carousel/owl.theme.css" rel="stylesheet" />
+    <link href="assets/js/owl-carousel/owl.transitions.css" rel="stylesheet" />
+    <!-- intro animations -->
+    <link href="assets/js/wow/animate.css" rel="stylesheet" />
+    <!-- font awesome -->
+    <link href="assets/css/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <!-- lightbox -->
+    <link href="assets/js/lightbox/css/lightbox.css" rel="stylesheet /">
+
+    <!-- styles for twilli template -->
+    <link href="assets/css/styles.css" rel="stylesheet" />
+    <!-- place your extra custom styles in this file -->
+    <link href="assets/css/custom.css" rel="stylesheet" />
+    <link href="assets/css/toastr.css" rel="stylesheet" />
+    <!-- vysa custom styles-->
+    <link href="Content/vysa.css" rel="stylesheet" />
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+    <div class="background-image-overlay"></div>
+    <div id="outer-background-container" data-default-background-img="assets/images/backgrounds/moonlight.png" style="background-image: url(assets/images/backgrounds/moonlight.png);"></div>
+
+    <!-- Outer Container -->
+    <div id="outer-container" ng-controller="MainController">
+        <div ng-if="authenticated" class="authenticatedDiv content-wrapper clearfix wow fadeInDown pull-right" data-wow-delay="0.3s">
+            <text>
+                Welcome <strong>{{accountInfo.username}}</strong>!
+            </text>            
+        </div>
+        <!-- Left Sidebar -->
+        <section id="left-sidebar">
+            <div class="logo">
+                <a href="#intro" class="link-scroll"><img src="assets/images/logo/logoSm.png" alt="YVSA N.C.E." /></a>
+            </div><!-- .logo -->
+             <!-- Menu Icon for smaller viewports -->
+            <div id="mobile-menu-icon" class="visible-xs" onclick=" toggle_main_menu(); "><span class="glyphicon glyphicon-th"></span></div>
+            
+            <ul id="main-menu">
+                <li id="menu-item-carousel" class="menu-item scroll"><a href="#carousel">News</a></li>
+                <li id="menu-item-featured" class="menu-item scroll"><a href="#featured">Coaching</a></li>
+                <li id="menu-item-grid" class="menu-item scroll"><a href="#grid">About</a></li>
+                <li id="menu-item-contact" class="menu-item scroll"><a href="#contact">Contact</a></li>
+                <li ng-show="!authenticated" class="menu-item">
+                    <form autocomplete="on" class="m-t" ng-submit="login()" style="border: maroon thin 2px;">
+                        <div class="form-group">
+                            <input id="username" type="text" value="{{username}}" data-ng-model="username" class="form-control" placeholder="Username" required="">
+                        </div>
+                        <div class="form-group">
+                            <input id="password" type="password" value="{{password}}" data-ng-model="password" class="form-control" placeholder="Password" required="">
+                        </div>
+                        <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
+
+                        <!--<p class="text-muted text-center"><small>Do not have an account?</small></p>
+                        <a class="btn btn-sm btn-white btn-block" href="register.html">Create an account</a>-->
+                    </form>
+                </li>
+                <li ng-show="isAdmin">
+                    <a href="admin.html" class="btn-link vysaNavLink">Admin</a>
+                </li>
+                <li ng-show="authenticated">
+                    <button ng-click="logoff()" type="submit" class="btn btn-primary block m-b" style="margin-top: 10px; margin-left: 65px;">Logoff</button>
+                </li>
+                <!--<li ng-if="!authenticated" class="menu-item">
+                    <a href="#"><small>Forgot password?</small></a>
+                </li>-->
+            </ul><!-- #main-menu -->
+
+        </section><!-- #left-sidebar -->
+        <!-- end: Left Sidebar -->
+        <section id="main-content" class="clearfix">
+            
+            <article id="intro" class="section-wrapper clearfix" data-custom-background-img="assets/images/backgrounds/moonlight.png">
+                <div class="content-wrapper clearfix wow fadeInDown" data-wow-delay="0.3s">
+                    <div class="col-sm-10 col-md-9 pull-right">
+                        <section class="feature-text">
+                            <h1>Official Website of the VYSA</h1>
+                            <p>
+                                Founded in 2010 and based out of Holmen, Wisconsin, the Viking Youth Soccer Association (VYSA) is the most competitive, fastest growing club in the La Crosse Area.
+                                After a very successfull fall season, we are looking forward to more growth and fun in the spring!
+                            </p>
+                            <p>
+                                <a href="#carousel" class="link-scroll btn btn-outline-inverse btn-lg">What's Happening</a>
+                            </p>
+                        </section>
+                    </div><!-- .col-sm-10 -->
+                </div><!-- .content-wrapper -->
+            </article><!-- .section-wrapper -->
+            <article id="carousel" class="section-wrapper clearfix" data-custom-background-img="assets/images/backgrounds/news.jpg">
+                <div class="content-wrapper clearfix">
+                    <div id="features-carousel" class="carousel slide with-title-indicators max-height" data-height-percent="70" data-ride="carousel">
+
+                        <!-- Indicators - slide navigation -->
+                        <ol class="carousel-indicators title-indicators">
+                            <li data-target="#features-carousel" data-slide-to="0" class="active">Announcements</li>
+                            <li data-target="#features-carousel" data-slide-to="1">2014 Photo Gallery</li>
+                            <li data-target="#features-carousel" data-slide-to="2">ODP Player Recognition</li>
+                            <li data-target="#features-carousel" data-slide-to="3">Board Meeting News</li>
+                            <li data-target="#features-carousel" data-slide-to="4">Links</li>
+                        </ol>
+                        <!-- Wrapper for slides -->
+                        <div class="carousel-inner">
+                            <div class="item active">
+                                <div class="carousel-text-content" ng-controller="AnnouncementsController">
+                                    <img src="assets/images/backgrounds/transp-image7.png" class="icon" alt="Announcements" />
+                                    <h2 class="title">Announcements</h2>
+                                    <div ng-show="false">
+                                        <p>There are no announcements at this time</p>
+                                    </div>
+                                    <div ng-show="true">
+                                        <div ng-repeat="a in announcements">
+                                            <p>
+                                                <strong>{{a.title}}:</strong> {{a.message}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <!--<p><a href="" onclick="populate_and_open_modal(event, 'modal-content-2');" class="btn btn-outline-inverse btn-sm">read more</a></p>
+                                    <div class="content-to-populate-in-modal" id="modal-content-2">
+                                        <h1>Announcements</h1>
+                                        <p><img data-img-src="assets/images/backgrounds/transp-image1.png" class="lazy rounded_border hover_effect pull-left" alt="Announcements">Etiam at ligula sit amet arcu laoreet consequat. Duis dictum lorem metus, vitae dapibus risus imperdiet nec. <a href="#">Suspendisse molestie lorem odio</a>, sit amet. </p>
+                                        <p>Laoreet consequat. Duis dictum lorem metus, vitae dapibus risus imperdiet nec. Suspendisse molestie lorem odio, sit amet.</p>
+                                        <p>Suspendisse molestie lorem odio, sit amet. Duis dictum lorem metus, vitae dapibus risus imperdiet nec. Suspendisse molestie lorem odio test.</p>
+                                    </div>-->
+                                    <!-- #modal-content-2 -->
+                                </div>
+                            </div><!-- .item -->
+                            <div class="item">
+                                <div class="carousel-text-content">
+                                    <img src="assets/images/stories/ODP.jpg" class="icon" alt="WI ODP" />
+                                    <h3 class="title">2014 Gallery</h3>
+                                    <p>Inside this feature's popup you'll find an alternative version of an image gallery.</p>
+                                    <p>
+                                        <a href="" onclick=" populate_and_open_modal(event, 'modal-content-8', '', 'full-size'); " class="btn btn-outline-inverse btn-sm">view gallery</a>
+                                    </p>
+                                    <div class="content-to-populate-in-modal" id="modal-content-8">
+                                        <h1>Fall 2014</h1>
+                                        <p>Take a look at some of the best images from our 2014 Seasons</p>
+                                        <!-- alt image slider inside popup -->
+                                        <div id="unique-id-for-alt-image-slider" class="owl-carousel popup-alt-image-gallery">
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/boy.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/gallery-thumb-boy.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/numbers.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/gallery-thumb-numbers.jpg" /></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/cyrus.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/cyrus.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/girl_shake.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/gallery-thumb-girl_shake.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/girl2.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/girl2.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/u13girls_team.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/u13girls_team.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/u13girls_meeting.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/u13girls_meeting.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/reddan_14champs.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/reddan_14champs.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/oregon_14champs.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/oregon_14champs.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/reddan_12grey_runnerup.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/reddan_12grey_runnerup.jpg"></a>
+                                            </div>
+                                            <div class="item">
+                                                <a href="assets/images/galleries/2014/year/reddan_12maroon_runnerup.jpg" data-lightbox="popup-alt-gallery"><img class="lazyOwl" data-src="assets/images/galleries/2014/year/reddan_12maroon_runnerup.jpg"></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- .item -->
+                            <div class="item">
+                                <div class="carousel-text-content">
+                                    <img src="assets/images/stories/ODP.jpg" class="icon" alt="WI ODP" />
+                                    <h3 class="title">Meet Our ODP Players</h3>
+                                    <p>
+                                        Our club would like to recognize the nine players who are currently involved with the Wisconsin Olympic Development Progam.
+                                        It is quite impressive to have 4 players from U14 and 5 players from the U13 age-group tryout and be selected for the WI pool team. Last year, three of those players went on from the pool to be selected to the final 18 on the State team!
+                                    </p>
+                                    <p>
+                                        <a href="" onclick=" populate_and_open_modal(event, 'modal-content-4'); " class="btn btn-outline-inverse btn-sm">view players</a>
+                                    </p>
+                                    <div class="content-to-populate-in-modal" id="modal-content-4" style="height: 900px;">
+                                        <h1>Congrats to our WI ODP Players!</h1>
+                                        <p>
+                                            <img data-img-src="assets/images/stories/ODP.jpg" class="lazy rounded_border hover_effect" alt="WIODP"><br /><br />
+                                            Pictured (left to right): Ethan Waldron, Jacob Clements, Caleb Harmon, Jonah Johson
+                                            Kaden Moore, Daniel Naik, Sean Rieck & Quintin Olson
+                                        </p>
+                                        <p>
+                                            <img data-img-src="assets/images/stories/odp2.jpg" class="lazy rounded_border hover_effect" alt="WIODP2" /><br /><br />
+                                            Pictured here is Evan Webar (He had his picture taken at a later date.)
+                                        </p>
+                                    </div><!-- #modal-content-4 -->
+                                </div>
+                            </div><!-- .item -->
+                            <div class="item">
+                                <div class="carousel-text-content">
+                                    <img src="assets/images/backgrounds/transp-image4.png" class="icon" alt="Lorem Ipsum">
+                                    <h2 class="title">Board Meeting Agenda</h2>
+                                    <p>The next board meeting will be held Sunday, May 17th at 7pm at the Holmen Legion</p>
+                                    <p>
+                                        <a href="" onclick=" populate_and_open_modal(event, 'modal-content-5'); " class="btn btn-outline-inverse btn-sm">view agenda</a>
+                                    </p>
+                                    <div class="content-to-populate-in-modal" id="modal-content-5">
+                                        <h2>Board Meeting</h2>
+                                        <p>
+                                            May 17th, 2015 - Agenda
+                                            <!--<ul>
+                                                <li>Item 1</li>
+                                                <li>Item 2</li>
+                                                <li>Item 3</li>
+                                                <li>Item 4</li>
+                                            </ul>-->
+                                        </p>
+                                    </div><!-- #modal-content-5 -->
+                                </div>
+                            </div><!-- .item -->
+                            <div class="item">
+                                <div class="carousel-text-content">
+                                    <img src="assets/images/backgrounds/transp-image4.png" class="icon" alt="Lorem Ipsum">
+                                    <h2 class="title">Useful Links</h2>
+                                    <ul>
+                                        <li><a href="http://www.holmenwi.com/holmenpr/" target="_blank">Holmen Park & Rec Department</a></li>
+                                        <li><a href="http://www.wiyouthsoccer.com/" target="_blank">Wisconsin Youth Soccer Association</a></li>
+                                        <li><a href="http://www.mnyouthsoccer.org/" target="_blank">Minnesota Youth Soccer Association</a></li>
+                                        <li><a href="http://www.southwestdistrictwiyouthsoccer.org/" target="_blank">Southwest District of WI</a></li>
+                                        <li><a href="http://www.wisconsinsoccercentral.com/" target="_blank">Wisconsin Soccer Central</a></li>
+                                        <li><a href="http://www.fifa.com/" target="_blank">FIFA.com</a> </li>
+                                    </ul>
+                                </div>
+                            </div><!-- .item -->
+                        </div><!-- .carousel-inner -->
+                        <!-- Controls -->
+                        <a class="left carousel-control" href="#features-carousel" data-slide="prev"></a>
+                        <a class="right carousel-control" href="#features-carousel" data-slide="next"></a>
+                    </div><!-- #about-carousel -->
+                </div><!-- .content-wrapper -->
+            </article><!-- .section-wrapper -->
+            <article id="featured" class="section-wrapper clearfix" data-custom-background-img="assets/images/backgrounds/kids.jpg">
+                <div class="content-wrapper clearfix">
+                    <div class="col-sm-11 pull-left">
+                        <h1 class="section-title  pull-left">Coaching</h1>
+                        <div style="clear: both; height: 5px;"></div>
+                        <!-- feature columns -->
+                        <section class="feature-columns row clearfix">
+
+                            <!-- feature 2 -->
+                            <article class="feature-col col-md-4">
+                                <a href="" onclick=" populate_and_open_modal(event, 'modal-content-7'); " class="thumbnail linked">
+                                    <div class="image-container">
+                                        <img data-img-src="assets/images/backgrounds/lori.jpg" class="lazy item-thumbnail" alt="Lorem Ipsum">
+                                    </div>
+                                    <div class="caption">
+                                        <h5>Coaching Philosophy</h5>
+                                        <p>Coaching soccer is just as much about understanding psychology as it is about teaching technique, tactics and teaching an overall understanding of the game. Click inside here to get into more information on our club's coaching philosophy.</p>
+                                    </div><!-- .caption -->
+                                </a><!-- .thumbnail -->
+                                <div class="content-to-populate-in-modal" id="modal-content-7">
+                                    <img data-img-src="assets/images/backgrounds/lori.jpg" class="lazy full-width" alt="Lori">
+                                    <h1>Coaching Philosophy</h1>
+                                    <p>
+                                        Coaching soccer is an on-going learning experience. The approach to coaching really depends on the team's age group. It is important to keep in mind your individual players' mental and physical development when attempting to implement practice drills and/or deciding when and how much strategy to introduce.
+                                    </p>
+                                    <p>
+                                        We have to remember that not all of our players share the same skill level, ability to quickly pick things up, or just general interest in what's going on or reason for joining the club. Our job as coaches is to try to implement a practice plan and discuss team goals and expectations based on the makeup of our teams.
+                                        Obviously, the level of competition increases as age groups increase; but, if we can, we should really be concentrating on developing complete players and less on the outcome of individual matches. After all, we'll probably not remember the outcome of such matches a year from now.
+                                    </p>
+                                    <p>
+                                        A complete player possesses the necessary skills allowing them to play the game. But more than that, a complete player is unselfish, knows how to trust others, accepts failure, and knows how to be a good winner. A complete player should always respect the game, his/her coach, teammates, and the officials. As coaches, it's our job to teach the players how to become complete players.
+                                    </p>
+                                    <p>
+                                        In conclusion, there aren't many coaches that would claim to know everything about the sport they are coaching. With that in mind, below are some links for practice ideas, physical training and drills. Never stop searching, sharing, and learning new ideas for drills, short-sided games, or fitness training.
+                                    </p>
+                                </div><!-- #modal-content-7 -->
+                            </article>
+                            <!-- feature 3 -->
+                            <article class="feature-col col-md-4">
+                                <a href="" onclick=" populate_and_open_modal(event, 'modal-content-generalthoughts'); " class="thumbnail linked">
+                                    <div class="image-container">
+                                        <img data-img-src="assets/images/backgrounds/viterbo.jpg" class="lazy item-thumbnail" alt="General Thoughts">
+                                    </div>
+                                    <div class="caption">
+                                        <h5>General Thoughts</h5>
+                                        <p>Are you new to coaching or looking for some tips that might help. Click inside here to get some general thoughts on coaching that we think are important.</p>
+                                    </div><!-- .caption -->
+                                </a><!-- .thumbnail -->
+                                <div class="content-to-populate-in-modal" id="modal-content-generalthoughts">
+                                    <img data-img-src="assets/images/backgrounds/viterbo.jpg" class="lazy full-width" alt="Viterbo">
+                                    <h1>General Thoughts</h1>
+                                    <ul>
+                                        <li>
+                                            <strong>Keep it Fun</strong>
+                                            <p>Try not allow long lines or long periods of waiting. Try to implement a game instead of just plain old boring drills. Give the kids some say as to one part of the structure of practice</p>
+                                        </li>
+                                        <li>
+                                            <strong>Teach fair play</strong>
+                                            <p>Limit aggressiveness shown towards our own players during practice. We don't want to hurt each other.</p>
+                                        </li>
+                                        <li>
+                                            <strong>Be Productive</strong>
+                                            <p>Don't try to implement drills that are above the skill level or thought processing ability of the players trying to do it. ie: Don't try to setup a cross field passing drill with U6 age group.</p>
+                                        </li>
+                                        <li>
+                                            <strong>Take Control</strong>
+                                            <p>This can be the hardest part of coaching sometimes. Try to make it understood that you'll be running practice, and the players should do what you tell them to.</p>
+                                        </li>
+                                        <li>
+                                            <strong>Encouragement</strong>
+                                            <p>Generally, players respond to a postive environment better than they do to a bunch of rules and negative reinforcement for breaking the rules. Soccer is a sport of decision making. At some point in time, every player will have to make pressure-packed game-time decisions. This can put a lot of pressure on our youth. If we can positevely reinforce good decisions and (sometimes) ignore bad decisions, we'll create a more positive environment that allows the creative part of the game to show itself.</p>
+                                        </li>
+                                        <li>
+                                            <strong>Positions</strong>
+                                            <p>Try to not place too much emphasis on what positions kids play; especially in the younger age groups. Everyone probably wants to play on the attack; however, there will come a day where they might be forced to play defense or midfield just to be on the pitch. A complete player should be comfortable in all areas of the field, whether that be with the ball at his feet attacking the goal or making a run back to cover un-marked defenders. Don't limit a player to one side of the field, even if he shows know interest in defense or offense. Whether it be in practice or games, make sure players learn to get comfortable playing all positions.</p>
+                                        </li>
+                                        <li>
+                                            <strong>Let them play</strong>
+                                            <p>As coaches, sometimes we always want to stop and explain what they should do, sometimes we need to just "let them play". Do your best to know when to stop play and when it might be best to mention the thought after the play period has come to an end.</p>
+                                        </li>
+                                    </ul>
+                                </div><!-- #modal-content-7 -->
+                            </article>
+
+                        </section><!-- end: .feature-columns -->
+                        <div class="col-sm-8 pull-left">
+                            <h6 class="pull-left">Helpful Links</h6>
+                            <div style="clear: both; height: 2px;"></div>
+                            <ul class="pull-left">
+                                <li><a href="http://www.soccerxpert.com/" target="_blank">SoccerExpert.com</a></li>
+                                <li><a href="http://www.bettersoccercoaching.com/" target="_blank">BetterSoccerCoaching.com</a></li>
+                                <li><a href="https://www.youtube.com/channel/UCGjXGhzABKd52FpDBqhw1Iw" target="_blank">Brendan Donahue Drills (Youtube)</a></li>
+                                <li><a href="https://www.youtube.com/channel/UC92hjelOIgreLz_d6XzOlNw" target="_blank">IMG Soccer Academy (Youtube)</a></li>
+                            </ul>
+                        </div>
+                        <div style="clear: both; height: 55px;"></div>
+                        <!-- End: Section content to edit -->
+                    </div><!-- .col-sm-10 -->
+                </div><!-- .content-wrapper -->
+            </article><!-- .section-wrapper -->
+            <article id="grid" class="section-wrapper clearfix" data-custom-background-img="assets/images/backgrounds/girls.jpg">
+                <div class="content-wrapper clearfix">
+                    <div class="col-sm-11 col-md-10">
+                        <!-- grid -->
+                        <section class="grid row clearfix clearfix-for-2cols">
+                            <h1 class="section-title pull-left">Mission</h1>
+                            <div class="pull-left col-md-8" style="clear: both; margin-top: 5px;">
+                                <p style="text-align: center">
+                                    The Viking Youth Soccer Association (VYSA) supports and enhances the Holmen, Wis.
+                                    area's youth soccer program. We teach and promote ethical conduct and good sportsmanship
+                                    on and off the field. VYSA maintains an alliance with the Holmen Park & Recreation
+                                    Department.
+                                </p>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-sm-11 col-md-10">
+                        <!-- grid -->
+                        <section class="grid row clearfix clearfix-for-2cols">
+                            <h1 class="section-title pull-left">Board</h1>
+                            <div class="col-md-4 pull-left" style="clear: both; margin-top: 5px;" ng-controller="BoardMembersController">
+                                <table class="pull-left">
+                                    <tr ng-repeat="member in boardMembers">
+                                        <td>
+                                            <h6>{{member.name}}</h6>
+                                            <p>{{member.title}}</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <!--<div class="col-md-4 pull-left" style="clear: both; margin-top: 5px;" ng-repeat="row in rows" ng-controller="BoardMembersController">
+                        <div class="col-md-4 pull-left" ng-repeat="member in row">
+                            <div>
+                                <h6>{{member.name}}</h6>
+                                <p>{{member.title}}</p>
+                            </div>
+                        </div>
+                    </div>-->
+                        </section><!-- end: grid -->
+                    </div><!-- .col-sm-11 -->
+
+                </div><!-- .content-wrapper -->
+            </article><!-- .section-wrapper -->
+            <article id="contact" class="section-wrapper clearfix" data-custom-background-img="assets/images/backgrounds/field.jpg">
+                <div class="content-wrapper clearfix">
+
+                    <h1 class="section-title">Contact</h1>
+
+                    <!-- CONTACT DETAILS -->
+                    <div class="contact-details col-sm-5 col-md-3">
+                        <p>
+                            P.O. Box 193<br />Holmen,<br 7>WI<br />54636
+                        </p>
+                        <p>
+                            <a href="mailto:info@loremipsum.com">holmenvysa@yahoo.com</a>
+                        </p>
+                    </div>
+                    <!-- END: CONTACT DETAILS -->
+                    <!-- CONTACT FORM -->
+                    <div class="col-sm-7 col-md-9" ng-controller="ContactUsController">
+                        <!-- IMPORTANT: change the email address at the top of the assets/php/mail.php file to the email address that you want this form to send to -->
+                        <form class="form-style validate-form clearfix">
+                            <!-- form left col -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" ng-model="msg.name" class="text-field form-control validate-field required" data-validation-type="string" id="form-name" placeholder="Full Name" name="name">
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" ng-model="msg.emailaddr" class="text-field form-control validate-field required" data-validation-type="email" id="form-email" placeholder="Email Address" name="email">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" ng-model="msg.subject" class="text-field form-control validate-field required" data-validation-type="string" id="form-subject" placeholder="Subject" name="subject">
+                                </div>
+                                <!--<div class="form-group text-right">
+                    <img id="form-captcha-img" src="../../assets/php/form_captcha/captcha_img.php"/>
+                    <input type="text" class="text-field form-control validate-field required" data-validation-type="captcha" id="form-captcha" placeholder="Enter text" name="captcha">
+                    <span id="form-captcha-refresh" class="fa fa-refresh" title="Reload"></span>
+                </div>-->
+                            </div><!-- end: form left col -->
+                            <!-- form right col -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <textarea ng-model="msg.message" placeholder="Message..." class="form-control validate-field required" name="message"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-sm btn-outline-inverse" ng-click="sendMsg()">Submit</button>
+                                </div>
+                                <!--<div class="form-group form-general-error-container"></div>-->
+                            </div><!-- end: form right col -->
+                        </form>
+                    </div><!-- end: CONTACT FORM -->
+                </div><!-- .content-wrapper -->
+            </article><!-- .section-wrapper -->
+
+        </section><!-- #main-content -->
+        <!-- Footer -->
+        <section id="footer">
+            <!-- Go to Top -->
+            <div id="go-to-top" onclick=" scroll_to_top(); "><span class="icon glyphicon glyphicon-chevron-up"></span></div>
+            <ul class="social-icons">
+                <li><a href="https://www.facebook.com/pages/Viking-Youth-Soccer-Association-Holmen-Wis/110254995702549?fref=ts" target="_blank" title="Facebook"><img src="assets/images/theme_images/social_icons/facebook.png" /></a></li>
+            </ul>
+            <!-- copyright text -->
+            <div class="footer-text-line">&copy; 2015 Site Designed by Nick Turner</div>
+        </section>
+        <!-- end: Footer -->
+    </div><!-- #outer-container -->
+    <!-- end: Outer Container -->
+    <!-- Modal -->
+    <!-- DO NOT MOVE, EDIT OR REMOVE - this is needed in order for popup content to be populated in it -->
+    <div class="modal fade" id="common-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <div class="modal-body">
+                </div><!-- .modal-body -->
+            </div><!-- .modal-content -->
+        </div><!-- .modal-dialog -->
+    </div><!-- .modal -->
+    <!-- Javascripts
+            ================================================== -->
+    <!-- Jquery and Bootstrap JS -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="assets/js/jquery-1.11.1.min.js"><\/script>')</script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Easing - for transitions and effects -->
+    <script src="assets/js/jquery.easing.1.3.js"></script>
+    <!-- background image strech script -->
+    <script src="assets/js/jquery.backstretch.min.js"></script>
+
+    <!-- background image fix for IE 9 or less
+       - use same background as set above to <body> -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript">
+    $(document).ready(function(){
+      jQuery("#outer-background-container").backstretch("assets/images/other_images/bg5.jpg");
+    });
+    </script>
+    <![endif]-->
+    <!-- detect mobile browsers -->
+    <script src="assets/js/detectmobilebrowser.js"></script>
+    <!-- owl carousel js -->
+    <script src="assets/js/owl-carousel/owl.carousel.min.js"></script>
+    <!-- lightbox js -->
+    <script src="assets/js/lightbox/js/lightbox.min.js"></script>
+    <!-- intro animations -->
+    <script src="assets/js/wow/wow.min.js"></script>
+    <!-- responsive videos -->
+    <script src="assets/js/jquery.fitvids.js"></script>
+
+    <!-- Custom functions for this theme -->
+    <script src="assets/js/functions.js"></script>
+    <script src="assets/js/initialise-functions.js"></script>
+
+    <!-- IE9 form fields placeholder fix -->
+    <!--[if lt IE 9]>
+    <script>contact_form_IE9_placeholder_fix();</script>
+    <![endif]-->
+
+
+</body>
+</html>

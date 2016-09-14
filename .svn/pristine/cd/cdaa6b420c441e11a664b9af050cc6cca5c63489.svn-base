@@ -1,0 +1,83 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class CoachService
+    {
+        private UnitOfWork unitOfWork;
+
+        public CoachService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<CoachDTO> GetCoachDtos()
+        {
+            var list = new List<CoachDTO>();
+            unitOfWork.CoachRepository.Get(a => a.IsActive).ToList()
+                        .ForEach(x => list.Add(x.ConvertToDto()));
+            return list;
+        }
+
+        public IEnumerable<DropdownItemVM> GetCoachDropdownVMs()
+        {
+            var coachList = unitOfWork.CoachRepository.Get(a => a.IsActive);
+            var list = new List<DropdownItemVM>();
+            coachList.ToList().ForEach(x => list.Add(new DropdownItemVM
+                                                       {
+                                                           Id = x.Id,
+                                                           Label = x.FirstName + " " + x.LastName
+                                                       }));
+            return list;
+        }
+
+        public CoachDTO GetCoach(int id)
+        {
+            var coach = unitOfWork.CoachRepository.GetByID(id);
+            return coach == null ? null : coach.ConvertToDto();
+        }
+
+        public CoachDTO UpdateCoach(CoachDTO updatedCoachDto, string lastUpdateBy)
+        {
+            var coach = unitOfWork.CoachRepository.GetByID(updatedCoachDto.Id);
+            if (coach == null) return null;
+
+            //do update
+            coach.UpdateValuesFromDTO(updatedCoachDto, lastUpdateBy, false);
+
+            unitOfWork.CoachRepository.Update(coach);
+            unitOfWork.Save();
+
+            return updatedCoachDto;
+        }
+
+        public CoachDTO AddCoach(CoachDTO newCoachDto, string lastUpdateBy)
+        {
+            Coach coach = new Coach().UpdateValuesFromDTO(newCoachDto, lastUpdateBy, true);
+            unitOfWork.CoachRepository.Insert(coach);
+            unitOfWork.Save();
+
+            return coach.ConvertToDto();
+        }
+
+        public CoachDTO SoftDeleteCoach(int id, string lastUpdateBy)
+        {
+            var coach = unitOfWork.CoachRepository.GetByID(id);
+            if (coach == null) return null;
+
+            coach.IsActive = false;
+            coach.LastUpdateUtc = DateTime.UtcNow;
+            coach.LastUpdateBy = lastUpdateBy;
+            unitOfWork.CoachRepository.Update(coach);
+            unitOfWork.Save();
+
+            return coach.ConvertToDto();
+        }
+    }
+}

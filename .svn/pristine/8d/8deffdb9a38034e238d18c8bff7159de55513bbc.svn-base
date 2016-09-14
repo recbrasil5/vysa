@@ -1,0 +1,11 @@
+﻿namespace VYSA.Domain.Entities
+{
+    public class ContactUsMessage : EntityBase
+    {
+        public string Name { get; set; }
+        public string EmailAddr { get; set; }
+        public string Subject { get; set; }
+        public string Message { get; set; }
+        public bool Read { get; set; }
+    }
+}

@@ -1,0 +1,207 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Infrastructure.Seed;
+
+namespace VYSA.WebApi.Infrastructure
+{
+    public static class InitializerUtil
+    {
+        public static void SeedDatabase(EfDbContext context, Boolean createInitializer)
+        {
+            //EF figures out that Roles need to save before Users :-)
+            setupDefaultRoles(context);
+            setupDefaultUsers(context, createInitializer);
+
+            //Site Management
+            setupDefaultAnnouncements(context);
+            setupDefaultBoardMembers(context);
+
+            //Club Management
+            setupDefaultPlayers(context);
+            setupDefaultCoaches(context);
+            setupDefaultParentReps(context);
+
+            setupDefaultSeason(context);
+            setupDefaultDivisions(context);
+            setupDefaultMailingListMembers(context);
+            setupDefaultContactUsMessages(context);
+
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                //TODO: LOG EXCEPTION
+                var x = e;
+            }
+        }
+
+        private static void setupDefaultContactUsMessages(EfDbContext context)
+        {
+            new List<ContactUsMessage>
+            {
+                DefaultContactUsMessages.JimsMessage,
+                DefaultContactUsMessages.PamsMessage
+            }.ToList().ForEach(a => context.ContactUsMessages.Add(a)); 
+        }
+
+        private static void setupDefaultMailingListMembers(EfDbContext context)
+        {
+            DefaultMailingListMembers.MailingList.ForEach(m => context.MailingListMembers.Add(m));
+        }
+
+        private static void setupDefaultPlayers(EfDbContext context)
+        {
+            new List<Player>
+            {
+                DefaultPlayers.PlayerJacobClements,
+                DefaultPlayers.PlayerBraxtonStrupp,
+                DefaultPlayers.PlayerJonahJohnson,
+                DefaultPlayers.PlayerQuintinOlson,
+                DefaultPlayers.PlayerAlecOlson,
+                DefaultPlayers.PlayerTyler,
+                DefaultPlayers.PlayerKyler,
+                DefaultPlayers.PlayerBraydon,
+                DefaultPlayers.PlayerMatt,
+                DefaultPlayers.PlayerDaniel,
+                DefaultPlayers.PlayerZakTurner,
+                DefaultPlayers.PlayerZachMueller,
+                DefaultPlayers.PlayerCadenReed,
+                DefaultPlayers.PlayerKadenMoore,
+                DefaultPlayers.PlayerEthanWaldron,
+                DefaultPlayers.PlayerKylerPalmberg,
+                DefaultPlayers.PlayerCalebDeluww,
+                DefaultPlayers.PlayerDeejGarret,
+                DefaultPlayers.PlayerSpencerMalone,
+                DefaultPlayers.PlayerSeanReick,
+                DefaultPlayers.PlayerNathanAlberts,
+                DefaultPlayers.PlayerElliotWaldron,
+                DefaultPlayers.PlayerDefault18,
+                DefaultPlayers.PlayerDefault19,
+                DefaultPlayers.PlayerDefault20
+            }.ForEach(a => context.Players.Add(a));
+        }
+
+        private static void setupDefaultParentReps(EfDbContext context)
+        {
+            new List<ParentRep>
+            {
+                DefaultParentReps.ParentRepU10Boys,
+                DefaultParentReps.ParentRepU11Coed,
+                DefaultParentReps.ParentRepU11Girls,
+                DefaultParentReps.ParentRepU13Boys,
+                DefaultParentReps.ParentRepU14Boys
+            }.ForEach(a => context.ParentReps.Add(a));
+        }
+
+        private static void setupDefaultCoaches(EfDbContext context)
+        {
+            new List<Coach>
+            {
+                DefaultCoaches.CoachAndy,
+                DefaultCoaches.CoachBruce,
+                DefaultCoaches.CoachLori,
+                DefaultCoaches.CoachManuel,
+                DefaultCoaches.CoachMark,
+                DefaultCoaches.CoachNick,
+                DefaultCoaches.CoachZach
+            }.ForEach(a => context.Coaches.Add(a));
+        }
+
+        private static void setupDefaultDivisions(EfDbContext context)
+        {
+            new List<Division>
+            {
+                DefaultDivisions.U10Boys,
+                DefaultDivisions.U11Coed,
+                DefaultDivisions.U11Girls,
+                DefaultDivisions.U12Boys,
+                DefaultDivisions.U13Boys,
+                DefaultDivisions.U14Boys,
+                DefaultDivisions.U17Boys
+            }.ForEach(a => context.Divisions.Add(a));
+        }
+
+        private static void setupDefaultAnnouncements(EfDbContext context)
+        {
+            new List<Announcement>
+            {
+                DefaultAnnouncements.SummerRegistrationAnnouncement,
+                DefaultAnnouncements.FallTryoutsAnnouncement
+            }.ForEach(a => context.Announcements.Add(a));
+        }
+
+        private static void setupDefaultSeason(EfDbContext context)
+        {
+            new List<Season>()
+            {
+                DefaultSeasons.Fall2015,
+                DefaultSeasons.Spring2016,
+                //DefaultSeasons.Summer2016
+            }.ForEach(s => context.Seasons.Add(s));
+        }
+
+        private static void setupDefaultBoardMembers(EfDbContext context)
+        {
+            #region BoardMembers
+            List<BoardMember> members = new List<BoardMember>()
+            {
+                DefaultBoardMembers.bmAlHanson,
+                DefaultBoardMembers.bmJoshKipp,
+                DefaultBoardMembers.bmStacyFoster,
+                DefaultBoardMembers.bmTaraRieck,
+                DefaultBoardMembers.bmSteveOlson,
+                DefaultBoardMembers.bmPatRotering,
+                DefaultBoardMembers.bmKatieMalone,
+                DefaultBoardMembers.bmShannonSchneider,
+                DefaultBoardMembers.bmDerekPeterson,
+                DefaultBoardMembers.bmAndyOlson
+            };
+            #endregion
+
+            members.ForEach(m => context.BoardMembers.Add(m));
+        }
+
+        private static void setupDefaultRoles(EfDbContext context)
+        {
+            #region Roles
+            new List<Role>()
+            {
+               DefaultRoles.AdminRole,                
+               DefaultRoles.SuperAdminRole,
+               DefaultRoles.MemberRole
+            }.ForEach(r => context.Roles.Add(r));
+            #endregion
+        }
+
+        private static void setupDefaultUsers(EfDbContext context, Boolean createInitializer)
+        {
+            #region Create Users (SuperAdmin, Admin, Board Members)
+
+            new List<User>()
+            {
+                createInitializer ? DefaultUsers.userSuperAdmin : DefaultUsers.debugSuperAdmin,
+                createInitializer ? DefaultUsers.userAdmin : DefaultUsers.debugAdmin,
+                createInitializer ? DefaultUsers.userMe : DefaultUsers.debugMe,
+                DefaultUsers.userAl,
+                DefaultUsers.userJosh,
+                DefaultUsers.userStacey,
+                DefaultUsers.userTara,
+                DefaultUsers.userKatie,
+                DefaultUsers.userSteve,
+                DefaultUsers.userPat,
+                DefaultUsers.userShannon,
+                DefaultUsers.userDerek,
+                DefaultUsers.userPatStrupp,
+                DefaultUsers.userAndyMeyer
+            }.ForEach(u => context.Users.Add(u));
+
+            #endregion
+        }
+   
+    }
+}

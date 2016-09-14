@@ -1,0 +1,115 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Models.Binding;
+using VYSA.WebApi.Models.Resource;
+
+namespace VYSA.WebApi.Services
+{
+    public class GuardianService
+    {
+        private readonly UnitOfWork _unitOfWork;
+
+        public GuardianService(IUnitOfWork _unitOfWork)
+        {
+            this._unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<GuardianResourceModel> GetGuardiansByFilter(FilterBindingModel filterDto)
+        {
+            var list = new List<GuardianResourceModel>();
+
+            var playerDto = new PlayerService(_unitOfWork).GetPlayer(filterDto.LookupId);
+            var playerGuardianIdList = new List<Int32>();
+            if (playerDto != null && playerDto.Guardians != null)
+            {
+                 playerGuardianIdList = playerDto.Guardians.Select(x => x.GuardianId).ToList();
+            }
+            _unitOfWork.GuardianRepository.Get(b => b.IsActive && !playerGuardianIdList.Contains(b.Id) &&
+                                                   (b.FirstName.StartsWith(filterDto.SearchTerm) || b.LastName.StartsWith(filterDto.SearchTerm)))
+                   .ToList().ForEach(x => list.Add(x.ConvertToResourceModel()));
+            return list;
+        }
+
+        public IEnumerable<GuardianResourceModel> GetGuardians()
+        {
+            var list = new List<GuardianResourceModel>();
+            _unitOfWork.GuardianRepository.Get(b => b.IsActive)
+                   .ToList().ForEach(x => list.Add(x.ConvertToResourceModel()));
+            return list;
+        }
+
+        public IEnumerable<MailingListResourceModel> GetMailingList()
+        {
+            return _unitOfWork.GuardianRepository.Get(b => b.IsActive)
+                .Select(x => new MailingListResourceModel
+                {
+                    Name = string.Format("{0} {1}", x.FirstName, x.LastName),
+                    Email = x.Email
+                });
+        }
+
+        public String GetListViewPlayerDTOGuardians(List<Int32> guardianIdList)
+        {
+            var guardianList = new List<String>();
+
+            _unitOfWork.GuardianRepository
+                .Get(b => b.IsActive && guardianIdList.Contains(b.Id)).ToList()
+                .ForEach(x => guardianList.Add(x.ConvertToResourceModel().FullName));
+
+            return guardianList.Count > 0 ? string.Join(", ", guardianList.ToArray()) : "";
+        }
+
+        public Guardian GetGuardian(int id)
+        {
+            return _unitOfWork.GuardianRepository.GetByID(id);
+        }
+
+        public GuardianResourceModel GetGuardianDto(int id)
+        {
+            var guardian = _unitOfWork.GuardianRepository.GetByID(id);
+            return guardian == null ? null : guardian.ConvertToResourceModel();
+        }
+
+        public GuardianResourceModel UpdateGuardian(GuardianResourceModel updatedGuardianDTO, string lastUpdateBy)
+        {
+            var guardian = _unitOfWork.GuardianRepository.GetByID(updatedGuardianDTO.Id);
+            if (guardian == null) return null;
+
+            //do update
+            guardian.PopulateEntityWithResourceModel(updatedGuardianDTO, lastUpdateBy, false);
+
+            _unitOfWork.GuardianRepository.Update(guardian);
+            _unitOfWork.Save();
+
+            return updatedGuardianDTO;
+        }
+
+        public GuardianResourceModel AddGuardian(GuardianResourceModel newGuardianDTO, string lastUpdateBy)
+        {
+            Guardian guardian = new Guardian().PopulateEntityWithResourceModel(newGuardianDTO, lastUpdateBy, true);
+            _unitOfWork.GuardianRepository.Insert(guardian);
+            _unitOfWork.Save();
+
+            return guardian.ConvertToResourceModel();
+        }
+
+        public GuardianResourceModel SoftDeleteGuardian(int id, string lastUpdateBy)
+        {
+            var guardian = _unitOfWork.GuardianRepository.GetByID(id);
+            if (guardian == null) return null;
+
+            guardian.IsActive = false;
+            guardian.LastUpdateUtc = DateTime.UtcNow;
+            guardian.LastUpdateBy = lastUpdateBy;
+            _unitOfWork.GuardianRepository.Update(guardian);
+            _unitOfWork.Save();
+
+            return guardian.ConvertToResourceModel();
+        }
+    }
+}

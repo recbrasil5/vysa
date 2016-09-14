@@ -1,0 +1,94 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Enums;
+using VYSA.Domain.Extensions;
+
+namespace VYSA.WebApi.Models
+{
+    public class PlayerGuardianDTO
+    {
+        public int Id { get; set; }
+        public int PlayerId { get; set; }
+        public int GuardianId { get; set; }
+
+        public string FullName
+        {
+            get { return String.Format("{0} {1}", FirstName, LastName); }
+        }
+
+        [Required]
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; }
+
+        [Required]
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; }
+
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Display(Name = "Phone")]
+        public string Phone { get; set; }
+
+        private Enums.Relationship relationship;
+        public Enums.Relationship Relationship
+        {
+            get
+            {
+                relationship = RelationshipStr.ToEnum<Enums.Relationship>();
+                return relationship;
+            }
+            set { relationship = value; }
+        }
+
+        [Required(ErrorMessage = "Relationship Required.")]
+        [Display(Name = "Relationship")]
+        public string RelationshipStr { get; set; }
+
+    }
+
+
+    public static class PlayerGuardianDTOExtensions
+    {
+        public static PlayerGuardian UpdateValuesFromDTO(this PlayerGuardian playerGuardian, PlayerGuardianDTO playerGuardianDto, string lastUpdateBy, bool onCreate)
+        {
+            playerGuardian.Id = playerGuardianDto.Id;
+            playerGuardian.Relationship = playerGuardianDto.Relationship; //we'll only ever edit the relationship b/t player and guardian 
+            playerGuardian.IsActive = true;
+            playerGuardian.LastUpdateBy = lastUpdateBy;
+            playerGuardian.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                //only on creation are these set.
+                playerGuardian.PlayerId = playerGuardianDto.PlayerId;
+                playerGuardian.GuardianId = playerGuardianDto.GuardianId;
+
+                playerGuardian.CreatedBy = lastUpdateBy;
+                playerGuardian.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return playerGuardian;
+        }
+
+        public static PlayerGuardianDTO ConvertToDto(this PlayerGuardian playerGuardian, GuardianDTO guardianDto)
+        {
+            var playerGuardianDto = new PlayerGuardianDTO
+            {
+                Id = playerGuardian.Id,
+                PlayerId = playerGuardian.PlayerId,
+                GuardianId = playerGuardian.GuardianId,
+                Relationship = playerGuardian.Relationship,
+                RelationshipStr = playerGuardian.Relationship.ToString(),
+                FirstName = guardianDto.FirstName,
+                LastName = guardianDto.LastName,
+                Email = guardianDto.Email,
+                Phone = guardianDto.Phone
+            };
+
+            return playerGuardianDto;
+        }
+        
+    }
+}

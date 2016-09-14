@@ -1,0 +1,5 @@
+﻿<td><a data-ng-click="edit(parentRep)"><span class="glyphicon glyphicon-pencil"></span></a></td>
+<td>{{parentRep.firstName }}</td>
+<td>{{parentRep.lastName }}</td>
+<td>{{parentRep.email }}</td>
+<td>{{parentRep.phone }}</td>

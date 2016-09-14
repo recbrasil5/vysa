@@ -1,0 +1,9 @@
+﻿<td><a data-ng-click="update(guardian)">Save</a></td>
+<td><a data-ng-click="reset()" class="vysa-inline-edit-cancel-button">Cancel</a></td>
+<td><input class="form-control" type="text" data-ng-model="guardian.firstName" required /></td>
+<td><input class="form-control" type="text" data-ng-model="guardian.lastName" required /></td>
+<td><select id="relationshipStr" class="form-control"
+        data-ng-model="guardian.relationshipStr"
+        data-ng-options="r for r in relationshipTypes" required></select></td>
+<td><input class="form-control" type="email" data-ng-model="guardian.email" /></td>
+<td><input class="form-control" type="tel" data-ng-model="guardian.phone" /></td>

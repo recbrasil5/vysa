@@ -1,0 +1,89 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("admin").controller('AdminPlayersController',
+        function ($scope, $location, notifierService, AdminPlayerRepository) {
+
+            loadForm();
+
+            function loadForm() {
+                $scope.players = [];
+                $scope.totalRecords = 0;
+                $scope.recordsPerPage = 10;
+                getPlayersGrid(1);
+                setupPaginationScopeVars();
+            }
+
+            function setupPaginationScopeVars() {
+                $scope.pagination = {
+                    current: 1
+                };
+
+                $scope.pageChanged = function (pageNo) {
+                    getPlayersGrid(pageNo);
+                };
+            }
+
+            function getPlayersGrid(pageNo) {
+
+                if (pageNo === undefined) {
+                    pageNo = $scope.pagination.current;
+                }
+
+                AdminPlayerRepository.listView.post({
+                    pageNum: pageNo,
+                    numRecs: $scope.recordsPerPage,
+                    getCount: true
+                })
+                .$promise
+                .then(function (data) {
+                            if (data.count > 0) {
+                                //$scope.noData = true;
+                                $scope.players = data.players;
+                                $scope.totalRecords = data.count;
+                                togglePagingDisplaySettings(data.count);
+                            } else {
+                                $scope.noData = false;
+                            }
+                        }),
+                      function (error) {
+                          notifierService.error('Failure to load players table' + error);
+                    };
+            }
+
+            $scope.delete = function (playerId) {
+                AdminPlayerRepository.players.delete({ id: parseInt(playerId) })
+                    .$promise.then(function () {
+                        notifierService.success('Record has been removed!');
+                        getPlayersGrid(1);
+                    }, function (error) {
+                        notifierService.error('Ex: ' + error.message);
+                    });
+            };
+
+            function togglePagingDisplaySettings(count) {
+                if (count > 50) {
+                    $scope.equals100Records = true;
+                    $scope.under50Records = true;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count > 25) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = true;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count > 15) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = false;
+                    $scope.under25Records = true;
+                    $scope.under15Records = true;
+                } else if (count < 15) {
+                    $scope.equals100Records = false;
+                    $scope.under50Records = false;
+                    $scope.under25Records = false;
+                    $scope.under15Records = false;
+                }
+            }
+
+        });
+}());

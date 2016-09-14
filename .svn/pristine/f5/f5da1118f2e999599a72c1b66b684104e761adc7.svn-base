@@ -1,0 +1,52 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public class DefaultPlayers
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static Player PlayerJacobClements = new Player
+        {
+            FirstName = "Jacob",
+            LastName = "Clements",
+            DateOfBirth = Convert.ToDateTime("2001-06-02"),
+            PlayerGuardians = DefaultPlayerGuardians.PlayerGuardianListJacobClements,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static Player PlayerJonahJohnson = new Player
+        {
+            FirstName = "Jonah",
+            LastName = "Johnson",
+            DateOfBirth = Convert.ToDateTime("2001-06-02"),
+            PlayerGuardians = DefaultPlayerGuardians.PlayerGuardianListJonahJohnson,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+
+        public static Player PlayerBraxtonStrupp = new Player
+        {
+            FirstName = "Braxton",
+            LastName = "Strupp",
+            DateOfBirth = Convert.ToDateTime("2004-09-29"),
+            PlayerGuardians = DefaultPlayerGuardians.PlayerGuardianListStrupp,
+            IsActive = true,
+            CreatedBy = lastUpdateBy,
+            LastUpdateBy = lastUpdateBy,
+            CreatedDateUtc = DateTime.UtcNow,
+            LastUpdateUtc = DateTime.UtcNow
+        };
+    }
+}

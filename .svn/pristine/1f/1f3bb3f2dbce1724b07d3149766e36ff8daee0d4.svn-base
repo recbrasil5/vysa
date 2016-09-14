@@ -1,0 +1,328 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Entities;
+
+namespace VYSA.Domain.Concrete
+{
+    public class UnitOfWork : IUnitOfWork, IDisposable
+    {
+        
+        private bool disposed = false;
+
+        #region Properties
+        private EFDbContext context;
+        public EFDbContext Context
+        {
+            get
+            {
+                if (this.context == null)
+                {
+                    this.context = new EFDbContext();
+                }
+                return context;
+            }
+        }
+
+        private GenericRepository<Upload> uploadRepository;
+        public GenericRepository<Upload> UploadRepository
+        {
+            get
+            {
+                if (this.uploadRepository == null)
+                {
+                    this.uploadRepository = new GenericRepository<Upload>(Context);
+                }
+                return uploadRepository;
+            }
+        }
+
+        private GenericRepository<MailingListMember> mailingListMemberRepository;
+        public GenericRepository<MailingListMember> MailingListMemberRepository
+        {
+            get
+            {
+                if (this.mailingListMemberRepository == null)
+                {
+                    this.mailingListMemberRepository = new GenericRepository<MailingListMember>(Context);
+                }
+                return mailingListMemberRepository;
+            }
+        }
+
+        private GenericRepository<ContactUsMessage> contactUsMessageRepository;
+        public GenericRepository<ContactUsMessage> ContactUsMessageRepository
+        {
+            get
+            {
+                if (this.contactUsMessageRepository == null)
+                {
+                    this.contactUsMessageRepository = new GenericRepository<ContactUsMessage>(Context);
+                }
+                return contactUsMessageRepository;
+            }
+        }
+
+        private GenericRepository<Announcement> announcementRepository;
+        public GenericRepository<Announcement> AnnouncementRepository
+        {
+            get
+            {
+                if (this.announcementRepository == null)
+                {
+                    this.announcementRepository = new GenericRepository<Announcement>(Context);
+                }
+                return announcementRepository;
+            }
+        }
+
+        private GenericRepository<BoardMember> boardMemberRepository;
+        public GenericRepository<BoardMember> BoardMemberRepository
+        {
+            get
+            {
+                if (this.boardMemberRepository == null)
+                {
+                    this.boardMemberRepository = new GenericRepository<BoardMember>(Context);
+                }
+                return boardMemberRepository;
+            }
+        }
+
+        private GenericRepository<Division> divisionRepository;
+        public GenericRepository<Division> DivisionRepository
+        {
+            get
+            {
+                if (this.divisionRepository == null)
+                {
+                    this.divisionRepository = new GenericRepository<Division>(Context);
+                }
+                return divisionRepository;
+            }
+        }
+
+        private GenericRepository<Coach> coachRepository;
+        public GenericRepository<Coach> CoachRepository
+        {
+            get
+            {
+                if (this.coachRepository == null)
+                {
+                    this.coachRepository = new GenericRepository<Coach>(Context);
+                }
+                return coachRepository;
+            }
+        }
+
+        private GenericRepository<ParentRep> parentRepRepository;
+        public GenericRepository<ParentRep> ParentRepRepository
+        {
+            get
+            {
+                if (this.parentRepRepository == null)
+                {
+                    this.parentRepRepository = new GenericRepository<ParentRep>(Context);
+                }
+                return parentRepRepository;
+            }
+        }
+
+        private GenericRepository<Season> seasonRepository;
+        public GenericRepository<Season> SeasonRepository
+        {
+            get
+            {
+                if (this.seasonRepository == null)
+                {
+                    this.seasonRepository = new GenericRepository<Season>(Context);
+                }
+                return seasonRepository;
+            }
+        }
+
+        private GenericRepository<Event> eventRepository;
+        public GenericRepository<Event> EventRepository
+        {
+            get
+            {
+                if (this.eventRepository == null)
+                {
+                    this.eventRepository = new GenericRepository<Event>(Context);
+                }
+                return eventRepository;
+            }
+        }
+
+        private GenericRepository<Team> teamRepository;
+        public GenericRepository<Team> TeamRepository
+        {
+            get
+            {
+                if (this.teamRepository == null)
+                {
+                    this.teamRepository = new GenericRepository<Team>(Context);
+                }
+                return teamRepository;
+            }
+        }
+
+        private GenericRepository<Roster> rosterRepository;
+        public GenericRepository<Roster> RosterRepository
+        {
+            get
+            {
+                if (this.rosterRepository == null)
+                {
+                    this.rosterRepository = new GenericRepository<Roster>(Context);
+                }
+                return rosterRepository;
+            }
+        }
+
+        private GenericRepository<TeamEvent> teamEventRepository;
+        public GenericRepository<TeamEvent> TeamEventRepository
+        {
+            get
+            {
+                if (this.teamEventRepository == null)
+                {
+                    this.teamEventRepository = new GenericRepository<TeamEvent>(Context);
+                }
+                return teamEventRepository;
+            }
+        }
+
+        private GenericRepository<TeamCoach> teamCoachRepository;
+        public GenericRepository<TeamCoach> TeamCoachRepository
+        {
+            get
+            {
+                if (this.teamCoachRepository == null)
+                {
+                    this.teamCoachRepository = new GenericRepository<TeamCoach>(Context);
+                }
+                return teamCoachRepository;
+            }
+        }
+
+        private GenericRepository<TeamParentRep> teamParentRepRepository;
+        public GenericRepository<TeamParentRep> TeamParentRepRepository
+        {
+            get
+            {
+                if (this.teamParentRepRepository == null)
+                {
+                    this.teamParentRepRepository = new GenericRepository<TeamParentRep>(Context);
+                }
+                return teamParentRepRepository;
+            }
+        }
+        
+        private GenericRepository<Guardian> guardianRepository;
+        public GenericRepository<Guardian> GuardianRepository
+        {
+            get
+            {
+                if (this.guardianRepository == null)
+                {
+                    this.guardianRepository = new GenericRepository<Guardian>(Context);
+                }
+                return guardianRepository;
+            }
+        }
+
+        private GenericRepository<Player> playerRepository;
+        public GenericRepository<Player> PlayerRepository
+        {
+            get
+            {
+                if (this.playerRepository == null)
+                {
+                    this.playerRepository = new GenericRepository<Player>(Context);
+                }
+                return playerRepository;
+            }
+        }
+
+        private GenericRepository<PlayerGuardian> playerGuardianRepository;
+        public GenericRepository<PlayerGuardian> PlayerGuardianRepository
+        {
+            get
+            {
+                if (this.playerGuardianRepository == null)
+                {
+                    this.playerGuardianRepository = new GenericRepository<PlayerGuardian>(Context);
+                }
+                return playerGuardianRepository;
+            }
+        }
+
+        private GenericRepository<Registration> registrationRepository;
+        public GenericRepository<Registration> RegistrationRepository
+        {
+            get
+            {
+                if (this.registrationRepository == null)
+                {
+                    this.registrationRepository = new GenericRepository<Registration>(Context);
+                }
+                return registrationRepository;
+            }
+        }
+
+        private EFUserRepository userRepository;
+        public EFUserRepository UserRepository
+        {
+            get
+            {
+                if (this.userRepository == null)
+                {
+                    this.userRepository = new EFUserRepository(Context);
+                }
+                return userRepository;
+            }
+        }
+
+        private EFRoleRepository roleRepository;
+        public EFRoleRepository RoleRepository
+        {
+            get
+            {
+                if (this.roleRepository == null)
+                {
+                    this.roleRepository = new EFRoleRepository(Context);
+                }
+                return roleRepository;
+            }
+        }
+
+        #endregion
+
+        public void Save()
+        {
+            context.SaveChanges();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    Context.Dispose();
+                }
+            }
+            this.disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            //GC.SuppressFinalize();
+            GC.Collect();
+        }
+    }
+}

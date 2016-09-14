@@ -1,0 +1,66 @@
+﻿using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.Http;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Images")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class ImagesController : ApiController
+    {
+        [HttpPost]
+        [Route("upload")]
+        public async Task<HttpResponseMessage> Post()
+        {
+            //TODO: Change the storage path when we have a spot on the server
+            const string baseStorageDir = @"C:\tmp";
+            string[] acceptedTypes = { ".jpg", ".jpeg", ".png", ".gif" };
+            if (Request.Content.IsMimeMultipartContent())
+            {
+                var streamProvider = new MultipartFormDataStreamProvider(baseStorageDir);
+                await Request.Content.ReadAsMultipartAsync(streamProvider);
+                if (streamProvider.FileData.Count > 1)
+                {
+                    return Request.CreateResponse(HttpStatusCode.NotAcceptable, "Only one file may be uploaded.");
+                }
+
+                foreach (MultipartFileData fileData in streamProvider.FileData)
+                {
+                    if (string.IsNullOrEmpty(fileData.Headers.ContentDisposition.FileName))
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotAcceptable, "This request is not properly formatted");
+                    }
+
+                    var fileName = fileData.Headers.ContentDisposition.FileName;
+                    var fileType = fileName.Substring(fileName.Length - 5, 4);
+
+                    if (!acceptedTypes.Contains(fileType))
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotAcceptable, "File was not in the correct format. Allowable image formats are JPG, JPEG, GIF and PNG.");
+                    }
+                    if (fileName.StartsWith("\"") && fileName.EndsWith("\""))
+                    {
+                        fileName = fileName.Trim('"');
+                    }
+                    if (fileName.Contains(@"/") || fileName.Contains(@"\"))
+                    {
+                        fileName = Path.GetFileName(fileName);
+                    }
+
+                    var filePath = Path.Combine(baseStorageDir, fileName + fileType);
+                    //File.Move(fileData.LocalFileName, filePath);
+                    File.Delete(filePath);
+                    File.Move(fileData.LocalFileName, filePath);
+                }
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.NotAcceptable, "This request is not properly formatted");
+            }
+        }
+    }
+}

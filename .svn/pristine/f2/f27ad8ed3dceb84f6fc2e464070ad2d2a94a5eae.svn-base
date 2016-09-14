@@ -1,0 +1,78 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using System.Web.Http;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class AnnouncementService
+    {
+        const int maxAnnouncements = 5;
+        private UnitOfWork unitOfWork;
+
+        public AnnouncementService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<Announcement> GetAnnouncements(bool adminLoad)
+        {
+            //on adminLoad don't perform the DateTime check - display all announcements no matter what
+            var announcements = adminLoad ? 
+                unitOfWork.AnnouncementRepository.Get(a => a.IsActive)
+                : unitOfWork.AnnouncementRepository.Get(a => a.IsActive && DateTime.Compare(a.EndTime.Value, DateTime.Now) > 0);
+
+            return announcements != null ? announcements.Where(a => a.StartTime.HasValue).OrderByDescending(a => a.StartTime.Value)
+                                                        .Take(announcements.Count() > maxAnnouncements ? maxAnnouncements : announcements.Count())
+                                          : new List<Announcement>();
+        }
+
+        public AnnouncementDTO GetAnnouncement(int id)
+        {
+            var announcement = unitOfWork.AnnouncementRepository.GetByID(id);
+            return announcement == null ? null : announcement.ConvertToDto();
+        }
+
+        public AnnouncementDTO UpdateAnnouncement(AnnouncementDTO updatedAnnouncementDto, string lastUpdateBy)
+        {
+            var announcement = unitOfWork.AnnouncementRepository.GetByID(updatedAnnouncementDto.Id);
+            if (announcement == null) return null;
+
+            //do update
+            announcement.UpdateValuesFromDTO(updatedAnnouncementDto, lastUpdateBy, false);
+
+            unitOfWork.AnnouncementRepository.Update(announcement);
+            unitOfWork.Save();
+
+            return updatedAnnouncementDto;
+        }
+
+        public AnnouncementDTO AddAnnouncement(AnnouncementDTO newAnnouncementDto, string lastUpdateBy)
+        {
+            Announcement announcement = new Announcement().UpdateValuesFromDTO(newAnnouncementDto, lastUpdateBy, true);
+            unitOfWork.AnnouncementRepository.Insert(announcement);
+            unitOfWork.Save();
+
+            return announcement.ConvertToDto();
+        }
+
+        public AnnouncementDTO SoftDeleteAnnouncement(int id, string lastUpdateBy)
+        {
+            var announcement = unitOfWork.AnnouncementRepository.GetByID(id);
+            if (announcement == null) return null;
+
+            announcement.IsActive = false;
+            announcement.LastUpdateUtc = DateTime.UtcNow;
+            announcement.LastUpdateBy = lastUpdateBy;
+            unitOfWork.AnnouncementRepository.Update(announcement);
+            unitOfWork.Save();
+
+            return announcement.ConvertToDto();
+        }
+    }
+}

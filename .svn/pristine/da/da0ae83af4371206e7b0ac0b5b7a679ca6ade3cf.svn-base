@@ -1,0 +1,18 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace VYSA.WebApi.Models.Resource
+{
+    public class MailingListResourceModel
+    {
+        [Display(Name = "Name")]
+        public string Name { get; set; }
+
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Display(Name = "Role")]
+        public string Role { get; set; }
+
+        public bool Subscribed { get; set; }
+    }
+}

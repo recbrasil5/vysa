@@ -1,0 +1,10 @@
+﻿using System.Collections.Generic;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Models.ViewModel
+{
+    public class UsersViewModel
+    {
+        public IEnumerable<User> Users { get; set; }
+    }
+}

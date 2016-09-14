@@ -1,0 +1,10 @@
+C:\vysa\VYSA.Domain\bin\Release\VYSA.Domain.dll.config
+C:\vysa\VYSA.Domain\bin\Release\VYSA.Domain.dll
+C:\vysa\VYSA.Domain\bin\Release\VYSA.Domain.pdb
+C:\vysa\VYSA.Domain\bin\Release\EntityFramework.dll
+C:\vysa\VYSA.Domain\bin\Release\EntityFramework.SqlServer.dll
+C:\vysa\VYSA.Domain\bin\Release\EntityFramework.xml
+C:\vysa\VYSA.Domain\bin\Release\EntityFramework.SqlServer.xml
+C:\vysa\VYSA.Domain\obj\Release\VYSA.Domain.dll
+C:\vysa\VYSA.Domain\obj\Release\VYSA.Domain.pdb
+C:\vysa\VYSA.Domain\obj\Release\VYSA.Domain.csprojResolveAssemblyReference.cache

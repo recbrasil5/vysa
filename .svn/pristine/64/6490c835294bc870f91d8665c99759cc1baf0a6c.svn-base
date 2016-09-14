@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Util;
+using VYSA.WebApi.Infrastructure.Seed;
+
+namespace VYSA.WebApi.Infrastructure
+{
+    public class DropCreateIfChangeInitializer : DropCreateDatabaseIfModelChanges<EFDbContext>
+    {
+        protected override void Seed(EFDbContext context)
+        {
+            InitializerUtil.SeedDatabase(context, false);
+        }
+    }
+}

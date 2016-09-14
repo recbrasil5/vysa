@@ -1,0 +1,23 @@
+﻿
+
+.styleTable
+{
+    text-align:left;
+}
+
+.styleTable th
+{
+    font-weight:bold;
+    padding: 5px;
+}
+
+.styleTable td
+{
+    padding: 5px;
+}
+
+.styleTable a
+{
+    color:Blue;
+    text-decoration: underline;
+}

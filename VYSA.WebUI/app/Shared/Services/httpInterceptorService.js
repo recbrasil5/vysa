@@ -1,0 +1,84 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysaApp")
+        .factory('httpInterceptorService', ['$q', '$injector', '$location', '$cookieStore', '$rootScope',
+            'httpPendingRequestsService', 'notifierService', function ($q, $injector, $location, $cookieStore, $rootScope,
+             httpPendingRequestsService, notifierService) {
+
+        var numLoadings = 0;
+
+        function checkAndHideLoader() {
+            if ((--numLoadings) === 0) {
+                $rootScope.$broadcast("loader_hide");
+            };
+        }
+
+        return {
+
+            // On request success
+            request: function (config) {
+                numLoadings++;
+
+                config.headers = config.headers || {};
+                var token = $cookieStore.get('_Token');
+                if (token) {
+                    config.headers.Authorization = 'Bearer ' + token;
+                }
+
+                // Show loader
+                $rootScope.$broadcast("loader_show");
+
+                //Check for any client requested timeout
+                if (config.timeout === undefined && !config.noCancelOnRouteChange) {
+                    config.timeout = httpPendingRequestsService.newTimeout();
+                }
+
+                //return config;
+                return config || $q.when(config);
+            },
+
+            // On request failure
+            requestError: function (response) {
+                $rootScope.$broadcast("loader_hide");
+                return $q.reject(response);
+            },
+
+            // On response success
+            response: function (response) {
+                checkAndHideLoader();
+                return response || $q.when(response);
+            },
+
+            // On response failure
+            responseError: function (response) {
+                console.log(response);
+                switch (response.status) {
+                    case 401:
+                        //todo: think about injecting 'authenticationService' and calling it instead to removeAuthorizationToken and move
+                        // handle the case where the user is not authenticated
+                        //need to remove the cookie and log the person out
+                        $cookieStore.remove('_Token');
+                        httpPendingRequestsService.cancelAll();
+                        notifierService.warn(response.data.message);
+                        $injector.get('$state').go('login');
+                        break;
+                    case 400:
+                        //Redirect?
+                        $rootScope.$broadcast("loader_hide"); //does this need to be here???
+                        break;
+                    case 406:
+                        console.log('406 response returned');
+                        break;
+                    default:
+                        //reroute to a different page for other responses
+                        break;
+                }
+
+                checkAndHideLoader();
+                return $q.reject(response); //always return the rejected response, so error functions pick this up.
+            }
+        }
+    }]);
+}());

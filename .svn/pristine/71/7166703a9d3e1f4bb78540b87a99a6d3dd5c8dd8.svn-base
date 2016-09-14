@@ -1,0 +1,26 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysaApp").factory('adminUserRepository',
+        function ($resource, config) {
+
+            return {
+                users: $resource(config.apiServerUri + 'Admin/Users/:id', { id: '@id' }, {
+                    get: { method: 'GET' },
+                    //query: { method: 'GET', isArray: true },
+                    post: { method: 'POST' },
+                    update: { method: 'PUT' },
+                    delete: { method: 'DELETE' }
+                }),
+                filter: $resource(config.apiServerUri + 'Admin/Users/filter/', {
+                    pageNum: '@pageNum',
+                    numRecs: '@numRecs',
+                    getCount: '@getCount',
+                    boolCount: '@boolCount'
+                }, {
+                    post: { method: 'POST' },
+                })
+            }
+        });
+
+}());

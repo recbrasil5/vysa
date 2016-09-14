@@ -1,0 +1,180 @@
+﻿<div class="pull-left">
+    <div class="page-header">
+        <h1>
+            Club Management
+            <small>Season Setup</small>
+        </h1>
+    </div>
+    <div class="container pull-left">
+        <form class="form-horizontal" role="form">
+            <div class="panel-group">
+                <div class="panel-group">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h2 data-ng-if="!editing" class="panel-title">New Season Setup</h2>
+                            <h2 data-ng-if="editing" class="panel-title">Season Setup</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-sm-6 col-lg-12">
+                                <div class="panel panel-primary panel-margin">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Season Information</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <input type="hidden" name="seasonId" data-ng-model="season.id" />
+                                                    <label for="year" class="col-md-4 control-label">Year: </label>
+                                                    <div class="col-md-8">
+                                                        <select id="year" class="form-control"
+                                                                data-ng-model="season.year"
+                                                                data-ng-options="y for y in years" required></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <label for="season" class="col-md-4 control-label">Season: </label>
+                                                    <div class="col-md-8">
+                                                        <select id="season" class="form-control"
+                                                                data-ng-model="season.seasonTypeStr"
+                                                                data-ng-options="s for s in seasonTypes" required></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <label for="toDate" class="col-md-4 control-label">Registration Date: </label>
+                                                    <div class="col-md-8">
+                                                        <input id="toDate" type="date" class="form-control" placeholder="End Date" data-ng-model="season.registrationDate" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <label for="fromDate" class="col-md-4 control-label">Start Date: </label>
+                                                    <div class="col-md-8">
+                                                        <input id="fromDate" type="date" class="form-control" placeholder="Start Date" data-ng-model="season.startDate" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 col-lg-4">
+                                                <div class="form-group">
+                                                    <label for="toDate" class="col-md-4 control-label">End Date: </label>
+                                                    <div class="col-md-8">
+                                                        <input id="toDate" type="date" class="form-control" placeholder="End Date" data-ng-model="season.endDate" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-ng-if="editing" class="col-sm-6 col-lg-12">
+                                <div class="panel panel-primary panel-margin">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Events</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="ibox float-e-margins">
+                                                <div>
+                                                    <div class="ibox-content">
+                                                        <button type="button" ng-click="addNewEvent()">Add Event</button>
+                                                        <table class="table table-hover table-responsive">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>&nbsp;</th>
+                                                                    <th>&nbsp;</th>
+                                                                    <th>Name</th>
+                                                                    <th>Location</th>
+                                                                    <th>Start Date</th>
+                                                                    <th>End Date</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="event in season.eventList">
+                                                                    <td>
+                                                                        <div edit-item-btn item-to-edit="event" type2="Event"></div>
+                                                                    </td>
+                                                                    <td><a ng-click="deleteEvent($index)" ng-confirm-click="Are you sure you would like to delete {{event.name}}?"><span class="glyphicon glyphicon-trash pull-left"></span></a></td>
+                                                                    <td>{{event.name}}</td>
+                                                                    <td>{{event.location}}</td>
+                                                                    <td>{{event.startDate | dateFormat }}</td>
+                                                                    <td>{{event.endDate | dateFormat }}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-ng-if="editing" class="col-sm-6 col-lg-12">
+                                <div class="panel panel-primary panel-margin">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Teams</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="ibox float-e-margins">
+                                                <div>
+                                                    <div class="ibox-content">
+                                                        <button type="button" ng-click="addNewTeam()">Add Team</button>
+                                                        <table class="table table-hover table-responsive">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>&nbsp;</th>
+                                                                    <th>&nbsp;</th>
+                                                                    <th>Team</th>
+                                                                    <th>Coach(es)</th>
+                                                                    <th>Parent Rep(s)</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-init="confirmedDelete = false;" ng-repeat="team in season.teamList">
+                                                                    <td>
+                                                                        <div edit-item-btn item-to-edit="team" type2="Team"></div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <a ng-click="deleteTeam($index);" ng-confirm-click="Are you sure you would like to delete the {{team.teamName}} team and information linked to it?">
+                                                                            <span class="glyphicon glyphicon-trash pull-left"></span>
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>{{team.teamName}}</td>
+                                                                    <td>{{team.coaches}}</td>
+                                                                    <td>{{team.parentReps}}</td>
+                                                                    <!--<td>{{team.cost | currency:"$"}}</td>-->
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer" style="text-align: right;">
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button type="submit" data-ng-if="!editing" class="btn btn-success btn-sm" data-ng-click="create()">Create Season</button>
+                                    <button type="submit" data-ng-if="editing" class="btn btn-success btn-sm" data-ng-click="save()">Update Season</button>
+                                    <button type="button" class="btn btn-default btn-sm" ui-sref="ClubManagement.SeasonManagement">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

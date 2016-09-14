@@ -1,0 +1,33 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Util;
+
+namespace VYSA.WebApi.Services
+{
+    public class ContactUsService
+    {
+        private UnitOfWork unitOfWork;
+
+        public ContactUsService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public ContactUsMessageDTO SendAndSaveContactUsMessage(ContactUsMessageDTO newContactUsMessageDto)
+        {
+            EmailUtil.SendContactUsMessage(newContactUsMessageDto);
+
+            var contactUsMessage = new ContactUsMessage().UpdateValuesFromDTO(newContactUsMessageDto);
+            unitOfWork.ContactUsMessageRepository.Insert(contactUsMessage);
+            unitOfWork.Save();
+
+            return contactUsMessage.ConvertToDto();
+        }
+    }
+}

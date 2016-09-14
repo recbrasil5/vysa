@@ -1,0 +1,48 @@
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("MailingListMember")]
+    public class MailingListMemberController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private MailingListMemberService mlmService;
+        public MailingListMemberController()
+        {
+            mlmService = new MailingListMemberService(unitOfWork);
+        }
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(MailingListMemberDto))]
+        public IHttpActionResult CreateMailingListMember(MailingListMemberDto mailingListMemberDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (mlmService.EmailAlreadyExists(mailingListMemberDto.Email))
+            {
+                return BadRequest(String.Format("The email '{0}' already exists!", mailingListMemberDto.Email));
+            }
+
+            var userName = User.Identity.Name ?? HttpContext.Current.Request.UserHostAddress;
+            var newMailingListDto = mlmService.AddMailingListMember(mailingListMemberDto, userName);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetAnnouncementById
+            //return CreatedAtRoute("GetAnnouncementById", new { id = newAnnouncementDto.Id }, newAnnouncementDto);
+            return Ok(newMailingListDto);
+        }
+
+    }
+}

@@ -1,0 +1,21 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysaApp").controller('forgotPasswordController', function ($scope, $resource, $state, accountRepository, notifierService) {
+        $scope.emailAddress = '';
+
+        $scope.send = function() {
+            console.log('send() - emailAddress: ', $scope.emailAddress)
+            accountRepository.forgotPassword.post({
+                email: $scope.emailAddress
+            }).$promise.then(function (data) {
+                console.log(data);
+            }, function (error) {
+
+            });
+            //$state.go('login');
+        };
+
+    });
+
+}());

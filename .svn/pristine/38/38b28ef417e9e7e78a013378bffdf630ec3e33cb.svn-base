@@ -1,0 +1,160 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class PlayerGuardianService
+    {
+        private UnitOfWork unitOfWork;
+
+        public PlayerGuardianService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public PlayerGuardian GetPlayerGuardian(int id)
+        {
+            return unitOfWork.PlayerGuardianRepository.GetByID(id);
+        }
+
+        public PlayerGuardian GetPlayerGuardian(int playerId, int guardianId)
+        {
+            return unitOfWork.PlayerGuardianRepository
+                    .Get(e => e.IsActive && e.GuardianId == guardianId && e.PlayerId == playerId)
+                    .SingleOrDefault();
+        }
+
+        public IEnumerable<PlayerGuardianDTO> GetPlayerGuardianDtoListFromGuardianList(ICollection<PlayerGuardian> playerGuardianList)
+        {
+            var list = new List<PlayerGuardianDTO>();
+            if (playerGuardianList != null)
+            {
+                var guardianService = new GuardianService(unitOfWork);
+                playerGuardianList
+                    .ToList()
+                      .ForEach(x =>
+                      {
+                          if (x.IsActive)
+                              list.Add(x.ConvertToDto(guardianService.GetGuardianDto(x.GuardianId)));
+                      });
+            }
+            return list;
+        }
+
+        public PlayerGuardianDTO AddPlayerGuardian(PlayerGuardianDTO newPlayerGuardianDto, string lastUpdateBy)
+        {
+            bool onCreate = newPlayerGuardianDto.GuardianId == 0;
+
+            //first create new Guardian
+            var newGuardianDto = new GuardianDTO
+                                    {
+                                        FirstName = newPlayerGuardianDto.FirstName,
+                                        LastName = newPlayerGuardianDto.LastName,
+                                        Email = newPlayerGuardianDto.Email,
+                                        Phone = newPlayerGuardianDto.Phone
+                                    };
+
+            Guardian guardian = null; 
+            if (onCreate)
+            {
+                guardian = new Guardian().UpdateValuesFromDTO(newGuardianDto, lastUpdateBy, true);
+                unitOfWork.GuardianRepository.Insert(guardian);
+            }
+            else
+            {
+                guardian = new GuardianService(unitOfWork).GetGuardian(newPlayerGuardianDto.GuardianId);
+                unitOfWork.GuardianRepository.Update(guardian); 
+            }
+
+            newPlayerGuardianDto.GuardianId = guardian.Id;
+            PlayerGuardian newPlayerGuardian = new PlayerGuardian().UpdateValuesFromDTO(newPlayerGuardianDto, lastUpdateBy, true);
+            unitOfWork.PlayerGuardianRepository.Insert(newPlayerGuardian);
+            unitOfWork.Save();
+
+            return newPlayerGuardian.ConvertToDto(guardian.ConvertToDto());
+        }
+
+        public void AddPlayerGuardians(IEnumerable<PlayerGuardianDTO> playerGuardianDtos, string lastUpdateBy)
+        {
+            foreach (var guardianDto in playerGuardianDtos)
+            {
+                bool onCreate = guardianDto.GuardianId == 0;
+
+                var newGuardianDto = new GuardianDTO
+                {
+                    Id = guardianDto.GuardianId,
+                    FirstName = guardianDto.FirstName,
+                    LastName = guardianDto.LastName,
+                    Email = guardianDto.Email,
+                    Phone = guardianDto.Phone
+                };
+
+                Guardian guardian = new Guardian().UpdateValuesFromDTO(newGuardianDto, lastUpdateBy, onCreate);
+                if (onCreate)
+                {
+                    unitOfWork.GuardianRepository.Insert(guardian);
+                }
+                else
+                {
+                    unitOfWork.GuardianRepository.Update(guardian);
+                }
+
+                guardianDto.GuardianId = guardian.Id;
+                PlayerGuardian newPlayerGuardian = new PlayerGuardian().UpdateValuesFromDTO(guardianDto, lastUpdateBy, true);
+                unitOfWork.PlayerGuardianRepository.Insert(newPlayerGuardian);
+                unitOfWork.Save();
+            }
+
+        }
+
+        public PlayerGuardianDTO UpdatePlayerGuardian(PlayerGuardianDTO playerGuardianDto, string lastUpdateBy)
+        {
+            var guardian = unitOfWork.GuardianRepository.GetByID(playerGuardianDto.GuardianId);
+            if (guardian == null) return null;
+
+            var guardianDto = new GuardianDTO
+            {
+                Id = playerGuardianDto.GuardianId,
+                FirstName = playerGuardianDto.FirstName,
+                LastName = playerGuardianDto.LastName,
+                Email = playerGuardianDto.Email,
+                Phone = playerGuardianDto.Phone
+            };
+
+            guardian.UpdateValuesFromDTO(guardianDto, lastUpdateBy, false);
+            unitOfWork.GuardianRepository.Update(guardian);
+
+            var playerGuardian = GetPlayerGuardian(playerGuardianDto.PlayerId, playerGuardianDto.GuardianId);
+            if (playerGuardian == null) return null;
+
+            playerGuardian.UpdateValuesFromDTO(playerGuardianDto, lastUpdateBy, false);
+            unitOfWork.PlayerGuardianRepository.Update(playerGuardian);
+            unitOfWork.Save();
+
+            return playerGuardian.ConvertToDto(guardianDto);
+        }
+
+        public PlayerGuardianDTO SoftDeletePlayerGuardian(Int32 id, string lastUpdateBy)
+        {
+            var playerGuardian = GetPlayerGuardian(id);
+            if (playerGuardian == null) return null;
+
+            playerGuardian.IsActive = false;
+            playerGuardian.LastUpdateUtc = DateTime.UtcNow;
+            playerGuardian.LastUpdateBy = lastUpdateBy;
+            unitOfWork.PlayerGuardianRepository.Update(playerGuardian);
+            unitOfWork.Save();
+
+            var guardianDto = new GuardianService(unitOfWork).GetGuardianDto(playerGuardian.GuardianId);
+            if(guardianDto == null) return null;
+
+            return playerGuardian.ConvertToDto(guardianDto);
+        }
+    }
+}

@@ -1,0 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Web;
+using System.Web.Http;
+using System.Web.Http.Controllers;
+
+namespace VYSA.WebApi.Filters
+{
+    public class AdminAuthorizationFilterAttribute : AuthorizeAttribute
+    {
+        /// <summary>
+        /// contextApplicationId used along with HttpMethod & RouteTemplate to determine whether client IsAuthorized to make endpoint call
+        /// </summary>
+        /// <param name="actionContext"></param>
+        /// <returns></returns>
+        protected override bool IsAuthorized(HttpActionContext actionContext)
+        {
+            var controllerName = actionContext.ControllerContext.ControllerDescriptor.ControllerName;
+            var roles = actionContext.Request.GetOwinContext().Authentication.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Role);
+            if (roles == null || string.IsNullOrWhiteSpace(roles.Value))
+            {
+                return false;
+            }
+
+            var roleList = roles.Value.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var validated = true;
+            
+            if(controllerName.StartsWith("Admin"))
+            {
+                validated = roleList.Contains("Admin") || roleList.Contains("SuperAdmin"); 
+            }
+
+            return validated;
+        }
+    }
+}

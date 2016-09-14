@@ -1,0 +1,25 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysa")
+        .directive('editItemBtn', ['$location', 'directiveRoutingService', function ($location, directiveRoutingService) {
+
+
+            return {
+                restrict: 'A',
+                replace: true,
+                template: '<a><span class="glyphicon glyphicon-pencil"></span></a>',
+                scope: {
+                    itemToEdit: '='
+                },
+                link: function (scope, element, attrs) {
+                    element.on('click', function () {
+                        scope.$apply(function () {
+                            $location.path(directiveRoutingService.getPath(attrs.type2.toLowerCase()) + '/' + scope.itemToEdit.id);
+                        });
+                    });
+                }
+            }
+        }]);
+}());

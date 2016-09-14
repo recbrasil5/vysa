@@ -1,0 +1,123 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Abstract;
+using System.Data;
+using System.Data.Entity;
+using System.Data.SqlTypes;
+
+namespace VYSA.Domain.Concrete
+{
+    public class EFUserRepository : IUserRepository
+    {
+        private EFDbContext context;
+
+        public EFUserRepository(EFDbContext context)
+        {
+            this.context = context;
+        }
+
+        public IQueryable<User> Users
+        {
+            get
+            { 
+                return context.Users; 
+            }
+        }
+
+        public User GetUser(string userName)
+        {
+            try
+            {
+                return context.Users.SingleOrDefault(u => u.UserName.ToLower() == userName.ToLower());
+            }
+            catch 
+            {
+                try
+                {
+                    return context.Users.SingleOrDefault(u => u.UserName.ToLower() == userName.ToLower());
+                }
+                catch 
+                {
+                    throw;
+                }
+            }
+        }
+
+        public User GetUser(int id)
+        {
+            return context.Users.Include(x => x.Role).SingleOrDefault(u => u.Id == id);
+        }
+        
+        public User GetUser(string userName, byte[] password)
+        {
+            return context.Users.SingleOrDefault(u => u.UserName.ToLower() == userName.ToLower()
+                                                     && u.Password == password);
+        }
+
+        public IEnumerable<User> GetUsersWithRoles()
+        {
+            return context.Users.Include(x => x.Role).AsEnumerable();
+        }
+
+        public User GetUserByEmail(string email)
+        {
+            return context.Users.SingleOrDefault(u => u.Email.ToLower() == email.ToLower());
+        }
+
+        //public string[] GetUsersInRole(string roleName)
+        //{
+        //    List<string> usersInRole = new List<string>();
+        //    foreach (User u in context.Users)
+        //    {
+        //        if (u.Role != null)
+        //        {
+        //            if (u.Role.Name.Equals(roleName))
+        //                usersInRole.Add(u.UserName);
+        //        }
+        //    }
+        //    return usersInRole.ToArray();
+        //}
+
+        public void Save(User user)
+        {
+            //assignMinDatesWhereFieldNull(user);
+
+            if (context.Users.Any(u => u.Id == user.Id))
+            {
+                context.Entry(user).State = EntityState.Modified;
+            }
+            else
+            {
+                context.Users.Add(user);
+            }
+            try
+            {
+                context.SaveChanges();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        
+        public void Delete(User user)
+        {
+            context.Users.Remove(user);
+            context.SaveChanges();
+        }
+
+        private static void assignMinDatesWhereFieldNull(User user)
+        {
+            if (!user.LastActivityDate.HasValue)
+                user.LastActivityDate = SqlDateTime.MinValue.Value;
+            if (!user.LastLoginDate.HasValue)
+                user.LastLoginDate = SqlDateTime.MinValue.Value;
+            if (!user.LastPasswordChangeDate.HasValue)
+                user.LastPasswordChangeDate = SqlDateTime.MinValue.Value;
+            
+        }
+    }
+}

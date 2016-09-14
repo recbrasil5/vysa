@@ -1,0 +1,101 @@
+﻿
+function adminConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $provide) {
+
+    var adminRootPath = '/templates/Admin';
+    $locationProvider.html5Mode({ enabled: true, requireBase: false }); //hash signs no-longer needed in href
+
+    //$urlRouterProvider.otherwise("/admin.html");
+    $httpProvider.interceptors.push('httpInterceptorService');
+
+    $stateProvider
+        .state('WebsiteMaintenance', {
+            abstract: true,
+            url: '/Admin/WebsiteMaintenance',
+            templateUrl: adminRootPath + "/WebsiteMaintenance/website-maintenance.html",
+        })
+        .state('WebsiteMaintenance.nav', {
+            url: '',
+            templateUrl: adminRootPath + "/WebsiteMaintenance/main.html",
+        })
+        .state('WebsiteMaintenance.default', {
+            url: '',
+            templateUrl: adminRootPath + "/WebsiteMaintenance/main.html",
+        })
+        .state('WebsiteMaintenance.AnnouncementAddEdit', {
+            url: '/AnnouncementAddEdit/{id:int}',
+            templateUrl: adminRootPath + "/WebsiteMaintenance/announcements-add-edit.html",
+            controller: 'AdminAnnouncementsAddEditController'
+        })
+        .state('WebsiteMaintenance.BoardAddEdit', {
+            url: '/BoardAddEdit/{id:int}',
+            templateUrl: adminRootPath + "/WebsiteMaintenance/board-add-edit.html",
+            controller: 'AdminBoardMembersAddEditController'
+        })
+        .state('ClubManagement', {
+            abstract: true,
+            url: "/Admin/ClubManagement",
+            templateUrl: adminRootPath + "/ClubManagement/club-management.html",
+        })
+        .state('ClubManagement.nav', {
+            // Using an empty url means that this child state will become active
+            // when its parent's url is navigated to. Urls of child states are
+            // automatically appended to the urls of their parent. So this state's
+            // url is '/ClubManagement' (because '/ClubManagement' + '').
+            url: '',
+            // IMPORTANT: Now we have a state that is not a top level state. Its
+            // template will be inserted into the ui-view within this state's
+            // parent's template; so the ui-view within index.html. This is the
+            // most important thing to remember about templates.
+            templateUrl: adminRootPath + "/ClubManagement/main.html"
+        })
+        .state('ClubManagement.default', {
+            url: '',
+            templateUrl: adminRootPath + "/ClubManagement/main.html"
+        })
+        .state('ClubManagement.SeasonManagement', {
+            url: '/SeasonManagement',
+            templateUrl: adminRootPath + "/ClubManagement/SeasonManagement/season-management.html",
+            controller: 'AdminSeasonsController'
+        })
+        .state('ClubManagement.SeasonSetup', {
+            url: '/SeasonSetup/{id:int}',
+            templateUrl: adminRootPath + "/ClubManagement/SeasonManagement/season-setup.html",
+            controller: 'AdminSeasonSetupController'
+        })
+        .state('ClubManagement.SeasonEventSetup', {
+            url: '/SeasonSetup/EventSetup/{eventId:int}/{seasonId:int}',
+            templateUrl: adminRootPath + "/ClubManagement/SeasonManagement/Events/event-setup.html",
+            controller: 'AdminEventsAddEditController'
+        })
+        .state('ClubManagement.SeasonTeamSetup', {
+            url: '/SeasonSetup/TeamSetup/{teamId:int}/{seasonId:int}',
+            templateUrl: adminRootPath + "/ClubManagement/SeasonManagement/Teams/team-setup.html",
+            controller: 'AdminTeamSetupController'
+        })
+        .state('ClubManagement.PlayerAddEdit', {
+            url: '/PlayerAddEdit/{id:int}',
+            templateUrl: adminRootPath + "/ClubManagement/Players/player-add-edit.html",
+            controller: 'AdminPlayersAddEditController'
+        });
+
+}
+angular
+    .module('admin')
+    .config(adminConfig)
+    .run(['$rootScope', '$state', '$stateParams', '$http', '$cookies', '$cookieStore', 'authService',
+        function ($rootScope, $state, $stateParams, $http, $cookies, $cookieStore, authService) {
+
+            /*if authToken (cookie) exists, get it and add to request headers when the app is loaded 
+            note: the user may leave and come back and as long as the cookie exists and is valid, then they are allowed to navigate inside the site*/
+            authService.fillAuthData();
+
+            // It's very handy to add references to $state and $stateParams to the $rootScope
+            // so that you can access them from any scope within your applications.
+            $rootScope.$state = $state;
+            $rootScope.$stateParams = $stateParams;
+
+            //prevent scrolling to ui-view on click
+            $rootScope.$on('$stateChangeSuccess', function () {
+                $("html, body").animate({ scrollTop: 0 }, 200);
+            })
+        }]);

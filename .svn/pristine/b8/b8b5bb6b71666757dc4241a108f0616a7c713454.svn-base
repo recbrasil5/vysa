@@ -1,0 +1,69 @@
+﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.Http;
+using VYSA.WebApi.Services;
+using VYSA.WebApi.Util;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Upload")]
+    [Authorize(Roles = "Admin, SuperAdmin")]
+    public class UploadController : ApiController
+    {
+        //private UnitOfWork unitOfWork = new UnitOfWork();
+        private UploadService _uploadService;
+        private StringBuilder sb;
+        private String subDirMap;
+
+        public UploadController()
+        {
+            _uploadService = new UploadService();
+        }
+
+        [HttpPost]
+        [Route("test")]
+        public async Task<HttpResponseMessage> Post()
+        {
+            //call without asynchronous error handling
+            //return await _uploadService.UploadImageTask(this.Request, subDirMap);  //exceptionHandlingIsDoneSynchronously so the user must wait for it to return.
+            
+            try
+            {
+                var ateHandler = new AsyncTaskExecutionHandler();
+
+                #region new code (handleExceptionAsync)
+                await ateHandler.ExecuteAndHandleErrorAsync(
+                    async () => await _uploadService.UploadImageTask(this.Request), //asyncWorker
+                    async (ex) =>                                                             //asyncExceptionHandler
+                    {
+                        await ateHandler.LogExceptionAsyncTask(ex);
+                        return false; //sets needsThrow --> see below: needsThrow = await errorHandlerAsync(capturedException.SourceException).ConfigureAwait(false);
+                    }
+                );
+
+                return ateHandler.CapturedException == null
+                    ? new HttpResponseMessage {StatusCode = HttpStatusCode.OK}
+                    : new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.NotAcceptable,
+                        Content = new StringContent(ateHandler.CapturedException.SourceException.Message)
+                    };
+
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                //Unpredicated Exceptions (thread stops running in await)
+                return new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.NotAcceptable,
+                    Content = new StringContent(string.Format("Unexpected Error: {0}", ex.Message))
+                };
+            }
+        }
+
+    }
+}

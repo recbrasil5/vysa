@@ -1,0 +1,142 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Abstract;
+using System.Data.Entity;
+using System.Data.SqlTypes;
+using VYSA.Domain.Cryptography;
+using VYSA.Domain.Util;
+
+namespace VYSA.Domain.Concrete
+{
+    public class EfUserRepository : IUserRepository
+    {
+        private readonly EfDbContext _context;
+
+        public EfUserRepository(EfDbContext context)
+        {
+            _context = context;
+        }
+
+        public IQueryable<User> Users
+        {
+            get
+            {
+                return _context.Users.Include(x => x.Roles);
+            }
+        }
+
+        public IQueryable<User> ActiveUsers
+        {
+            get
+            {
+                return _context.Users.Where(u => u.IsActive).Include(x => x.Roles);
+            }
+        }
+
+        public User GetUser(string userName)
+        {
+            try
+            {
+                return _context.Users.Include(x => x.Roles).SingleOrDefault(u => u.UserName == userName);
+            }
+            catch
+            {
+                try
+                {
+                    return _context.Users.Include(x => x.Roles).SingleOrDefault(u => u.UserName == userName);
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+        }
+
+        public User GetUser(int id)
+        {
+            return _context.Users.Include(x => x.Roles).SingleOrDefault(u => u.Id == id);
+        }
+
+        public User GetUser(string userName, string passwordHash)
+        {
+            return _context.Users.SingleOrDefault(u => u.UserName.ToLower() == userName.ToLower()
+                                                     && u.PasswordHash == passwordHash);
+        }
+
+        public IEnumerable<User> GetUsersWithRoles()
+        {
+            return _context.Users.Include(x => x.Roles).AsEnumerable();
+        }
+
+        public bool EmailExists(string email)
+        {
+            return _context.Users.Any(x => x.Email == email);
+        }
+
+        public string ResetPassword(string email)
+        {
+            var user = GetUserByEmail(email);
+            if (user == null) return "";
+
+            var newPassword = RandomPassword.GeneratePassword();
+            user.PasswordHash = PasswordHash.CreateHash(newPassword);
+            Save(user);
+
+            return newPassword;
+        }
+
+        public User GetUserByEmail(string email)
+        {
+            return _context.Users.SingleOrDefault(u => u.Email == email);
+        }
+
+        //public string[] GetUsersInRole(string roleName)
+        //{
+        //    List<string> usersInRole = new List<string>();
+        //    foreach (User u in context.Users)
+        //    {
+        //        if (u.Role != null)
+        //        {
+        //            if (u.Role.Name.Equals(roleName))
+        //                usersInRole.Add(u.UserName);
+        //        }
+        //    }
+        //    return usersInRole.ToArray();
+        //}
+
+        public void Save(User user)
+        {
+            //assignMinDatesWhereFieldNull(user);
+
+            if (_context.Users.Any(u => u.Id == user.Id))
+            {
+                _context.Entry(user).State = EntityState.Modified;
+            }
+            else
+            {
+                _context.Users.Add(user);
+            }
+            
+            _context.SaveChanges();
+
+        }
+
+        public void Delete(User user)
+        {
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+        }
+
+        private static void assignMinDatesWhereFieldNull(User user)
+        {
+            if (!user.LastActivityDateTimeUtc.HasValue)
+                user.LastActivityDateTimeUtc = SqlDateTime.MinValue.Value;
+            if (!user.LastLoginDateTimeUtc.HasValue)
+                user.LastLoginDateTimeUtc = SqlDateTime.MinValue.Value;
+            if (!user.LastPasswordChangeDateTimeUtc.HasValue)
+                user.LastPasswordChangeDateTimeUtc = SqlDateTime.MinValue.Value;
+        }
+    }
+}

@@ -1,0 +1,146 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+
+namespace VYSA.WebApi.Services
+{
+    public class PlayerService
+    {
+        private UnitOfWork unitOfWork;
+
+        public PlayerService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public Int32 GetActivePlayerCount()
+        {
+            return unitOfWork.PlayerRepository.Get(b => b.IsActive).Count();
+        }
+
+        public IEnumerable<PlayerDTO> GetActivePlayers()
+        {
+            var list = new List<PlayerDTO>();
+            unitOfWork.PlayerRepository.Get(b => b.IsActive)
+                   .ToList().ForEach(x => list.Add(x.ConvertToDto(unitOfWork)));
+            return list;
+        }
+
+        public IEnumerable<PlayerDTO> GetPlayersByRosterFilter(FilterDTO filterDto)
+        {
+            var list = new List<PlayerDTO>();
+
+            var teamDto = new TeamService(unitOfWork).GetTeamDto(filterDto.LookupId);
+            var playerIdList = new List<Int32>();
+            if (teamDto.Roster != null)
+            {
+                playerIdList = teamDto.Roster.Select(x => x.PlayerId).ToList();
+            }
+            unitOfWork.PlayerRepository.Get(b => b.IsActive && !playerIdList.Contains(b.Id) &&
+                                                (b.FirstName.StartsWith(filterDto.SearchTerm) || b.LastName.StartsWith(filterDto.SearchTerm)))
+                   .ToList().ForEach(x => list.Add(x.ConvertToDto(unitOfWork)));
+            return list;
+        }
+
+        public IEnumerable<PlayerInGridViewDTO> GetListViewPlayers(PagingFilterDTO pfDto)
+        {
+            Func<IQueryable<Player>, IOrderedQueryable<Player>> defaultOrderingFunc =  
+                            query => query.OrderBy(player => player.DateOfBirth);
+
+            var listViewPlayerDtos = new List<PlayerInGridViewDTO>();
+
+            var playerData = unitOfWork.PlayerRepository
+                .Get(b => b.IsActive, defaultOrderingFunc, "PlayerGuardians").ToList();
+
+            var originalSkipCount = (pfDto.PageNum - 1) * pfDto.NumRecs;
+            var skipCount = playerData.Count < originalSkipCount 
+                            ? originalSkipCount - playerData.Count 
+                            : originalSkipCount;
+
+            var players = playerData.Skip(skipCount)
+                                    .Take(pfDto.NumRecs).ToList();
+
+            players.ForEach(x => listViewPlayerDtos.Add(x.ConvertToListViewPlayerDTO(unitOfWork)));
+            return listViewPlayerDtos;
+        }
+
+        public PlayerDTO GetPlayer(int id)
+        {
+            var player = unitOfWork.PlayerRepository.Get(b => b.Id.Equals(id), null, "PlayerGuardians").SingleOrDefault();
+            return player == null ? null : player.ConvertToDto(unitOfWork);
+        }
+
+        public PlayerDTO UpdatePlayer(PlayerDTO updatedPlayerDto, string lastUpdateBy)
+        {
+            var player = unitOfWork.PlayerRepository.GetByID(updatedPlayerDto.Id);
+            if (player == null) return null;
+
+            //do update
+            player.UpdateValuesFromDTO(updatedPlayerDto, lastUpdateBy, false);
+
+            unitOfWork.PlayerRepository.Update(player);
+            unitOfWork.Save();
+
+            return updatedPlayerDto;
+        }
+
+        public PlayerDTO AddPlayer(PlayerDTO newPlayerDto, string lastUpdateBy)
+        {
+            var player = new Player().UpdateValuesFromDTO(newPlayerDto, lastUpdateBy, true);
+
+            unitOfWork.PlayerRepository.Insert(player);
+            unitOfWork.Save();
+
+            //make sure they all have PlayerIds
+            newPlayerDto.Guardians
+                .ToList().ForEach(x => x.PlayerId = player.Id);
+
+            //add all the players' guardians
+            new PlayerGuardianService(unitOfWork)
+                .AddPlayerGuardians(newPlayerDto.Guardians, lastUpdateBy);
+
+            return GetPlayer(player.Id);
+        }       
+
+        public PlayerDTO SoftDeletePlayer(int id, string lastUpdateBy)
+        {
+            var player = unitOfWork.PlayerRepository.Get(b => b.Id.Equals(id), null, "PlayerGuardians").SingleOrDefault();
+            if (player == null) return null;
+
+            player.IsActive = false;
+            player.LastUpdateUtc = DateTime.UtcNow;
+            player.LastUpdateBy = lastUpdateBy;
+            unitOfWork.PlayerRepository.Update(player);
+
+            //deactivate the PlayerGuardians as well. 
+            player.PlayerGuardians.ToList().ForEach(x =>
+            {
+                x.IsActive = false;
+                x.LastUpdateUtc = DateTime.UtcNow;
+                x.LastUpdateBy = lastUpdateBy;
+            });
+            player.PlayerGuardians.ToList().ForEach(x => unitOfWork.PlayerGuardianRepository.Update(x));
+
+            unitOfWork.Save();
+
+            return player.ConvertToDto(unitOfWork);
+        }
+
+        public PlayerGuardianDTO AddPlayerGuardian(PlayerGuardianDTO playerGuardianDto, string lastUpdateBy)
+        {
+            return new PlayerGuardianService(unitOfWork)
+                .AddPlayerGuardian(playerGuardianDto, lastUpdateBy);
+        }
+
+        public PlayerGuardianDTO UpdatePlayerGuardian(PlayerGuardianDTO playerGuardianDto, string lastUpdateBy)
+        {
+            return new PlayerGuardianService(unitOfWork)
+                .UpdatePlayerGuardian(playerGuardianDto, lastUpdateBy);
+        }
+    }
+}

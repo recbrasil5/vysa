@@ -1,0 +1,40 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Http;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.WebApi.Models;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Board")]
+    public class BoardController : ApiController
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+        private BoardService boardService;
+        public BoardController()
+        {
+            boardService = new BoardService(unitOfWork);
+        }
+
+        [HttpGet] //api/Board
+        [Route("")]
+        //public ActionResult Index() //old MVC call
+        public IEnumerable<BoardMember> Get() //webApi hybrid call
+        {
+            //return Json(_boardVmBuilder.GetBoardMembers(), JsonRequestBehavior.AllowGet);
+            return boardService.GetBoardMembers();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+
+    }
+}

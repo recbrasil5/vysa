@@ -1,0 +1,18 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysa")
+        .factory('metaDataService', function (years, seasonTypes) {
+
+            return{
+                getYears: function() {
+                    return years;
+                },
+                getSeasonTypes: function () {
+                    return seasonTypes;
+                }
+            }
+        });
+
+}());

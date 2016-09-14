@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace VYSA.WebApi.Models
+{
+    public class PlayersFilterResponseDto
+    {
+        public ICollection<PlayerInGridViewDTO> Players{ get; set; }
+        public int Count { get; set; }
+    }
+}

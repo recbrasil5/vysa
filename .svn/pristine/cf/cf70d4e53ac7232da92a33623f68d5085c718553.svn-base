@@ -1,0 +1,62 @@
+﻿(function () {
+    "use strict";
+
+    angular
+        .module("vysa")
+        .controller('AdminEventsAddEditController',
+        function ($scope, $routeParams, $location, notifierService, AdminEventRepository) {
+
+            var eventId = $routeParams.id;
+            //pass -1 when adding (second routeParam will then be seasonId)
+            //go to AdminSeasonSetupController to see the path
+            $scope.editing = eventId !== '-1';
+            var seasonId;
+
+            if ($scope.editing) {
+                AdminEventRepository.get({ id: parseInt(eventId) }, function (data) {
+                    data.startDate = new Date(data.startDate);
+                    data.endDate = new Date(data.endDate);
+                    $scope.event = data;
+                });
+            } else {
+                seasonId = $routeParams.seasonId;
+            }
+
+            $scope.save = function () {
+
+                if ($scope.editing) {
+
+                    AdminEventRepository.update($scope.event, function () {
+                        $location.url('/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/' + $scope.event.seasonId);
+                        notifierService.success("The event with the title '" + $scope.event.name + "' has been updated!");
+                    }, function () {
+                        notifierService.error("Error while updating event!");
+                    });
+                } else {
+                    console.log($scope.event);
+                    $scope.event.seasonId = seasonId;
+                    AdminEventRepository.save($scope.event, function () {
+                        $location.url('/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/' + $scope.event.seasonId);
+                        notifierService.success("The event with the title '" + $scope.event.name + "' has been added!");
+                    }, function () {
+                        notifierService.error("Error while adding event!");
+                    });
+                }
+            }
+
+            $scope.cancel = function () {
+
+                if ($scope.editing) {
+                    $scope.cancel = function () {
+                        $location.url('/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/' + $scope.event.seasonId);
+                    }
+                } else {
+                    $scope.cancel = function () {
+                        $location.url('/Admin/Home/ClubManagement/SeasonManagement/SeasonSetup/' + seasonId);
+                    }
+                }
+            }
+
+        });
+
+}());

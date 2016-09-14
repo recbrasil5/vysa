@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="VYSA.WebApi.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="EmailTo" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">holmensoccer@yahoo.com</Value>
+    </Setting>
+    <Setting Name="ErrorMsgFrom" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">errors@mail.holmenvysa.com</Value>
+    </Setting>
+    <Setting Name="VirtualUploadDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">../../App_Data/uploads</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

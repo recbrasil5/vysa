@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+using VYSA.Domain.Extensions;
+
+namespace VYSA.WebApi.Models
+{
+    public class RosterDTO
+    {
+        public int Id { get; set; }
+        public int TeamId { get; set; }
+        public int PlayerId { get; set; }
+    }
+
+    public class RosteredPlayerDTO
+    {
+        public int Id { get; set; }
+        public int TeamId { get; set; }
+        public int PlayerId { get; set; }
+
+        public DateTime DateOfBirth { get; set; }
+
+        [Display(Name = "FullName")]
+        public string FullName { get; set; }
+
+        [Display(Name = "Age")]
+        public int Age
+        {
+            get
+            {
+                return DateOfBirth.CalculateAge();
+            }
+        }
+    }
+
+    public static class RosteredPlayerDTOExtensions
+    {
+        public static Roster UpdateValuesFromDTO(this Roster roster, RosterDTO rosterDto, string lastUpdateBy, bool onCreate)
+        {
+            roster.Id = rosterDto.Id;
+            roster.TeamId = rosterDto.TeamId;
+            roster.PlayerId = rosterDto.PlayerId;
+            roster.IsActive = true;
+            roster.LastUpdateBy = lastUpdateBy;
+            roster.LastUpdateUtc = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                roster.CreatedBy = lastUpdateBy;
+                roster.CreatedDateUtc = DateTime.UtcNow;
+            }
+
+            return roster;
+        }
+
+        public static RosterDTO ConvertToDto(this Roster roster)
+        {
+            return new RosterDTO
+            {
+                Id = roster.Id,
+                TeamId = roster.TeamId,
+                PlayerId = roster.PlayerId
+            };
+        }
+
+        public static RosteredPlayerDTO ConvertToRosteredPlayerDto(this Roster roster, PlayerDTO playerDto)
+        {
+            return new RosteredPlayerDTO
+            {
+                Id = roster.Id,
+                TeamId = roster.TeamId,
+                PlayerId = roster.PlayerId,
+                FullName = playerDto.FirstName + " " + playerDto.LastName,
+                DateOfBirth = playerDto.DateOfBirth
+            };
+        }
+    }
+}

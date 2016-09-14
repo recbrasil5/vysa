@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public static class DefaultRosters
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static IEnumerable<Roster> U14Roster = new List<Roster>
+        {
+            new Roster
+            {
+                Team = DefaultTeams.TeamU14Boys,
+                Player = DefaultPlayers.PlayerJacobClements,
+                IsActive = true,
+                CreatedBy = lastUpdateBy,
+                LastUpdateBy = lastUpdateBy,
+                CreatedDateUtc = DateTime.UtcNow,
+                LastUpdateUtc = DateTime.UtcNow
+            }
+        };
+    }
+}

@@ -1,0 +1,20 @@
+﻿using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Services
+{
+    public class UserService
+    {
+        private UnitOfWork unitOfWork = new UnitOfWork();
+
+        public UserService()
+        {
+        }
+
+        public User GetUser(string username)
+        {
+            return unitOfWork.UserRepository.GetUser(username);
+        }
+
+    }
+}

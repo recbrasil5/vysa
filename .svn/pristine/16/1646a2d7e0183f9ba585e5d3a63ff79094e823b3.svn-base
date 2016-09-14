@@ -1,0 +1,108 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Entities;
+using VYSA.Web.Services;
+
+namespace VYSA.Web.Models
+{
+    public class TeamListViewDTO
+    {
+        public int Id { get; set; }
+        public string TeamName { get; set; }
+        public string Coaches { get; set; }
+        public string ParentReps { get; set; }
+        public decimal Cost { get; set; }
+    }
+
+    public class TeamDTO
+    {
+        public int Id { get; set; }
+        [Required]
+        public int SeasonId { get; set; }
+        [Required]
+        public int DivisionId { get; set; }
+        
+        [Required(ErrorMessage = "Cost Required.")]
+        [Display(Name = "Cost")]
+        public decimal Cost { get; set; }
+
+        public IEnumerable<DivisionDropdownVM> AvailableDivisions;
+    }
+
+    public static class TeamDTOExtensions
+    {
+        public static Team UpdateValuesFromDTO(this Team team, TeamDTO teamDTO, string lastUpdateBy, bool onCreate)
+        {
+            team.ID = teamDTO.Id;
+            team.SeasonID = teamDTO.SeasonId;
+            team.DivisionID = teamDTO.DivisionId;
+            team.Cost = teamDTO.Cost;
+            team.IsActive = true;
+            team.LastUpdateBy = lastUpdateBy;
+            team.LastUpdate = DateTime.UtcNow;
+
+            if (onCreate)
+            {
+                team.CreatedBy = lastUpdateBy;
+                team.CreatedDate = DateTime.UtcNow;
+            }
+
+            return team;
+        }
+
+        public static TeamDTO ConvertToDto(this Team team)
+        {
+            return new TeamDTO
+            {
+                Id = team.ID,
+                SeasonId = team.SeasonID,
+                DivisionId = team.DivisionID,
+                Cost = team.Cost
+            };
+        }
+
+        public static TeamDTO ConvertToDto(this Team team, IUnitOfWork _unitOfWork)
+        {
+            return new TeamDTO
+            {
+                Id = team.ID,
+                SeasonId = team.SeasonID,
+                DivisionId = team.DivisionID,
+                Cost = team.Cost,
+                //AvailableDivisions = new DivisionService(_unitOfWork).GetDivisionDropdownVms()
+            };
+        }
+
+        public static TeamListViewDTO ConvertToListViewDTO(this Team team, IUnitOfWork _unitOfWork)
+        {
+            var teamListViewDto = new TeamListViewDTO
+            {
+                Id = team.ID,
+                TeamName = string.Format("U{0} {1}", team.Division.AgeLimit.ToString(), team.Division.GenderCode.ToString()),
+                Cost = team.Cost
+            };
+
+            //if (team.TeamCoaches.Count > 0)
+            //{
+            //    var coachList = new List<String>();
+            //    team.TeamCoaches.Select(c => c.CoachID).ToList()
+            //        .ForEach(c => coachList.Add(new CoachService(_unitOfWork).GetCoach(c).FullName));
+            //    teamListViewDto.Coaches = string.Join(",", coachList.ToArray());
+            //}
+
+            //if (team.TeamParentReps.Count > 0)
+            //{
+            //    var parentRepList = new List<String>();
+            //    team.TeamParentReps.Select(c => c.ParentRepID).ToList()
+            //        .ForEach(c => parentRepList.Add(new ParentRepService(_unitOfWork).GetParentRep(c).FullName));
+            //    teamListViewDto.ParentReps = string.Join(",", parentRepList.ToArray());
+            //}
+
+            return teamListViewDto;
+        }
+    }
+}

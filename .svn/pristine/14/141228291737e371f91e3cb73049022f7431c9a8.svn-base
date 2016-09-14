@@ -1,0 +1,106 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Services
+{
+    public class TeamEventService
+    {
+        private readonly UnitOfWork _unitOfWork;
+
+        public TeamEventService(IUnitOfWork unitOfWork)
+        {
+            this._unitOfWork = (UnitOfWork)unitOfWork;
+        }
+
+        public IEnumerable<TeamEvent> GetTeamEvents(int teamId)
+        {
+            return _unitOfWork.TeamEventRepository.Get(e => e.IsActive && e.TeamId == teamId);
+        }
+
+        public IEnumerable<Int32> GetActiveTeamEventIdList(ICollection<TeamEvent> teamEvents)
+        {
+            var list = new List<Int32>();
+            if (teamEvents != null)
+            {
+                teamEvents.ToList().ForEach(x => { if (x.IsActive) list.Add(x.EventId); });
+            }
+            return list;
+        }
+
+        public Collection<TeamEvent> ReturnFullTeamEventsOnCreation(int teamId, int seasonId, string lastUpdateBy)
+        {
+            var utcNow = DateTime.UtcNow;
+
+            //automatically populate all events as attending.
+            var eventIdList = new EventService(_unitOfWork).GetEventIdListFromSeasonId(seasonId);
+            var collection = new Collection<TeamEvent>();
+            eventIdList.ToList().ForEach(e =>
+            {
+                collection.Add(new TeamEvent
+                {
+                    TeamId = teamId,
+                    EventId = e,
+                    IsActive = true,
+                    LastUpdateBy = lastUpdateBy,
+                    LastUpdateUtc = utcNow,
+                    CreatedBy = lastUpdateBy,
+                    CreatedDateUtc = utcNow
+                });
+            });
+
+            return collection;
+        }
+
+        public void UpdateTeamEvents(int teamId, List<Int32> eventIdList, string lastUpdateBy)
+        {
+            var addList = new List<TeamEvent>();
+
+            var existingRecords = GetTeamEvents(teamId);
+            var softDeleteList = existingRecords.Where(x => !eventIdList.Contains(x.EventId)).ToList();
+
+            var existingTeamEventIdList = existingRecords.Select(x => x.EventId);
+
+            //build addLIst
+            eventIdList.Where(x => !existingTeamEventIdList.Contains(x))
+                .ToList().ForEach(x => addList.Add(new TeamEvent
+                {
+                    TeamId = teamId,
+                    EventId = x,
+                    IsActive = true,
+                    CreatedBy = lastUpdateBy,
+                    CreatedDateUtc = DateTime.UtcNow,
+                    LastUpdateBy = lastUpdateBy,
+                    LastUpdateUtc = DateTime.UtcNow
+                }));
+
+            //perform soft delete
+            softDeleteList.ForEach(x =>
+            {
+                x.IsActive = false;
+                x.LastUpdateUtc = DateTime.UtcNow;
+                x.LastUpdateBy = lastUpdateBy;
+                _unitOfWork.TeamEventRepository.Update(x);
+            });
+
+            //add
+            addList.ForEach(x => _unitOfWork.TeamEventRepository.Insert(x));
+        }
+
+        //public void SoftDeleteTeamEvents(int teamId)
+        //{
+        //    var existingRecords = GetTeamEvents(teamId).ToList();
+        //    foreach(var r in existingRecords)
+        //    {
+        //        rd.IsActive = false;
+        //        r.LastUpdateUtc = DateTime.UtcNow;
+        //    }
+        //}
+    }
+
+
+}

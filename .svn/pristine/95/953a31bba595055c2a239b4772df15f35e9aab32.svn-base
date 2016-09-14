@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  For more information on how to configure your ASP.NET application, please visit
+  http://go.microsoft.com/fwlink/?LinkId=301879
+  -->
+<configuration>
+  <configSections>
+    <!-- For more information on Entity Framework configuration, visit http://go.microsoft.com/fwlink/?LinkID=237468 -->
+    <section name="entityFramework" type="System.Data.Entity.Internal.ConfigFile.EntityFrameworkSection, EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" requirePermission="false" />
+    <sectionGroup name="applicationSettings" type="System.Configuration.ApplicationSettingsGroup, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" >
+      <section name="VYSA.WebApi.Properties.Settings" type="System.Configuration.ClientSettingsSection, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" requirePermission="false" />
+    </sectionGroup>
+  </configSections>
+  <connectionStrings>
+    <add name="EFDbContext" connectionString="Data Source=.\sqlexpress;Initial Catalog=VYSA;Persist Security Info=True;User ID=sa;Password=Pass96Word" providerName="System.Data.SqlClient" />
+  </connectionStrings>
+  <!--
+    For a description of web.config changes see http://go.microsoft.com/fwlink/?LinkId=235367.
+
+    The following attributes can be set on the <httpRuntime> tag.
+      <system.Web>
+        <httpRuntime targetFramework="4.5.1" />
+      </system.Web>
+  -->
+  <system.web>
+    <trust level="Full" />
+    <compilation debug="true" targetFramework="4.5.1" />
+    <httpRuntime targetFramework="4.5" />
+    <membership defaultProvider="EFMembershipProvider">
+      <providers>
+        <clear />
+        <add name="EFMembershipProvider" type="VYSA.WebApi.Infrastructure.EFMembershipProvider" />
+      </providers>
+    </membership>
+    <roleManager defaultProvider="EFRoleProvider" enabled="true">
+      <providers>
+        <clear />
+        <add name="EFRoleProvider" type="VYSA.WebApi.Infrastructure.EFRoleProvider" />
+      </providers>
+    </roleManager>
+  </system.web>
+  <system.net>
+    <mailSettings>
+      <smtp deliveryMethod="SpecifiedPickupDirectory">
+        <specifiedPickupDirectory pickupDirectoryLocation="c:\email" />
+        <network host="http://localhost:50088/" />
+      </smtp>
+    </mailSettings>
+    <defaultProxy enabled="true" />
+    <settings>
+      <!-- This setting causes .NET to check certificate revocation lists (CRL) 
+           before trusting HTTPS certificates.  But this setting tends to not 
+           be allowed in shared hosting environments. -->
+      <!--<servicePointManager checkCertificateRevocationList="true"/>-->
+    </settings>
+  </system.net>
+  <entityFramework>
+    <defaultConnectionFactory type="System.Data.Entity.Infrastructure.SqlConnectionFactory, EntityFramework" />
+    <providers>
+      <provider invariantName="System.Data.SqlClient" type="System.Data.Entity.SqlServer.SqlProviderServices, EntityFramework.SqlServer" />
+    </providers>
+  </entityFramework>
+  <system.webServer>
+    <!--<modules runAllManagedModulesForAllRequests="true">
+      <remove name="WebDAVModule" />
+    </modules>-->
+    <handlers>
+      <!--<remove name="WebDAV" />-->
+      <remove name="ExtensionlessUrlHandler-Integrated-4.0" />
+      <remove name="OPTIONSVerbHandler" />
+      <remove name="TRACEVerbHandler" />
+      <add name="ExtensionlessUrlHandler-Integrated-4.0" path="*." verb="*" type="System.Web.Handlers.TransferRequestHandler" preCondition="integratedMode,runtimeVersionv4.0" />
+    </handlers>
+  </system.webServer>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="EntityFramework" publicKeyToken="b77a5c561934e089" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.2.0.0" newVersion="4.2.0.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Web.Http" publicKeyToken="31bf3856ad364e35" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-5.2.3.0" newVersion="5.2.3.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Net.Http.Formatting" publicKeyToken="31bf3856ad364e35" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-5.2.3.0" newVersion="5.2.3.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Owin" publicKeyToken="31bf3856ad364e35" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.0.0.0" newVersion="3.0.0.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+  <applicationSettings>
+    <VYSA.WebApi.Properties.Settings>
+      <setting name="EmailTo" serializeAs="String">
+        <value>holmensoccer@yahoo.com</value>
+      </setting>
+      <setting name="ErrorMsgFrom" serializeAs="String">
+        <value>errors@mail.holmenvysa.com</value>
+      </setting>
+      <setting name="VirtualUploadDirectory" serializeAs="String">
+        <value>~/App_Data/uploads</value>
+      </setting>
+    </VYSA.WebApi.Properties.Settings>
+  </applicationSettings>
+</configuration>

@@ -1,0 +1,131 @@
+﻿using System;
+using System.Collections.Generic;
+using VYSA.Domain.Entities;
+
+namespace VYSA.WebApi.Infrastructure.Seed
+{
+    public class DefaultTeamEvents
+    {
+        private const string lastUpdateBy = "VYSA.WebApi.Infrastructure";
+
+        public static List<TeamEvent> TeamEventListU10Boys 
+        {
+            get
+            {
+                var list = new List<TeamEvent>();
+                DefaultEvents.Spring2015Events
+                    .ForEach(x => list.Add(new TeamEvent
+                                           {
+                                                Event = x,
+                                                Team = DefaultTeams.TeamU10Boys,
+                                                IsActive = true,
+                                                CreatedBy = lastUpdateBy,
+                                                LastUpdateBy = lastUpdateBy,
+                                                CreatedDateUtc = DateTime.UtcNow,
+                                                LastUpdateUtc = DateTime.UtcNow
+                                            }));
+                return list;
+            }
+        }
+
+        public static List<TeamEvent> TeamEventListU11Coed
+        {
+            get
+            {
+                var list = new List<TeamEvent>();
+                DefaultEvents.Spring2015Events
+                    .ForEach(x => list.Add(new TeamEvent
+                    {
+                        Event = x,
+                        Team = DefaultTeams.TeamU11Coed,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    }));
+                return list;
+            }
+        }
+
+        public static List<TeamEvent> TeamEventListU11Girls
+        {
+            get
+            {
+                var list = new List<TeamEvent>();
+                DefaultEvents.Spring2015Events
+                    .ForEach(x => list.Add(new TeamEvent
+                    {
+                        Event = x,
+                        Team = DefaultTeams.TeamU11Girls,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    }));
+                return list;
+            }
+        }
+
+        public static List<TeamEvent> TeamEventListU12Boys
+        {
+            get
+            {
+                var list = new List<TeamEvent>();
+                DefaultEvents.Spring2015Events
+                    .ForEach(x => list.Add(new TeamEvent
+                    {
+                        Event = x,
+                        Team = DefaultTeams.TeamU12Boys,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    }));
+                return list;
+            }
+        }
+
+        public static List<TeamEvent> TeamEventListU13Boys
+        {
+            get
+            {
+                var list = new List<TeamEvent>();
+                DefaultEvents.Spring2015Events
+                    .ForEach(x => list.Add(new TeamEvent
+                    {
+                        Event = x,
+                        Team = DefaultTeams.TeamU13Boys,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    }));
+                return list;
+            }
+        }
+
+        public static List<TeamEvent> TeamEventListU14Boys
+        {
+            get
+            {
+                var list = new List<TeamEvent>();
+                DefaultEvents.Spring2015Events
+                    .ForEach(x => list.Add(new TeamEvent
+                    {
+                        Event = x,
+                        Team = DefaultTeams.TeamU14Boys,
+                        IsActive = true,
+                        CreatedBy = lastUpdateBy,
+                        LastUpdateBy = lastUpdateBy,
+                        CreatedDateUtc = DateTime.UtcNow,
+                        LastUpdateUtc = DateTime.UtcNow
+                    }));
+                return list;
+            }
+        }
+    }
+}

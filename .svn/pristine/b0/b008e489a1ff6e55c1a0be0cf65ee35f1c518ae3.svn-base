@@ -1,0 +1,132 @@
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.Owin.Security.OAuth;
+using VYSA.WebApi.Infrastructure;
+using VYSA.WebApi.Infrastructure.Service;
+
+namespace VYSA.WebApi.Providers
+{
+    public class ApplicationOAuthProvider : OAuthAuthorizationServerProvider
+    {
+        public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
+        {
+            //we only have one application, so identification doesn't need totake place
+            context.Validated();
+
+            // TODO: This is where we should Authenticate the application making the request (WebApp)
+            // and block other applications
+            #region code for application security
+            //string clientId = string.Empty;
+            //string clientSecret = string.Empty;
+
+            //if (!context.TryGetBasicCredentials(out clientId, out clientSecret)) 
+            //{
+            //    context.SetError("invalid_client", "Client credentials could not be retrieved through the Authorization header.");
+            //    context.Rejected();
+            //    return;
+            //}
+
+            //ApplicationDatabaseContext dbContext = context.OwinContext.Get<ApplicationDatabaseContext>();
+            //ApplicationUserManager userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
+
+            //if (dbContext == null)
+            //{
+            //    context.SetError("server_error");
+            //    context.Rejected();
+            //    return;
+            //}
+
+            //try
+            //{
+            //    AppClient client = await dbContext
+            //        .Clients
+            //        .FirstOrDefaultAsync(clientEntity => clientEntity.Id == clientId);
+
+            //    if (client != null && userManager.PasswordHasher.VerifyHashedPassword(client.ClientSecretHash, clientSecret) == PasswordVerificationResult.Success)
+            //    {
+            //        // Client has been verified.
+            //        context.OwinContext.Set<AppClient>("oauth:client", client);
+            //        context.Validated(clientId);
+            //    }
+            //    else
+            //    {
+            //        // Client could not be validated.
+            //        context.SetError("invalid_client", "Client credentials are invalid.");
+            //        context.Rejected();
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    string errorMessage = ex.Message;
+            //    context.SetError("server_error");
+            //    context.Rejected();
+            //}
+            #endregion
+        }
+
+        public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
+        {
+            //IFormCollection submittedFormDataFormData = await context.Request.ReadFormAsync();// get form data not auto-parsed by owin context 
+            //string accountId = submittedFormDataFormData["accountId"];
+            var authenticationSuccess = new AccountMembershipService(context.UserName).ValidateUser(context.UserName, context.Password);
+
+            if (authenticationSuccess)
+            {
+                // Authentication succesfull grant an identity access token
+                var oAuthIdentity = new ClaimsIdentity(context.Options.AuthenticationType);
+
+                oAuthIdentity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
+                oAuthIdentity.AddClaim(new Claim(ClaimTypes.Role, new EFRoleProvider().GetRolesForUser(context.UserName)[0]));
+
+                context.Validated(oAuthIdentity);
+
+                #region cookieAuth
+                //var cookiesIdentity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationType);
+                //cookiesIdentity.AddClaim(new Claim("sub", context.UserName));
+                //cookiesIdentity.AddClaim(new Claim("role", "user"));
+                //cookiesIdentity.AddClaim(new Claim("accountId", accountId)); //company id
+                //cookiesIdentity.AddClaim(new Claim("userId", user.Id.ToString(CultureInfo.InvariantCulture)));
+                //context.Request.Context.Authentication.SignIn(cookiesIdentity);
+                #endregion
+
+                return;
+            }
+            
+            //Authentication failed
+            context.SetError("Invalid Credentials", "The user name or password is incorrect.");
+            context.Rejected();
+            return;
+
+            #region code not yet used
+            //    HttpContextBase httpContext;
+            //string userName;
+            //HashSet<string> scope;
+            //if (!request.TryGetHttpContext(out httpContext))
+            //    throw new InvalidOperationException(“HttpContext must not be null.”);
+            //var resourceServer = new ResourceServer(new StandardAccessTokenAnalyzer(
+            //                                            (RSACryptoServiceProvider)_configuration.IssuerSigningCertificate.PublicKey.Key,
+            //                                            (RSACryptoServiceProvider)_configuration.EncryptionVerificationCertificate.PrivateKey));
+            //var error = resourceServer.VerifyAccess(httpContext.Request, out userName, out scope);
+            //if (error != null)
+            //    return Task<HttpResponseMessage>.Factory.StartNew(error.ToHttpResponseMessage);
+            //var identity = new ClaimsIdentity(scope.Select(s => new Claim(s, s)));
+            //if (!string.IsNullOrEmpty(userName))
+            //    identity.Claims.Add(new Claim(ClaimTypes.Name, userName));
+            //httpContext.User = ClaimsPrincipal.CreateFromIdentity(identity);
+            //Thread.CurrentPrincipal = httpContext.User;
+            //return base.SendAsync(request, cancellationToken);
+            #endregion
+
+        }
+
+        ////Maybe
+        //public static AuthenticationProperties CreateProperties(string userName)
+        //{
+        //    IDictionary<string, string> data = new Dictionary<string, string>
+        //    {
+        //        { "userName", userName }
+        //    };
+        //    return new AuthenticationProperties(data);
+        //}
+    }
+}

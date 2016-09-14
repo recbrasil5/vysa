@@ -1,0 +1,65 @@
+﻿<div class="row" style="margin-top:20px">
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div>
+                <div class="ibox-title">
+                    <h5>Users</h5>
+                    <div class="pull-right">
+                        <span>Count: {{totalRecords}}</span>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <!--<button type="button" ui-sref="clubmanagement.user.addedit">Add User</button>-->
+                    <div>
+                        <table class="table table-hover table-responsive">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th data-ng-repeat="item in gridHeaderItems">
+                                    <div ng-show="sort.column === item.field" ng-hide="sort.column !== item.field">
+                                        <div class="inner-cell-left">
+                                            <a href="#" ng-click="orderBy(item.field);">{{item.name}}</a>
+                                        </div>
+                                        <div class="inner-cell-right">
+                                            <div ng-class="sort.ascending ? 'sort-asc' : 'sort-desc'"></div>
+                                        </div>
+                                    </div>
+                                    <div class="tble-row" ng-show="sort.column !== item.field">
+                                        <div class="inner-cell-left">
+                                            <a href="#" ng-click="orderBy(item.field);">{{item.name}}</a>
+                                        </div>
+                                        <div class="inner-cell-right">
+                                            <div class="sort-both"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr dir-paginate="u in gridData | itemsPerPage: recordsPerPage" total-items="totalRecords">
+                                <td>
+                                    <!--<div edit-item-btn item-to-edit="u" type2="User"></div>-->
+                                    <a ng-click="delete(p.id)" ng-confirm-click="Are you sure you would like to delete {{u.username}}?"><span class="margin-left-sm glyphicon glyphicon-trash "></span></a>
+                                </td>
+                                <td>{{u.userName}}</td>
+                                <td>{{u.email}}</td>
+                                <td>{{u.role}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"
+                                             template-url="/Templates/Common/dirPagination.tpl.html">
+                    </dir-pagination-controls>
+                    <div class="btn-group pull-right" role="group">
+                        <button type="button" ng-show="under15Records" data-ng-class="{'active':recordsPerPage === 15}" data-ng-click="recordsPerPage=15;" class="btn btn-xs-ms btn-default">15</button>
+                        <button type="button" ng-show="under25Records" data-ng-class="{'active':recordsPerPage === 25}" data-ng-click="recordsPerPage=25;" class="btn btn-xs-ms btn-default">25</button>
+                        <button type="button" ng-show="under50Records" data-ng-class="{'active':recordsPerPage === 50}" data-ng-click="recordsPerPage=50;" class="btn btn-xs-ms btn-default">50</button>
+                        <button type="button" ng-show="equals100Records" data-ng-class="{'active':recordsPerPage === 100}" data-ng-click="recordsPerPage=100;" class="btn btn-xs-ms btn-default">100</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

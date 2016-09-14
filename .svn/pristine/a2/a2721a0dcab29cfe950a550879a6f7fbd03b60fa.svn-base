@@ -1,0 +1,26 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysaApp").factory('accountRepository',
+        function ($resource, config) {
+
+            return {
+                forgotPassword: $resource(config.apiServerUri + 'Account/forgotpassword', {
+                    email: '@email'
+                }, {
+                    post: { method: 'POST' }
+                })
+
+                //coachDropdownVms: $resource(config.apiServerUri + 'Admin/Coaches/GetCoachDropdownVms/', {
+                //    id: '@id'
+                //}, {
+                //    get: { method: 'GET' },
+                //    post: { method: 'POST' },
+                //    update: { method: 'PUT' }
+
+                //})
+            }
+
+        });
+
+}());

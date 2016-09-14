@@ -1,0 +1,32 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysa").controller('AdminBoardMembersController',
+        function ($scope, $location, notifierService, AdminBoardMemberRepository) {
+
+            function loadBoardMembers() {
+                AdminBoardMemberRepository.query().$promise.then(function (data) {
+                    $scope.boardMembers = data;
+                }, function (error) {
+                    console.log('Failure to load boardMembers table: ' + error.message);
+                });
+            }
+
+            loadBoardMembers();
+
+            $scope.addNew = function () {
+                $location.url('/Admin/Home/WebsiteMaintenance/Board/AddEdit');
+            }
+
+            $scope.delete = function (boardMemberId) {
+                AdminBoardMemberRepository.delete({ id: parseInt(boardMemberId) })
+                    .$promise.then(function () {
+                        notifierService.success('Record has been removed!');
+                        loadBoardMembers();
+                    }, function (error) {
+                        notifierService.error('Ex: ' + error.message);
+                    });
+            };
+        });
+
+}());

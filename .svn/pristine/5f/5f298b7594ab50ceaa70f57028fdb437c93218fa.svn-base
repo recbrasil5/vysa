@@ -1,0 +1,78 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using VYSA.Domain.Abstract;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Entities;
+using VYSA.Web.Models;
+
+namespace VYSA.Web.Services
+{
+    public class DivisionService
+    {
+        private UnitOfWork unitOfWork;
+
+        public DivisionService(IUnitOfWork _unitOfWork)
+        {
+            this.unitOfWork = (UnitOfWork)_unitOfWork;
+        }
+
+        public IEnumerable<Division> GetDivisions()
+        {
+            return unitOfWork.DivisionRepository.Get(a => a.IsActive);
+        }
+
+        public IEnumerable<DivisionDropdownVM> GetDivisionDropdownVms()
+        {
+            var divisionDropdownVms = new List<DivisionDropdownVM>();
+            var divisions = unitOfWork.DivisionRepository
+                              .Get(d => d.IsActive)
+                              .OrderBy(a => a.AgeLimit).ThenBy(a => a.GenderCode).ToList();
+
+            divisions.ForEach(d => divisionDropdownVms.Add(d.ConvertToDivisionDropdownVm()));
+            return divisionDropdownVms;
+        }
+
+        public DivisionDTO GetDivision(int id)
+        {
+            var division = unitOfWork.DivisionRepository.GetByID(id);
+            return division == null ? null : division.ConvertToDto();
+        }
+
+        public DivisionDTO UpdateDivision(DivisionDTO updatedDivisionDto, string lastUpdateBy)
+        {
+            var division = unitOfWork.DivisionRepository.GetByID(updatedDivisionDto.Id);
+            if (division == null) return null;
+
+            //do update
+            division.UpdateValuesFromDTO(updatedDivisionDto, lastUpdateBy, false);
+
+            unitOfWork.DivisionRepository.Update(division);
+            unitOfWork.Save();
+
+            return updatedDivisionDto;
+        }
+
+        public DivisionDTO AddDivision(DivisionDTO newDivisionDto, string lastUpdateBy)
+        {
+            Division division = new Division().UpdateValuesFromDTO(newDivisionDto, lastUpdateBy, true);
+            unitOfWork.DivisionRepository.Insert(division);
+            unitOfWork.Save();
+
+            return division.ConvertToDto();
+        }
+
+        public DivisionDTO SoftDeleteDivision(int id)
+        {
+            var division = unitOfWork.DivisionRepository.GetByID(id);
+            if (division == null) return null;
+
+            division.IsActive = false;
+            unitOfWork.DivisionRepository.Update(division);
+            unitOfWork.Save();
+
+            return division.ConvertToDto();
+        }
+    }
+}

@@ -1,0 +1,25 @@
+﻿/// <reference path="C:\vysa\VYSA.WebUI\templates/announcements.html" />
+(function () {
+    "use strict";
+
+    angular
+        .module("vysaApp")
+        .directive('announcementsSlider', ['announcementRepository', function (announcementRepository) {
+
+            function link(scope, element, attrs) {
+                scope.isData = false;
+                announcementRepository.query().$promise.then(function (data) {
+                    scope.announcements = data;
+                    scope.isData = true;
+                }, function (error) {
+                        console.log(error.data.message);
+                    });
+            };
+
+            return {
+                restrict: 'A',
+                templateUrl: 'templates/announcements.html',
+                link: link
+            }
+        }]);
+}());

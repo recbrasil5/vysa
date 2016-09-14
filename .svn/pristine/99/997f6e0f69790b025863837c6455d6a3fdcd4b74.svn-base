@@ -1,0 +1,34 @@
+﻿(function () {
+    "use strict";
+
+    angular.module("vysa").controller('AdminAnnouncementsController',
+        function ($scope, $location, notifierService, AdminAnnouncementRepository) {
+
+            function loadAnnouncements() {
+                AdminAnnouncementRepository.query().$promise.then(function (data) {
+                    $scope.announcements = data;
+                }, function (error) {
+                    //TODO
+                    console.log('Failure to load announcements table' + error.message);
+                });
+            }
+
+            loadAnnouncements();
+
+            $scope.addNew = function () {
+                $location.url('/Admin/Home/WebsiteMaintenance/Announcements/AddEdit');
+            }
+
+            $scope.delete = function (announcementId) {
+                AdminAnnouncementRepository.delete({ id: parseInt(announcementId) })
+                    .$promise.then(function () {
+                        notifierService.success('Record has been removed!');
+                        loadAnnouncements();
+                    }, function (error) {
+                        notifierService.error('Ex: ' + error.message);
+                    });
+            };
+
+        });
+
+}());

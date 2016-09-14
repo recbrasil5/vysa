@@ -1,0 +1,140 @@
+﻿using System.Collections.Generic;
+using System.Web.Http;
+using System.Web.Http.Description;
+using VYSA.Domain.Concrete;
+using VYSA.WebApi.Filters;
+using VYSA.WebApi.Models.Binding;
+using VYSA.WebApi.Models.Resource;
+using VYSA.WebApi.Models.ViewModel;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Controllers
+{
+    [RoutePrefix("Admin/Users")]
+    public class AdminUsersController : BaseAdminController
+    {
+        private readonly UnitOfWork _unitOfWork = new UnitOfWork();
+        private readonly UserService _userService;
+        public AdminUsersController()
+        {
+            _userService = new UserService(_unitOfWork);
+        }
+
+        [HttpGet]
+        [Route("")]
+        public IEnumerable<UserResourceModel> GetUsers()
+        {
+            return _userService.GetUserResourceModels();
+        }
+
+        [HttpPost]
+        [Route("filter")]
+        [ResponseType(typeof(UsersViewModel))]
+        public IHttpActionResult GetUsersFilter(FilterBindingModel bm)
+        {
+            var vm = new UsersViewModel();
+            vm.Users = _userService.GetUsersFilter(bm);
+            if (bm.GetCount)
+            {
+                vm.Count = _userService.GetUsersFilterCount(bm);
+            }
+            return Ok(vm);
+        }
+
+        //[HttpGet]
+        //[Route("")]
+        //public IEnumerable<User> GetUsers()
+        //{
+        //    return _usersService.GetUsers();
+        //}
+
+        [HttpGet]
+        [Route("{id:int}", Name = "GetUserById")]
+        [ResponseType(typeof(UserResourceModel))]
+        public IHttpActionResult GetUser(int id)
+        {
+            var userResourceModel = _userService.GetUserResourceModel(id);
+
+            // return it if you got it
+            if (userResourceModel == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(userResourceModel);
+        }
+
+        //[HttpPut]
+        //[Route("{id:int}")]
+        //[ResponseType(typeof(UserResourceModel))]
+        //public IHttpActionResult UpdateUser(int id, UserResourceModel userResourceModel)
+        //{
+        //    if (id != userResourceModel.Id)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    //var updateduserRm = _usersService.UpdateUser(userResourceModel, User.Identity.Name);
+
+        //    if (updateduserRm == null)
+        //    {
+        //        //can't find the record to update
+        //        return NotFound();
+        //    }
+
+        //    return Ok(updateduserRm);
+        //}
+
+
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(UserResourceModel))]
+        public IHttpActionResult CreateUser(UserResourceModel userRm)
+        {
+
+            var newUserRm = _userService.AddUser(userRm, User.Identity.Name);
+
+            //for some reason this CreatedAtRoute doesn't work like it should for me - can't find GetUserById
+            //return CreatedAtRoute("GetUserById", new { id = newuserRm.Id }, newuserRm);
+            return Ok(newUserRm);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ResponseType(typeof(UserResourceModel))]
+        public IHttpActionResult DeleteUser(int id)
+        {
+            var user = _userService.SoftDeleteUser(id, User.Identity.Name);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+
+        //[HttpPatch]
+        //[Route("{id:int}")]
+        //[ResponseType(typeof(LeadDTO))]
+        //public IHttpActionResult PatchLead(int id, IEnumerable<OperationDTO> operations)
+        //{
+        //    var updatedLeadDto = ServiceManager.LeadService.UpdateLead(id, operations);
+        //    if (updatedLeadDto == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return Ok(updatedLeadDto);
+
+        //    return StatusCode(HttpStatusCode.NoContent);
+        //}
+
+        //Add
+    }
+}

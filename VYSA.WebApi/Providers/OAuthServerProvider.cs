@@ -1,0 +1,50 @@
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.Owin;
+using Microsoft.Owin.Security.OAuth;
+using VYSA.Domain.Concrete;
+using VYSA.Domain.Cryptography;
+//using VYSA.WebApi.Infrastructure;
+//using VYSA.WebApi.Infrastructure.Service;
+using VYSA.WebApi.Services;
+
+namespace VYSA.WebApi.Providers
+{
+    public class ApplicationOAuthProvider : OAuthAuthorizationServerProvider
+    {
+        //http://www.tugberkugurlu.com/archive/simple-oauth-server-implementing-a-simple-oauth-server-with-katana-oauth-authorization-server-components-part-1
+
+        private string _email;
+        private string _password;
+
+        public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
+        {
+            var data = await context.Request.ReadFormAsync();// get form data not auto-parsed by owin context 
+            _email = data["username"];
+            _password = data["password"];
+
+            var user = new UserService(new UnitOfWork()).GetUser(_email);
+
+            if (user == null || !PasswordHash.ValidatePassword(_password, user.PasswordHash))
+            {
+                //Authentication failed
+                context.SetError("Invalid Credentials", "The user name or password is incorrect.");
+                context.Rejected();
+                return;
+            }
+
+            //authenication validated!
+            await Task.FromResult(context.Validated());
+        }
+
+        public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
+        {
+            // Authentication succesfull grant an identity access token
+            var oAuthIdentity = new ClaimsIdentity(context.Options.AuthenticationType);
+            oAuthIdentity.AddClaim(new Claim(ClaimTypes.Name, _email)); //name = email
+            oAuthIdentity.AddClaim(new Claim(ClaimTypes.Role, new UserService(new UnitOfWork()).GetUserResourceModel(context.UserName).Roles));
+
+            await Task.FromResult(context.Validated(oAuthIdentity));
+        }
+    }
+}
